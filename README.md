@@ -47,4 +47,4 @@ You need to install tools for the language you need syntax checking.See the ale 
 
 ## other plugs
 - [kite](https://www.kite.com/)  
-An ai code completion engine.It supports a lot of editor and IDE.
+An ai code completion engine.It supports a lot of editors and IDE.
