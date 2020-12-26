@@ -41,7 +41,7 @@ colorscheme nord
 
 - [wildfire.vim](https://github.com/gcmt/wildfire.vim)
 
-- [ale](https://github.com/dense-analysis/ale)
+- [ale](https://github.com/dense-analysis/ale)  
 I used to use [coo.vim](https://github.com/neoclide/coc.nvim), but it's complicate to config.And I also use [kite](https://www.kite.com/) to complete my code.However kite will disable coc.There is also a coc.kite plug, but it works not that good.Now I use ale for syntax checking.
 
 ## other plugs
