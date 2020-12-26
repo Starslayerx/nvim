@@ -2,9 +2,9 @@
 My neovim configuraton
 
 ## Plugs
-I use (vim-plug)[https://github.com/junegunn/vim-plug] to manage this plugs blew:
+I use [vim-plug](https://github.com/junegunn/vim-plug) to manage this plugs blew:
 
-- (lightline.vim)[https://github.com/itchyny/lightline.vim]
+- [lightline.vim](https://github.com/itchyny/lightline.vim)
 lightline is s statue line for vim and intergrted with many other plugs.
 This is my lightline config
 ```vimscrpit
@@ -22,7 +22,7 @@ let g:lightline = {
       \ }
 ```
 
-- (nord-vim)[https://www.nordtheme.com/]
+- [nord-vim](https://www.nordtheme.com/)
 Nord is a beautiful them.I also use this for my alactritty terminal.
 ```vimscript
 """ nord theme config """
@@ -35,11 +35,11 @@ let g:nord_underline = 1
 colorscheme nord
 ```
 
-- (vim-visual-multi)[https://github.com/mg979/vim-visual-multi]
+- [vim-visual-multi](https://github.com/mg979/vim-visual-multi)
 
-- (vim-surround)[https://github.com/tpope/vim-surround]
+- [vim-surround](https://github.com/tpope/vim-surround)
 
-- (wildfire.vim)[https://github.com/gcmt/wildfire.vim]
+- [wildfire.vim](https://github.com/gcmt/wildfire.vim)
 
-- (ale)[https://github.com/dense-analysis/ale]
-I used to use (coo.vim)[https://github.com/neoclide/coc.nvim], but it's complicate to config.And I also use (kite)[https://www.kite.com/] to complete my code.However kite will disable coc.There is also a coc.kite plug, but it works not that good.Now I use ale for syntax checking.
+- [ale](https://github.com/dense-analysis/ale)
+I used to use [coo.vim](https://github.com/neoclide/coc.nvim), but it's complicate to config.And I also use [kite](https://www.kite.com/) to complete my code.However kite will disable coc.There is also a coc.kite plug, but it works not that good.Now I use ale for syntax checking.
