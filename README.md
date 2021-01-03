@@ -1,5 +1,5 @@
 # nvim
-My neovim configuraton
+My  neovim configuraton :heart:
 
 ## vim plugs
 I use [vim-plug](https://github.com/junegunn/vim-plug) to manage this plugs blew:
@@ -34,6 +34,8 @@ let g:nord_italic_comments = 1
 let g:nord_underline = 1
 colorscheme nord
 ```
+- [onehalf](https://github.com/sonph/onehalf)
+A vim theme.I like the color of code, but no background.
 
 - [vim-visual-multi](https://github.com/mg979/vim-visual-multi)
 
@@ -44,6 +46,16 @@ colorscheme nord
 - [ale](https://github.com/dense-analysis/ale)  
 I used to use [coo.vim](https://github.com/neoclide/coc.nvim), but it's complicate to config.And I also use [kite](https://www.kite.com/) to complete my code.However kite will disable coc.There is also a coc.kite plug, but it works not that good.Now I use ale for syntax checking.
 You need to install tools for the language you need syntax checking.See the ale supported languages and tools list [here](https://github.com/dense-analysis/ale/blob/master/supported-tools.md).
+
+- [fzf.vim](https://github.com/junegunn/fzf.vim)
+It's a vim version of fzf.Very good tool to search files in vim.You need to install [bat](https://github.com/sharkdp/bat) for highligh preview. 
+
+- [ack.vim](https://github.com/mileszs/ack.vim)
+You will need to install [the_silver_searcher](https://github.com/ggreer/the_silver_searcher) frst. And install this plug then.Don't forget to add this
+> let g:ackprg = 'ag --nogroup --nocolor --column' 
+or
+> let g:ackprg = 'ag --vimgrep'  
+
 
 ## other plugs
 - [kite](https://www.kite.com/)  
