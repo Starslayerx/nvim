@@ -53,6 +53,7 @@ It's a vim version of fzf.Very good tool to search files in vim.You need to inst
 - [ack.vim](https://github.com/mileszs/ack.vim)
 You will need to install [the_silver_searcher](https://github.com/ggreer/the_silver_searcher) frst. And install this plug then.Don't forget to add this
 > let g:ackprg = 'ag --nogroup --nocolor --column' 
+
 or
 > let g:ackprg = 'ag --vimgrep'  
 
