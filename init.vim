@@ -1,4 +1,4 @@
-""" vim config """
+""" vim config
 set nu
 set showcmd
 set t_Co=256
@@ -25,7 +25,7 @@ inoremap {<CR> {<CR>}<ESC>O
 
 
 
-""" vim plugs """
+""" vim plugs
 call plug#begin('~/.config/nvim/plugged')
 " lightline "
 Plug 'itchyny/lightline.vim'
@@ -37,28 +37,15 @@ Plug 'mg979/vim-visual-multi', {'branch': 'master'}
 Plug 'tpope/vim-surround'
 Plug 'gcmt/wildfire.vim'
 " code complete
-Plug 'dense-analysis/ale'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " file search
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'mileszs/ack.vim'
 call plug#end()
 
-""" onehalfdark theme config"""
-"let g:lightline = {
-"      \ 'colorscheme': 'onehalfdark',
-"      \ 'component_function': {
-"      \   'gitbranch': 'FugitiveHead'
-"      \ },
-"      \ 'component': {
-"      \   'charvaluehex': '0x%B'
-"      \ },
-"      \ 'separator': { 'left': "\ue0b0", 'right': "\ue0b2" },
-"      \ 'subseparator': { 'left': "\ue0b1", 'right': "\ue0b3" },
-"      \ }
-"colorscheme onehalfdark
 
-""" nord theme config """
+""" nord theme config
 let g:nord_cursor_line_number_background = 1
 let g:nord_uniform_status_lines = 1
 let g:nord_bold_vertical_split_line = 1
@@ -78,7 +65,7 @@ let g:lightline = {
       \ 'subseparator': { 'left': "\ue0b1", 'right': "\ue0b3" },
       \ }
 
-""" fzf.vim """
+""" fzf.vim
 noremap <c-f> :Files<CR>
 noremap <c-l> :Lines<CR>
 noremap <c-b> :Buffers<CR>
@@ -86,5 +73,6 @@ noremap <c-h> :History<CR>
 noremap <c-g> :Ag<CR>
 let g:fzf_preview_window = 'right:60%'
 let g:fzf_commits_log_options = '--graph --color=always --format="%C(auto)%h%d %s %C(black)%C(bold)%cr"'
-""" ack: ag for fzf """
+
+""" ack: ag for fzf
 let g:ackprg = 'ag --nogroup --nocolor --column'
