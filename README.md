@@ -1,6 +1,13 @@
 # nvim
 My  neovim configuraton :heart:
 
+## Install by flatpak
+- init.vim to be created in '~/.var/app/io.neovim.nvim/config/nvim/'
+- Install vim pluug
+  ```bash
+  curl -fLo ~/.var/app/io.neovim.nvim/data/nvim/site/autoload/plug.vim --create-dirs     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  ```
+
 ## vim plugs
 I use [vim-plug](https://github.com/junegunn/vim-plug) to manage this plugs blew:
 
