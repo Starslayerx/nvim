@@ -64,7 +64,13 @@ You will need to install [the_silver_searcher](https://github.com/ggreer/the_sil
 or
 > let g:ackprg = 'ag --vimgrep'  
 
+### Install nodejs for coc
+```bash
+curl -sL install-node.now.sh/lts | bash
 
-## other plugs
-- [kite](https://www.kite.com/)  
-An ai code completion engine.It supports a lot of editors and IDE.
+# 如果安装后sudo下找不到node，则执行以下命令
+# 若直接使用root用户，而非sudo执行请忽略
+sudo ln -s /usr/local/bin/node /usr/bin/node
+sudo ln -s /usr/local/bin/npm /usr/bin/npm
+sudo ln -s /usr/local/bin/npx /usr/bin/npx
+```
