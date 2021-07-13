@@ -1,5 +1,5 @@
 # Nvim
-My  neovim configuraton :heart:
+My  neovim configuration :heart:
 
 ## Neovim Flatpak
 - `init.vim` to be created in `~/.var/app/io.neovim.nvim/config/nvim/`
