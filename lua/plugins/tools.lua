@@ -30,31 +30,32 @@ return {
     cmd = { "ConformInfo" },
     keys = {
       {
-        -- 这里定义 keymap
         "<leader>F",
         function()
           require("conform").format({ async = true })
         end,
-        mode = "",
+        mode = "n",
         desc = "Format buffer",
       },
     },
     opts = {
-      -- 这里定义 Formatters
       formatters_by_ft = {
-        python = { "ruff", "isort" },
+        python = { "ruff" },
         javascript = { "prettier", stop_after_first = true },
+        typescript = { "prettier", stop_after_first = true },
         lua = { "stylua" },
+        sh = { "shfmt" },
       },
       default_format_opts = {
         lsp_format = "fallback",
       },
-      -- Set up format-on-save
       format_on_save = { timeout_ms = 500 },
-      -- Customize formatters
       formatters = {
         shfmt = {
           append_args = { "-i", "2" },
+        },
+        stylua = {
+          append_args = { "--indent-width", "2", "--indent-type", "Spaces" },
         },
       },
     },
