@@ -18,8 +18,8 @@ opt.scrolloff = 8
 opt.colorcolumn = "100"
 
 -- 搜索设置
-opt.ignorecase = false  -- 搜索区分大小写 (对应 noignorecase)
-opt.smartcase = false   -- 不用智能大小写 (对应 nosmartcase)
+opt.ignorecase = false -- 搜索区分大小写 (对应 noignorecase)
+opt.smartcase = false -- 不用智能大小写 (对应 nosmartcase)
 opt.inccommand = "split"
 opt.hlsearch = true
 
@@ -29,8 +29,8 @@ opt.tabstop = 4
 opt.shiftwidth = 4
 opt.softtabstop = 4
 opt.autoindent = true
-opt.smartindent = false  -- 禁用智能缩进 (对应 nosmartindent)
-opt.cindent = false      -- 禁用 c 语言缩进 (对应 nocindent)
+opt.smartindent = false -- 禁用智能缩进 (对应 nosmartindent)
+opt.cindent = false -- 禁用 c 语言缩进 (对应 nocindent)
 opt.indentexpr = ""
 
 -- 折叠设置
@@ -51,10 +51,12 @@ opt.listchars = { tab = "  ", trail = "▫" }
 
 -- 性能优化
 opt.ttyfast = true
-opt.lazyredraw = true
 opt.updatetime = 100
 opt.ttimeoutlen = 0
 opt.timeout = false
+
+-- 避免导致 UI 插件渲染异常
+opt.lazyredraw = false
 
 -- 文件备份和历史
 opt.backup = false
@@ -69,7 +71,7 @@ vim.fn.system("mkdir -p " .. config_dir .. "/tmp/undo")
 
 opt.backupdir = config_dir .. "/tmp/backup,."
 opt.directory = config_dir .. "/tmp/backup,."
-if vim.fn.has('persistent_undo') == 1 then
+if vim.fn.has("persistent_undo") == 1 then
   opt.undofile = true
   opt.undodir = config_dir .. "/tmp/undo,."
 end
@@ -106,7 +108,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
     end
   end,
 })
-
 
 -- 终端设置
 vim.api.nvim_create_autocmd("TermOpen", {
