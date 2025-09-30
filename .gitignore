@@ -3,6 +3,8 @@
 
 # 保留配置文件
 !.gitignore
+!README.md
+!README-en.md
 !init.lua
 !lua/
 !lua/**
