@@ -17,9 +17,12 @@
 - **nvim-colorizer.lua** - 颜色高亮
 - **nvim-web-devicons** - 文件图标
 - **mini.nvim** - 图标支持
+- **window-picker.nvim** - 窗口选择器
+- **which-key.nvim** - 快捷键提示
 
 ### 代码补全 & LSP
 - **blink.cmp** - 代码补全引擎
+- **nvim-autopairs** - 自动括号补全
 - **nvim-lspconfig** - LSP 配置
 - **mason.nvim** - LSP 服务器管理
 - **mason-lspconfig.nvim** - 自动安装 LSP
@@ -34,9 +37,7 @@
 - **wildfire.nvim** - 快速内容选择
 
 ### 文件管理 & 搜索
-- **snacks.nvim** - 一体化工具集（文件浏览器、选择器等）
-- **window-picker.nvim** - 窗口选择器
-- **which-key.nvim** - 快捷键提示
+- **snacks.nvim** - 一体化工具集（文件浏览器、选择器、通知系统等）
 
 ### 格式化 & 工具
 - **conform.nvim** - 代码格式化
@@ -67,18 +68,45 @@
 - `<leader>,` - 缓冲区列表
 - `<leader>/` - 全局搜索
 - `<leader>:` - 命令历史
+- `<leader>n` - 通知历史
 - `<leader>e` - 文件浏览器
 - `<leader>ff` - 查找文件
 - `<leader>fg` - 查找 git 文件
+- `<leader>fb` - 查找缓冲区
+- `<leader>fc` - 查找配置文件
+- `<leader>fp` - 项目列表
+- `<leader>fr` - 最近文件
 - `<leader>z` - 禅模式
+- `<leader>Z` - 缩放模式
 - `<leader>gg` - Lazygit
+- `<leader>gB` - Git 浏览
 - `<leader>F` - 格式化代码
+- `<leader>bd` - 删除缓冲区
+- `<leader>cR` - 重命名文件
+- `<leader>un` - 关闭所有通知
+- `<c-/>` - 切换终端
+- `<leader>N` - Neovim 新闻
 
 ### LSP 快捷键
 - `<leader>xx` - 切换诊断面板
 - `<leader>xX` - 缓冲区诊断
 - `<leader>cs` - 符号列表
 - `<leader>cl` - LSP 信息
+- `<leader>xL` - 位置列表
+- `<leader>xQ` - 快速修复列表
+
+### 切换快捷键
+- `<leader>us` - 拼写检查
+- `<leader>uw` - 自动换行
+- `<leader>uL` - 相对行号
+- `<leader>ud` - 诊断信息
+- `<leader>ul` - 行号显示
+- `<leader>uc` - 隐藏级别
+- `<leader>uT` - Treesitter
+- `<leader>ub` - 深色背景
+- `<leader>uh` - 内联提示
+- `<leader>ug` - 缩进线
+- `<leader>uD` - 暗淡模式
 
 ## ⚙️ 配置选项
 
@@ -110,11 +138,17 @@
 
 ## 🎨 特色功能
 
-1. **一体化工具集**: 使用 snacks.nvim 整合了文件浏览器、选择器、通知系统等
+1. **一体化工具集**: 使用 snacks.nvim 整合了文件浏览器、选择器、通知系统、终端、调试工具等
 2. **现代化 LSP**: 完整的语言服务器支持，包含自动安装和 UI 美化
 3. **代码格式化**: 支持多种语言的自动格式化
 4. **透明界面**: 支持窗口透明效果
 5. **智能补全**: 基于 blink.cmp 的现代补全系统
+6. **自动括号补全**: 智能括号配对和补全
+7. **彩虹括号**: 彩色括号高亮，提高代码可读性
+8. **快速内容选择**: 使用空格键快速选择代码块
+9. **行内诊断**: 在代码行内显示诊断信息
+10. **窗口选择器**: 快速切换和管理窗口
+11. **快捷键提示**: 实时显示可用快捷键
 
 ## 📁 项目结构
 
@@ -163,6 +197,8 @@
 - C/C++ (clangd)
 - Markdown (marksman)
 - 以及其他常见语言
+
+语法高亮支持：Python, JavaScript, TypeScript, Lua, Go, HTML, CSS, JSON, YAML, TOML, LaTeX, Markdown, Dockerfile, Norg, SCSS, Svelte, TSX, Typst, Vue, Regex
 
 ## 🛠️ 代码格式化
 

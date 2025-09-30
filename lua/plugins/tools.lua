@@ -23,7 +23,7 @@ return {
     },
   },
 
-  -- Formatter
+  -- Formatter 代码格式化
   {
     "stevearc/conform.nvim",
     event = { "BufWritePre" },
@@ -60,6 +60,4 @@ return {
       },
     },
   },
-
-  -- Linter
 }

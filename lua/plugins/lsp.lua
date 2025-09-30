@@ -21,8 +21,7 @@ return {
         },
       },
     },
-  }
-,
+  },
 
   -- Mason: LSP server 管理
   {
@@ -105,7 +104,7 @@ return {
     priority = 1000,
     config = function()
       require("tiny-inline-diagnostic").setup({
-        preset = "modern",
+        preset = "ghost",
         options = {
           show_source = { enabled = true, if_many = true },
           throttle = 20,

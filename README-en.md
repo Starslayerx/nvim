@@ -17,9 +17,12 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - **nvim-colorizer.lua** - Color highlighter
 - **nvim-web-devicons** - File icons
 - **mini.nvim** - Icon support
+- **window-picker.nvim** - Window selector
+- **which-key.nvim** - Keybinding hints
 
 ### Code Completion & LSP
 - **blink.cmp** - Code completion engine
+- **nvim-autopairs** - Auto bracket completion
 - **nvim-lspconfig** - LSP configuration
 - **mason.nvim** - LSP server management
 - **mason-lspconfig.nvim** - Automatic LSP installation
@@ -34,9 +37,7 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - **wildfire.nvim** - Quick content selection
 
 ### File Management & Search
-- **snacks.nvim** - All-in-one toolkit (file explorer, picker, etc.)
-- **window-picker.nvim** - Window selector
-- **which-key.nvim** - Keybinding hints
+- **snacks.nvim** - All-in-one toolkit (file explorer, picker, notification system, etc.)
 
 ### Formatting & Tools
 - **conform.nvim** - Code formatter
@@ -67,18 +68,45 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - `<leader>,` - Buffer list
 - `<leader>/` - Global search
 - `<leader>:` - Command history
+- `<leader>n` - Notification history
 - `<leader>e` - File explorer
 - `<leader>ff` - Find files
 - `<leader>fg` - Find git files
+- `<leader>fb` - Find buffers
+- `<leader>fc` - Find configuration files
+- `<leader>fp` - Project list
+- `<leader>fr` - Recent files
 - `<leader>z` - Zen mode
+- `<leader>Z` - Zoom mode
 - `<leader>gg` - Lazygit
+- `<leader>gB` - Git browser
 - `<leader>F` - Format code
+- `<leader>bd` - Delete buffer
+- `<leader>cR` - Rename file
+- `<leader>un` - Close all notifications
+- `<c-/>` - Toggle terminal
+- `<leader>N` - Neovim news
 
 ### LSP Keymaps
 - `<leader>xx` - Toggle diagnostics panel
 - `<leader>xX` - Buffer diagnostics
 - `<leader>cs` - Symbols list
 - `<leader>cl` - LSP information
+- `<leader>xL` - Location list
+- `<leader>xQ` - Quickfix list
+
+### Toggle Keymaps
+- `<leader>us` - Spell check
+- `<leader>uw` - Word wrap
+- `<leader>uL` - Relative line numbers
+- `<leader>ud` - Diagnostics
+- `<leader>ul` - Line numbers
+- `<leader>uc` - Conceal level
+- `<leader>uT` - Treesitter
+- `<leader>ub` - Dark background
+- `<leader>uh` - Inline hints
+- `<leader>ug` - Indent guides
+- `<leader>uD` - Dim mode
 
 ## ⚙️ Configuration Options
 
@@ -110,11 +138,17 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 
 ## 🎨 Features
 
-1. **Integrated Toolkit**: Uses snacks.nvim for file explorer, picker, notification system, etc.
+1. **Integrated Toolkit**: Uses snacks.nvim for file explorer, picker, notification system, terminal, debugging tools, etc.
 2. **Modern LSP**: Complete language server support with auto-installation and UI enhancement
 3. **Code Formatting**: Auto-formatting for multiple languages
 4. **Transparent Interface**: Window transparency effects
 5. **Smart Completion**: Modern completion system based on blink.cmp
+6. **Auto Bracket Completion**: Smart bracket pairing and completion
+7. **Rainbow Parentheses**: Colorful parentheses highlighting for better code readability
+8. **Quick Content Selection**: Use space key to quickly select code blocks
+9. **Inline Diagnostics**: Show diagnostic information within code lines
+10. **Window Selector**: Quickly switch and manage windows
+11. **Keybinding Hints**: Real-time display of available keybindings
 
 ## 📁 Project Structure
 
@@ -151,3 +185,27 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - Update plugin configurations in `lua/plugins/` directory
 
 This configuration provides a complete, modern development environment with excellent performance and usability.
+
+## 📝 Language Support
+
+Configuration supports syntax highlighting and LSP for the following languages:
+- Python (pyright)
+- JavaScript/TypeScript (eslint, prettier)
+- Lua (lua_ls)
+- Go (gopls)
+- Rust (rust_analyzer)
+- C/C++ (clangd)
+- Markdown (marksman)
+- And other common languages
+
+Syntax highlighting support: Python, JavaScript, TypeScript, Lua, Go, HTML, CSS, JSON, YAML, TOML, LaTeX, Markdown, Dockerfile, Norg, SCSS, Svelte, TSX, Typst, Vue, Regex
+
+## 🛠️ Code Formatting
+
+Configured with the following formatting tools:
+- Python: ruff
+- JavaScript/TypeScript: prettier
+- Lua: stylua
+- Shell: shfmt
+
+All formatting supports auto-format on save.
