@@ -133,7 +133,8 @@
 │       ├── snacks.lua    # Snacks 工具集
 │       ├── tools.lua     # 工具插件
 │       └── ui.lua        # UI 插件
-└── README-CN.md          # 本文档
+└── README.md          # 本文档
+└── README-en.md       # 英文文档
 ```
 
 ## 🚀 开始使用

@@ -133,7 +133,8 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 │       ├── snacks.lua    # Snacks toolkit
 │       ├── tools.lua     # Utility plugins
 │       └── ui.lua        # UI plugins
-└── README.md             # This file
+└── README.md             # Chinese docs
+└── README-en.md          # This file
 ```
 
 ## 🚀 Getting Started
