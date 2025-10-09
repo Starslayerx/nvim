@@ -173,7 +173,6 @@ return {
       hl(0, "FrappeText", { fg = "#c6d0f5" })
     end,
     opts = {},
-    git = { submodules = false }, -- 禁止 submodules
   },
 
   -- 展示色块

@@ -63,6 +63,17 @@
 - `<leader>t` - 水平分割打开终端
 - `<leader>T` - 垂直分割打开终端
 
+### 翻页功能
+normal 模式:  
+- `<C-f>` - forward   向下翻一整屏
+- `<C-b>` - backward  向上翻一整屏
+- `<C-d>` - down half 向下翻半屏
+- `<C-u>` - up half   向上翻半屏
+
+insert 模式:  
+- `<C-j>` - forward   向下翻一整屏
+- `<C-k>` - backward  向上翻一整屏
+
 ### Snacks 快捷键
 - `<leader><space>` - 智能文件查找
 - `<leader>,` - 缓冲区列表
