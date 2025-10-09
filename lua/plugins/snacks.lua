@@ -78,7 +78,7 @@ return {
       indent = { enabled = true }, -- 视觉化缩进线 & 范围
       scope = { enabled = true }, -- 基于 treesitter/indent 的 scope 检测
       quickfile = { enabled = true }, -- 立刻渲染文件
-      scroll = { enabled = true }, -- 平滑滚动
+      scroll = { enabled = false }, -- 禁用平滑滚动，避免搜索显示问题
       -- 美化状态栏 gutter: 行号左侧的东西
       statuscolumn = {
         enabled = true,

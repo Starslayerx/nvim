@@ -51,9 +51,9 @@ opt.listchars = { tab = "  ", trail = "▫" }
 
 -- 性能优化
 opt.ttyfast = true
-opt.updatetime = 100
-opt.ttimeoutlen = 0
-opt.timeout = false
+opt.updatetime = 300
+opt.ttimeoutlen = 50
+opt.timeout = true
 
 -- 避免导致 UI 插件渲染异常
 opt.lazyredraw = false
@@ -81,7 +81,8 @@ opt.completeopt = { "longest", "noinsert", "menuone", "noselect", "preview" }
 
 -- 其他设置
 opt.virtualedit = "block"
-opt.shortmess:append("c")
+-- 确保搜索计数显示，移除可能抑制显示的选项
+opt.shortmess = "filnxxtToO"  -- 移除了 "c"，保留搜索计数显示
 opt.viewoptions = "cursor,folds,slash,unix"
 
 -- 终端相关
