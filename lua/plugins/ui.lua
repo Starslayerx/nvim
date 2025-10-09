@@ -60,54 +60,165 @@ return {
     end,
   },
 
-  -- 语法高亮
+  -- nvim-treesitter 语法高亮 (新版 main 分支)
   {
     "nvim-treesitter/nvim-treesitter",
-    lazy = false,
-    branch = "master",
+    lazy = false, -- 文档明确说明不支持 lazy-loading
+    branch = "main",
     build = ":TSUpdate",
+    keys = {
+      { "<CR>", desc = "Treesitter: Init/Expand selection", mode = { "n", "x" } },
+      { "<BS>", desc = "Treesitter: Shrink selection", mode = "x" },
+      { "<TAB>", desc = "Treesitter: Scope incremental", mode = "x" },
+    },
     config = function()
-      require("nvim-treesitter.configs").setup({
-        -- 确保安装的语言列表
-        ensure_installed = {
-          "python",
-          "javascript",
-          "typescript",
-          "lua",
-          "go",
-          "html",
-          "css",
-          "json",
-          "yaml",
-          "toml",
-          "latex",
-          "markdown",
-          "markdown_inline",
-          "dockerfile",
-          "norg",
-          "scss",
-          "svelte",
-          "tsx",
-          "typst",
-          "vue",
-          "regex", -- need for some plugins
-        },
-
-        highlight = {
-          enable = true,
-          disable = function(lang, buf)
-            local max_filesize = 100 * 1024 -- 100 KB
-            local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-            if ok and stats and stats.size > max_filesize then
-              return true
-            end
-          end,
-          additional_vim_regex_highlighting = false,
-        },
-
+      -- 基础配置
+      require("nvim-treesitter").setup({
+        install_dir = vim.fn.stdpath("data") .. "/site",
         indent = {
           enable = true,
+          disable = { "python" }, -- 禁用有问题的语言
         },
+      })
+
+      -- 安装需要的 parsers
+      require("nvim-treesitter").install({
+        "lua",
+        "vim",
+        "vimdoc",
+        "python",
+        "javascript",
+        "typescript",
+        "html",
+        "css",
+        "json",
+        "markdown",
+        "bash",
+        "c",
+        "cpp",
+        "rust",
+        "go",
+        "java",
+      })
+
+      -- 启用语法高亮
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "*",
+        callback = function()
+          if vim.bo.filetype ~= "" then
+            pcall(vim.treesitter.start)
+          end
+        end,
+      })
+
+      -- 启用 treesitter 折叠
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "*",
+        callback = function()
+          if vim.bo.filetype ~= "" then
+            vim.wo.foldmethod = "expr"
+            vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+            vim.wo.foldenable = false -- 默认不折叠
+          end
+        end,
+      })
+
+      -- 渐进式选择（替代 wildfire 的核心功能）
+      local ts_select = require("vim.treesitter")
+
+      -- 用于追踪选择历史的变量
+      local selection_stack = {}
+
+      -- 初始化或扩展选择
+      vim.keymap.set({ "n", "x" }, "<CR>", function()
+        if vim.fn.mode() == "n" then
+          -- 普通模式：进入可视模式并选择当前节点
+          vim.cmd("normal! v")
+
+          -- 获取当前光标位置的 treesitter 节点
+          local bufnr = vim.api.nvim_get_current_buf()
+          local node = vim.treesitter.get_node()
+
+          if node then
+            selection_stack = { node }
+            local start_row, start_col, end_row, end_col = node:range()
+            vim.api.nvim_win_set_cursor(0, { start_row + 1, start_col })
+            vim.cmd("normal! v")
+            vim.api.nvim_win_set_cursor(0, { end_row + 1, end_col - 1 })
+          end
+        else
+          -- 可视模式：扩展到父节点
+          local node = vim.treesitter.get_node()
+
+          if node then
+            local parent = node:parent()
+            if parent then
+              table.insert(selection_stack, parent)
+              local start_row, start_col, end_row, end_col = parent:range()
+              vim.api.nvim_win_set_cursor(0, { start_row + 1, start_col })
+              vim.cmd("normal! o")
+              vim.api.nvim_win_set_cursor(0, { end_row + 1, end_col - 1 })
+            end
+          end
+        end
+      end, { desc = "Treesitter: Init/Expand selection" })
+
+      -- 缩小选择
+      vim.keymap.set("x", "<BS>", function()
+        if #selection_stack > 1 then
+          table.remove(selection_stack)
+          local node = selection_stack[#selection_stack]
+          local start_row, start_col, end_row, end_col = node:range()
+          vim.api.nvim_win_set_cursor(0, { start_row + 1, start_col })
+          vim.cmd("normal! o")
+          vim.api.nvim_win_set_cursor(0, { end_row + 1, end_col - 1 })
+        else
+          -- 回到最初的选择
+          vim.cmd("normal! gv")
+        end
+      end, { desc = "Treesitter: Shrink selection" })
+
+      -- 扩展到作用域
+      vim.keymap.set("x", "<TAB>", function()
+        local node = vim.treesitter.get_node()
+        if node then
+          -- 查找最近的作用域节点（function, class, block 等）
+          local scope_types = { "function", "class", "block", "method" }
+          local current = node
+
+          while current do
+            local node_type = current:type()
+            for _, scope_type in ipairs(scope_types) do
+              if node_type:match(scope_type) then
+                table.insert(selection_stack, current)
+                local start_row, start_col, end_row, end_col = current:range()
+                vim.api.nvim_win_set_cursor(0, { start_row + 1, start_col })
+                vim.cmd("normal! o")
+                vim.api.nvim_win_set_cursor(0, { end_row + 1, end_col - 1 })
+                return
+              end
+            end
+            current = current:parent()
+          end
+
+          -- 如果没找到作用域节点，就扩展到父节点
+          local parent = node:parent()
+          if parent then
+            table.insert(selection_stack, parent)
+            local start_row, start_col, end_row, end_col = parent:range()
+            vim.api.nvim_win_set_cursor(0, { start_row + 1, start_col })
+            vim.cmd("normal! o")
+            vim.api.nvim_win_set_cursor(0, { end_row + 1, end_col - 1 })
+          end
+        end
+      end, { desc = "Treesitter: Scope incremental" })
+
+      -- 退出可视模式时清空历史
+      vim.api.nvim_create_autocmd("ModeChanged", {
+        pattern = "*:n",
+        callback = function()
+          selection_stack = {}
+        end,
       })
     end,
   },

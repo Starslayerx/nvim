@@ -8,6 +8,8 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - **Theme**: nord.nvim (Nord theme)
 - **Leader Key**: Space
 - **Transparency**: Enabled
+- **Completion Engine**: blink.cmp (Modern completion system)
+- **Toolkit**: snacks.nvim (All-in-one toolkit)
 
 ## 🔌 Plugins
 
@@ -32,16 +34,30 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - **noice.nvim** - Enhanced messages and cmdline
 
 ### Syntax Highlighting & Editing
-- **nvim-treesitter** - Advanced syntax highlighting
+- **nvim-treesitter** - Advanced syntax highlighting (main branch, built-in progressive selection)
 - **rainbow-delimiters.nvim** - Rainbow parentheses
-- **wildfire.nvim** - Quick content selection
+- **Built-in treesitter selection** - Progressive code selection using `<CR>`/`<BS>`/`<TAB>`
 
-### File Management & Search
-- **snacks.nvim** - All-in-one toolkit (file explorer, picker, notification system, etc.)
+### All-in-one Toolkit
+- **snacks.nvim** - All-in-one toolkit, including:
+  - File explorer (replaces netrw, supports file operations)
+  - Smart file picker (like fzf/Telescope)
+  - Notification system (with history)
+  - Terminal integration
+  - Big file friendly mode
+  - Welcome dashboard
+  - Image display support
+  - Indent visualization
+  - Scope detection
+  - Smooth scrolling
+  - Status bar enhancement
+  - Word highlight (with jump functionality)
+  - Scratch buffer
 
 ### Formatting & Tools
 - **conform.nvim** - Code formatter
 - **friendly-snippets** - Code snippets
+- **vim-python-pep8-indent** - Python PEP8 indentation
 
 ## ⌨️ Key Mappings
 
@@ -62,6 +78,22 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - `<C-h/j/k/l>` - Switch windows
 - `<leader>t` - Open terminal (horizontal split)
 - `<leader>T` - Open terminal (vertical split)
+
+### Page Navigation
+normal mode:
+- `<C-f>` - forward   Page down one full screen
+- `<C-b>` - backward  Page up one full screen
+- `<C-d>` - down half Page down half screen
+- `<C-u>` - up half   Page up half screen
+
+insert mode:
+- `<C-j>` - forward   Page down one full screen
+- `<C-k>` - backward  Page up one full screen
+
+### Cursor Movement (Insert Mode)
+- `<C-f>` - Move to end of line
+- `<C-l>` - Move one character to the right
+- `<C-b>` - Move to beginning of line
 
 ### Snacks Keymaps
 - `<leader><space>` - Smart file find
@@ -86,6 +118,9 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - `<leader>un` - Close all notifications
 - `<c-/>` - Toggle terminal
 - `<leader>N` - Neovim news
+- `<leader>.` - Toggle scratch buffer
+- `<leader>S` - Select scratch buffer
+- `]]` / `[[` - Jump to next/previous word reference
 
 ### LSP Keymaps
 - `<leader>xx` - Toggle diagnostics panel
@@ -118,37 +153,50 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 
 ### Editing Settings
 - Tab width: 4 spaces
-- Smart indent: Disabled
+- Smart indent: Disabled (nosmartindent)
 - Fold method: Indent
 - Auto save: Disabled
+- Auto indent: Enabled
+- Show invisible characters: Enabled
+- Auto comments: Disabled
+- Undo files: Enabled (persistent)
+- Cursor position memory: Enabled
 
 ### Search Settings
 - Case sensitive
 - Live search preview
+- Smart case: Disabled
 
 ### Performance Optimization
 - Backup files disabled
 - Hidden buffers enabled
-- Fast updates
+- Fast updates (updatetime=100ms)
+- Regex engine: Modern engine (re=0)
+- Backup directory: ~/.config/nvim/tmp/backup
+- Undo directory: ~/.config/nvim/tmp/undo
 
 ### Transparency Effects
 - Main window background transparent
 - Floating windows transparent
 - Status area transparent
+- Telescope interface transparent
+- Message area transparent
 
 ## 🎨 Features
 
-1. **Integrated Toolkit**: Uses snacks.nvim for file explorer, picker, notification system, terminal, debugging tools, etc.
+1. **All-in-one Toolkit**: Uses snacks.nvim to integrate file explorer, picker, notification system, terminal, debugging tools, etc.
 2. **Modern LSP**: Complete language server support with auto-installation and UI enhancement
 3. **Code Formatting**: Auto-formatting for multiple languages
 4. **Transparent Interface**: Window transparency effects
 5. **Smart Completion**: Modern completion system based on blink.cmp
 6. **Auto Bracket Completion**: Smart bracket pairing and completion
 7. **Rainbow Parentheses**: Colorful parentheses highlighting for better code readability
-8. **Quick Content Selection**: Use space key to quickly select code blocks
+8. **Quick Content Selection**: Use `<CR>`/`<BS>`/`<TAB>` for progressive code selection
 9. **Inline Diagnostics**: Show diagnostic information within code lines
 10. **Window Selector**: Quickly switch and manage windows
 11. **Keybinding Hints**: Real-time display of available keybindings
+12. **In-terminal Image Display**: Support for displaying images directly in terminal
+13. **Scratch Buffer**: Temporary note-taking and quick calculations
 
 ## 📁 Project Structure
 
@@ -167,16 +215,22 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 │       ├── snacks.lua    # Snacks toolkit
 │       ├── tools.lua     # Utility plugins
 │       └── ui.lua        # UI plugins
-└── README.md             # Chinese docs
+└── README.md             # Chinese documentation
 └── README-en.md          # This file
 ```
 
 ## 🚀 Getting Started
 
-1. Ensure you have Neovim installed
-2. Clone this configuration to `~/.config/nvim/`
-3. Open Neovim and let lazy.nvim install all plugins
-4. Use `<leader>?` to see available key mappings
+1. Ensure you have Neovim installed (recommended 0.10+)
+2. Disable unnecessary Perl and Ruby providers (configured in init.lua)
+3. Clone this configuration to `~/.config/nvim/`
+4. Open Neovim and let lazy.nvim install all plugins
+5. Use `<leader>?` to see available key mappings
+
+### Notes
+- Configuration has disabled Perl and Ruby language servers for faster startup
+- Treesitter parsers and LSP servers will be automatically installed on first launch
+- Transparency effects will be automatically applied after color theme loading
 
 ## 🔧 Customization
 
