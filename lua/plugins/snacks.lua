@@ -27,7 +27,9 @@ return {
         enabled = true,
         sources = {
           explorer = {
+            follow_file = true, -- 跟踪文件位置 (外层文件无法追踪, cwd 未改变)
             auto_close = true, -- 打开文件后自动关闭 explorer
+            focus = "list",
             win = {
               list = {
                 keys = {

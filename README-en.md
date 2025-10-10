@@ -6,7 +6,7 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 
 - **Package Manager**: lazy.nvim
 - **Theme**: nord.nvim (Nord theme)
-- **Leader Key**: Space
+- **Leader Key**: Space (LocalLeader: `\`)
 - **Transparency**: Enabled
 - **Completion Engine**: blink.cmp (Modern completion system)
 - **Toolkit**: snacks.nvim (All-in-one toolkit)
@@ -14,49 +14,49 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 ## 🔌 Plugins
 
 ### UI & Appearance
-- **nord.nvim** - Nord color theme
-- **lualine.nvim** - Status line
-- **nvim-colorizer.lua** - Color highlighter
+- **nord.nvim** - Nord theme with italic comments and bold lualine support
+- **lualine.nvim** - Status line using nord theme
+- **nvim-colorizer.lua** - Color highlighter, custom version (Starslayerx/nvim-colorizer.lua)
 - **nvim-web-devicons** - File icons
 - **mini.nvim** - Icon support
-- **window-picker.nvim** - Window selector
-- **which-key.nvim** - Keybinding hints
+- **window-picker.nvim** - Window selector (version 2.*)
+- **which-key.nvim** - Keybinding hints, use `<leader>?` for local mappings
 
 ### Code Completion & LSP
-- **blink.cmp** - Code completion engine
-- **nvim-autopairs** - Auto bracket completion
-- **nvim-lspconfig** - LSP configuration
-- **mason.nvim** - LSP server management
-- **mason-lspconfig.nvim** - Automatic LSP installation
-- **trouble.nvim** - Diagnostic interface
-- **tiny-inline-diagnostic.nvim** - Inline diagnostics
-- **lspsaga.nvim** - LSP UI enhancement
-- **noice.nvim** - Enhanced messages and cmdline
+- **blink.cmp** - Modern completion engine (version 1.*) with default preset keybindings
+- **nvim-autopairs** - Auto bracket completion, disabled in macros
+- **nvim-lspconfig** - LSP configuration supporting pyright and lua_ls
+- **mason.nvim** - LSP server management with custom icons
+- **mason-lspconfig.nvim** - Auto-install LSP (clangd, pyright, gopls, eslint, lua_ls, rust_analyzer, marksman)
+- **trouble.nvim** - Diagnostic interface with multiple view modes
+- **tiny-inline-diagnostic.nvim** - Inline diagnostics with ghost preset
+- **lspsaga.nvim** - LSP UI enhancement with rounded borders, lightbulb disabled
+- **noice.nvim** - Enhanced messages and cmdline with multiple presets
+- **friendly-snippets** - Code snippets support
 
 ### Syntax Highlighting & Editing
-- **nvim-treesitter** - Advanced syntax highlighting (main branch, built-in progressive selection)
-- **rainbow-delimiters.nvim** - Rainbow parentheses
+- **nvim-treesitter** - Advanced syntax highlighting (main branch) with built-in progressive selection
+- **rainbow-delimiters.nvim** - Rainbow parentheses using Nord and Catppuccin Frappé colors
 - **Built-in treesitter selection** - Progressive code selection using `<CR>`/`<BS>`/`<TAB>`
 
 ### All-in-one Toolkit
 - **snacks.nvim** - All-in-one toolkit, including:
-  - File explorer (replaces netrw, supports file operations)
+  - File explorer (replaces netrw with full file operations)
   - Smart file picker (like fzf/Telescope)
-  - Notification system (with history)
-  - Terminal integration
+  - Notification system (with history, 3s timeout)
+  - Terminal integration (Ghostty backend for images)
   - Big file friendly mode
   - Welcome dashboard
   - Image display support
   - Indent visualization
   - Scope detection
-  - Smooth scrolling
-  - Status bar enhancement
+  - Status bar enhancement (with folds, Git marks)
   - Word highlight (with jump functionality)
   - Scratch buffer
+  - Quick file rendering
 
 ### Formatting & Tools
-- **conform.nvim** - Code formatter
-- **friendly-snippets** - Code snippets
+- **conform.nvim** - Code formatter with auto-format on save
 - **vim-python-pep8-indent** - Python PEP8 indentation
 
 ## ⌨️ Key Mappings
@@ -67,6 +67,7 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - `Y` - Select all and copy to system clipboard
 - `<leader><CR>` - Clear search highlight
 - `K/J` - Move 5 lines up/down quickly
+- `</>/` - Indent/Unindent
 
 ### Tab Management
 - `tn` - New tab
@@ -75,9 +76,10 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - `tmh/tml` - Move tab left/right
 
 ### Window Management
-- `<C-h/j/k/l>` - Switch windows
+- `<C-h/j/k/l>` - Switch windows (normal and terminal modes)
 - `<leader>t` - Open terminal (horizontal split)
 - `<leader>T` - Open terminal (vertical split)
+- `<Esc>` - Exit to normal mode in terminal
 
 ### Page Navigation
 normal mode:
@@ -94,6 +96,18 @@ insert mode:
 - `<C-f>` - Move to end of line
 - `<C-l>` - Move one character to the right
 - `<C-b>` - Move to beginning of line
+
+### Treesitter Code Selection
+- `<CR>` - Initialize/Expand selection (normal and visual modes)
+- `<BS>` - Shrink selection (visual mode)
+- `<TAB>` - Scope incremental selection (visual mode)
+
+### Blink.cmp Completion Keys (Default preset)
+- `<C-y>` - Accept completion
+- `<C-Space>` - Open menu or toggle documentation
+- `<C-n>/<C-p>` or `Up/Down` - Select next/previous item
+- `<C-e>` - Hide menu
+- `<C-k>` - Toggle signature help
 
 ### Snacks Keymaps
 - `<leader><space>` - Smart file find
@@ -150,53 +164,70 @@ insert mode:
 - Cursor line highlight
 - 100-column marker
 - Auto wrap
+- Sign column always visible
+- Scroll offset: 8 lines
 
 ### Editing Settings
 - Tab width: 4 spaces
 - Smart indent: Disabled (nosmartindent)
-- Fold method: Indent
-- Auto save: Disabled
+- C indent: Disabled (nocindent)
+- Fold method: Indent (level 99, expanded by default)
 - Auto indent: Enabled
-- Show invisible characters: Enabled
+- Show invisible characters: Enabled (tabs as two spaces, trailing spaces as ▫)
 - Auto comments: Disabled
 - Undo files: Enabled (persistent)
 - Cursor position memory: Enabled
 
 ### Search Settings
-- Case sensitive
-- Live search preview
-- Smart case: Disabled
+- Case sensitive (ignorecase = false)
+- Smart case: Disabled (smartcase = false)
+- Live search preview (inccommand = "split")
+- Search highlight: Enabled
+
+### Window Splits
+- Vertical split: Opens to the right
+- Horizontal split: Opens below
 
 ### Performance Optimization
-- Backup files disabled
+- Backup and swap files disabled
 - Hidden buffers enabled
-- Fast updates (updatetime=100ms)
+- Update time: 300ms
+- Timeout: 50ms
 - Regex engine: Modern engine (re=0)
 - Backup directory: ~/.config/nvim/tmp/backup
 - Undo directory: ~/.config/nvim/tmp/undo
+- Disable lazyredraw to prevent UI plugin issues
+
+### Completion Settings
+- Complete options: longest, noinsert, menuone, noselect, preview
+- Virtual edit: Block mode enabled
 
 ### Transparency Effects
-- Main window background transparent
-- Floating windows transparent
-- Status area transparent
-- Telescope interface transparent
-- Message area transparent
+- Main window background transparent (Normal, NormalFloat)
+- Sign column transparent (SignColumn)
+- Non-current windows transparent (NormalNC)
+- Message area transparent (MsgArea)
+- Telescope interface transparent (TelescopeNormal, TelescopeBorder, TelescopePromptBorder)
 
 ## 🎨 Features
 
 1. **All-in-one Toolkit**: Uses snacks.nvim to integrate file explorer, picker, notification system, terminal, debugging tools, etc.
 2. **Modern LSP**: Complete language server support with auto-installation and UI enhancement
-3. **Code Formatting**: Auto-formatting for multiple languages
-4. **Transparent Interface**: Window transparency effects
-5. **Smart Completion**: Modern completion system based on blink.cmp
-6. **Auto Bracket Completion**: Smart bracket pairing and completion
-7. **Rainbow Parentheses**: Colorful parentheses highlighting for better code readability
-8. **Quick Content Selection**: Use `<CR>`/`<BS>`/`<TAB>` for progressive code selection
-9. **Inline Diagnostics**: Show diagnostic information within code lines
-10. **Window Selector**: Quickly switch and manage windows
-11. **Keybinding Hints**: Real-time display of available keybindings
-12. **In-terminal Image Display**: Support for displaying images directly in terminal
+3. **Code Formatting**: Auto-formatting for multiple languages (triggers on save)
+4. **Transparent Interface**: Window transparency effects automatically applied to color themes
+5. **Smart Completion**: Modern completion system based on blink.cmp with LSP, path, snippets, and buffer support
+6. **Auto Bracket Completion**: Smart bracket pairing and completion, disabled in specific filetypes and macros
+7. **Rainbow Parentheses**: Colorful parentheses highlighting using Nord and Catppuccin Frappé color schemes
+8. **Quick Content Selection**: Use `<CR>`/`<BS>`/`<TAB>` for progressive code selection with scope detection
+9. **Inline Diagnostics**: Show diagnostic information within code lines using ghost preset style
+10. **Window Selector**: Quickly switch and manage windows (version 2.*)
+11. **Keybinding Hints**: Real-time display of available keybindings, use `<leader>?` for local mappings
+12. **In-terminal Image Display**: Support for displaying images directly in terminal (Ghostty backend)
 13. **Scratch Buffer**: Temporary note-taking and quick calculations
+14. **Enhanced File Explorer**: Complete file operations support (add, delete, rename, copy, move, etc.)
+15. **Auto LSP Installation**: Mason automatically installs and configures multiple language servers
+16. **Cursor Position Memory**: Restores last cursor position when reopening files
+17. **Terminal Integration**: Smart terminal management with split and quick switching support
 
 ## 📁 Project Structure
 
@@ -221,45 +252,77 @@ insert mode:
 
 ## 🚀 Getting Started
 
-1. Ensure you have Neovim installed (recommended 0.10+)
-2. Disable unnecessary Perl and Ruby providers (configured in init.lua)
-3. Clone this configuration to `~/.config/nvim/`
-4. Open Neovim and let lazy.nvim install all plugins
-5. Use `<leader>?` to see available key mappings
+1. **Environment Setup**:
+   - Ensure you have Neovim 0.10+ installed
+   - Perl and Ruby providers are automatically disabled (configured in init.lua)
 
-### Notes
-- Configuration has disabled Perl and Ruby language servers for faster startup
-- Treesitter parsers and LSP servers will be automatically installed on first launch
-- Transparency effects will be automatically applied after color theme loading
+2. **Installation**:
+   - Clone this configuration to `~/.config/nvim/`
+   - On first launch, lazy.nvim will automatically install all plugins
+
+3. **Initialization**:
+   - Mason will automatically install configured LSP servers
+   - Treesitter will automatically install syntax parsers
+   - Transparency effects will be automatically applied after color theme loading
+
+4. **Usage Guide**:
+   - Use `<leader>?` to see available keybindings
+   - Use `<leader>e` to open file explorer
+   - Use `<leader><space>` for smart file finding
+
+### Automatic Features
+- **Auto Completion**: Code completion triggers automatically
+- **Auto Formatting**: Code auto-formats on file save
+- **Auto Diagnostics**: LSP diagnostics display in real-time
+- **File Type Detection**: Automatically enables corresponding syntax highlighting and LSP
 
 ## 🔧 Customization
 
-- Edit `lua/config/options.lua` for general settings
-- Modify `lua/config/keymaps.lua` for custom key mappings
-- Update plugin configurations in `lua/plugins/` directory
+### Core Configuration Files
+- **`lua/config/options.lua`** - General settings (display, editing, search, etc.)
+- **`lua/config/keymaps.lua`** - Key mappings
+- **`lua/config/transparency.lua`** - Transparency effects settings
+- **`lua/config/lazy.lua`** - Package manager initialization (Leader key setup)
 
-This configuration provides a complete, modern development environment with excellent performance and usability.
+### Plugin Configuration Files
+- **`lua/plugins/ui.lua`** - UI-related plugins (theme, status bar, icons, etc.)
+- **`lua/plugins/cmp.lua`** - Completion system configuration
+- **`lua/plugins/lsp.lua`** - LSP and diagnostics configuration
+- **`lua/plugins/snacks.lua`** - Snacks toolkit configuration
+- **`lua/plugins/tools.lua`** - Formatting and other tools
+
+### Quick Modification Guide
+1. **Change Theme**: Edit nord.nvim configuration in `lua/plugins/ui.lua`
+2. **Add LSP**: Add servers to ensure_installed in `lua/plugins/lsp.lua`
+3. **Modify Keybindings**: Edit `lua/config/keymaps.lua` to add custom mappings
+4. **Adjust Formatting**: Modify formatters_by_ft in `lua/plugins/tools.lua`
+5. **Disable Transparency**: Comment out the loading of `lua/config/transparency.lua`
+
+This configuration provides a complete, modern development environment with excellent performance and usability. All components have been carefully tuned to ensure compatibility and stability.
 
 ## 📝 Language Support
 
-Configuration supports syntax highlighting and LSP for the following languages:
-- Python (pyright)
-- JavaScript/TypeScript (eslint, prettier)
-- Lua (lua_ls)
-- Go (gopls)
-- Rust (rust_analyzer)
-- C/C++ (clangd)
-- Markdown (marksman)
-- And other common languages
+### Auto-installed LSP Servers
+Configuration automatically installs the following LSP servers:
+- **clangd** - C/C++ language server
+- **pyright** - Python language server
+- **gopls** - Go language server
+- **eslint** - JavaScript/TypeScript linting
+- **lua_ls** - Lua language server (specially configured for Neovim API support)
+- **rust_analyzer** - Rust language server
+- **marksman** - Markdown language server
 
-Syntax highlighting support: Python, JavaScript, TypeScript, Lua, Go, HTML, CSS, JSON, YAML, TOML, LaTeX, Markdown, Dockerfile, Norg, SCSS, Svelte, TSX, Typst, Vue, Regex
+### Treesitter Syntax Highlighting
+Automatically installs the following language parsers:
+- Lua, Vim, Vimdoc (Neovim core)
+- Python, JavaScript, TypeScript
+- HTML, CSS, JSON, Markdown
+- Bash, C, C++, Rust, Go, Java
 
-## 🛠️ Code Formatting
+### Code Formatting Support
+- **Python**: ruff (ignores F401 unused import warnings)
+- **JavaScript/TypeScript**: prettier
+- **Lua**: stylua (2-space indentation)
+- **Shell**: shfmt (2-space indentation)
 
-Configured with the following formatting tools:
-- Python: ruff
-- JavaScript/TypeScript: prettier
-- Lua: stylua
-- Shell: shfmt
-
-All formatting supports auto-format on save.
+All formatting tools support auto-format on save with 500ms timeout, LSP as fallback formatting option.
