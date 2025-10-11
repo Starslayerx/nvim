@@ -4,18 +4,19 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 
 ## 🎯 Overview
 
-- **Package Manager**: lazy.nvim
+- **Package Manager**: lazy.nvim (Auto-check for updates)
 - **Theme**: nord.nvim (Nord theme)
 - **Leader Key**: Space (LocalLeader: `\`)
 - **Transparency**: Enabled
-- **Completion Engine**: blink.cmp (Modern completion system)
+- **Completion Engine**: blink.cmp (Modern completion system with GitHub Copilot integration)
 - **Toolkit**: snacks.nvim (All-in-one toolkit)
+- **AI Assistant**: GitHub Copilot (Code completion and suggestions)
 
 ## 🔌 Plugins
 
 ### UI & Appearance
 - **nord.nvim** - Nord theme with italic comments and bold lualine support
-- **lualine.nvim** - Status line using nord theme
+- **lualine.nvim** - Status line using nord theme with Copilot status integration
 - **nvim-colorizer.lua** - Color highlighter, custom version (Starslayerx/nvim-colorizer.lua)
 - **nvim-web-devicons** - File icons
 - **mini.nvim** - Icon support
@@ -23,21 +24,25 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - **which-key.nvim** - Keybinding hints, use `<leader>?` for local mappings
 
 ### Code Completion & LSP
-- **blink.cmp** - Modern completion engine (version 1.*) with default preset keybindings
-- **nvim-autopairs** - Auto bracket completion, disabled in macros
+- **blink.cmp** - Modern completion engine (version 1.*) with default preset keybindings and Copilot integration
+- **blink-copilot** - Copilot integration for Blink.cmp
+- **copilot.lua** - GitHub Copilot support
+- **copilot-lualine** - Copilot status display in Lualine
+- **nvim-autopairs** - Auto bracket completion, disabled in macros and replace mode
 - **nvim-lspconfig** - LSP configuration supporting pyright and lua_ls
 - **mason.nvim** - LSP server management with custom icons
 - **mason-lspconfig.nvim** - Auto-install LSP (clangd, pyright, gopls, eslint, lua_ls, rust_analyzer, marksman)
 - **trouble.nvim** - Diagnostic interface with multiple view modes
-- **tiny-inline-diagnostic.nvim** - Inline diagnostics with ghost preset
+- **tiny-inline-diagnostic.nvim** - Inline diagnostics with ghost preset and multiline support
 - **lspsaga.nvim** - LSP UI enhancement with rounded borders, lightbulb disabled
 - **noice.nvim** - Enhanced messages and cmdline with multiple presets
 - **friendly-snippets** - Code snippets support
 
 ### Syntax Highlighting & Editing
-- **nvim-treesitter** - Advanced syntax highlighting (main branch) with built-in progressive selection
+- **nvim-treesitter** - Advanced syntax highlighting (main branch) with built-in progressive selection and folding support
 - **rainbow-delimiters.nvim** - Rainbow parentheses using Nord and Catppuccin Frappé colors
 - **Built-in treesitter selection** - Progressive code selection using `<CR>`/`<BS>`/`<TAB>`
+- **wildfire.nvim** - Quick bracket content selection (custom version)
 
 ### All-in-one Toolkit
 - **snacks.nvim** - All-in-one toolkit, including:
@@ -54,6 +59,8 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
   - Word highlight (with jump functionality)
   - Scratch buffer
   - Quick file rendering
+  - Zen mode and window zoom
+  - Git browse and Lazygit integration
 
 ### Formatting & Tools
 - **conform.nvim** - Code formatter with auto-format on save
@@ -97,7 +104,7 @@ insert mode:
 - `<C-l>` - Move one character to the right
 - `<C-b>` - Move to beginning of line
 
-### Treesitter Code Selection
+### Treesitter Code Selection & Wildfire
 - `<CR>` - Initialize/Expand selection (normal and visual modes)
 - `<BS>` - Shrink selection (visual mode)
 - `<TAB>` - Scope incremental selection (visual mode)
@@ -110,6 +117,7 @@ insert mode:
 - `<C-k>` - Toggle signature help
 
 ### Snacks Keymaps
+#### File Finding and Navigation
 - `<leader><space>` - Smart file find
 - `<leader>,` - Buffer list
 - `<leader>/` - Global search
@@ -122,6 +130,32 @@ insert mode:
 - `<leader>fc` - Find configuration files
 - `<leader>fp` - Project list
 - `<leader>fr` - Recent files
+
+#### File Explorer Operations (in explorer)
+- `<CR>` - Enter directory/Open file
+- `<BS>` - Open parent directory
+- `h` - Close directory
+- `l` - Open file
+- `t` - Open file in new tab
+- `s` - Open in horizontal split
+- `v` - Open in vertical split
+- `a` - Add file/directory
+- `d` - Delete file/directory
+- `r` - Rename file/directory
+- `c` - Copy file/directory
+- `y` - Copy file path
+- `p` - Paste file/directory
+- `u` - Update file tree
+- `P` - Preview file
+- `I` - Show .gitignore files
+- `H` - Show hidden files
+- `Z` - Collapse all subdirectories
+- `]g` / `[g` - Jump to next/previous git modified file
+- `]d` / `[d` - Jump to next/previous file with diagnostics
+- `]w` / `[w` - Jump to next/previous file with warnings
+- `]e` / `[e` - Jump to next/previous file with errors
+
+#### Other Features
 - `<leader>z` - Zen mode
 - `<leader>Z` - Zoom mode
 - `<leader>gg` - Lazygit
@@ -171,7 +205,7 @@ insert mode:
 - Tab width: 4 spaces
 - Smart indent: Disabled (nosmartindent)
 - C indent: Disabled (nocindent)
-- Fold method: Indent (level 99, expanded by default)
+- Fold method: Treesitter expr (level 99, not folded by default)
 - Auto indent: Enabled
 - Show invisible characters: Enabled (tabs as two spaces, trailing spaces as ▫)
 - Auto comments: Disabled
@@ -201,6 +235,7 @@ insert mode:
 ### Completion Settings
 - Complete options: longest, noinsert, menuone, noselect, preview
 - Virtual edit: Block mode enabled
+- GitHub Copilot: Integrated into blink.cmp for smart completion
 
 ### Transparency Effects
 - Main window background transparent (Normal, NormalFloat)
@@ -211,15 +246,15 @@ insert mode:
 
 ## 🎨 Features
 
-1. **All-in-one Toolkit**: Uses snacks.nvim to integrate file explorer, picker, notification system, terminal, debugging tools, etc.
+1. **All-in-one Toolkit**: Uses snacks.nvim to integrate file explorer, picker, notification system, terminal, debugging tools, zen mode, etc.
 2. **Modern LSP**: Complete language server support with auto-installation and UI enhancement
 3. **Code Formatting**: Auto-formatting for multiple languages (triggers on save)
 4. **Transparent Interface**: Window transparency effects automatically applied to color themes
-5. **Smart Completion**: Modern completion system based on blink.cmp with LSP, path, snippets, and buffer support
-6. **Auto Bracket Completion**: Smart bracket pairing and completion, disabled in specific filetypes and macros
+5. **Smart Completion**: Modern completion system based on blink.cmp with LSP, path, snippets, buffer, and GitHub Copilot support
+6. **Auto Bracket Completion**: Smart bracket pairing and completion, disabled in specific filetypes, macros, and replace mode
 7. **Rainbow Parentheses**: Colorful parentheses highlighting using Nord and Catppuccin Frappé color schemes
 8. **Quick Content Selection**: Use `<CR>`/`<BS>`/`<TAB>` for progressive code selection with scope detection
-9. **Inline Diagnostics**: Show diagnostic information within code lines using ghost preset style
+9. **Inline Diagnostics**: Show diagnostic information within code lines using ghost preset style with multiline support
 10. **Window Selector**: Quickly switch and manage windows (version 2.*)
 11. **Keybinding Hints**: Real-time display of available keybindings, use `<leader>?` for local mappings
 12. **In-terminal Image Display**: Support for displaying images directly in terminal (Ghostty backend)
@@ -228,6 +263,9 @@ insert mode:
 15. **Auto LSP Installation**: Mason automatically installs and configures multiple language servers
 16. **Cursor Position Memory**: Restores last cursor position when reopening files
 17. **Terminal Integration**: Smart terminal management with split and quick switching support
+18. **Treesitter Folding**: Intelligent code folding based on syntax tree
+19. **Zen Mode**: Distraction-free focused editing mode
+20. **GitHub Copilot**: AI code completion and suggestions
 
 ## 📁 Project Structure
 
@@ -271,10 +309,12 @@ insert mode:
    - Use `<leader><space>` for smart file finding
 
 ### Automatic Features
-- **Auto Completion**: Code completion triggers automatically
-- **Auto Formatting**: Code auto-formats on file save
-- **Auto Diagnostics**: LSP diagnostics display in real-time
+- **Auto Completion**: Code completion triggers automatically, including LSP, snippets, path, buffer, and Copilot suggestions
+- **Auto Formatting**: Code auto-formats on file save (supports Python, JS/TS, Lua, Shell)
+- **Auto Diagnostics**: LSP diagnostics display in real-time with multiline inline support
 - **File Type Detection**: Automatically enables corresponding syntax highlighting and LSP
+- **Auto Folding**: Intelligent code folding based on Treesitter
+- **Auto Terminal Start**: Automatically enters insert mode on TermOpen
 
 ## 🔧 Customization
 
@@ -285,18 +325,20 @@ insert mode:
 - **`lua/config/lazy.lua`** - Package manager initialization (Leader key setup)
 
 ### Plugin Configuration Files
-- **`lua/plugins/ui.lua`** - UI-related plugins (theme, status bar, icons, etc.)
-- **`lua/plugins/cmp.lua`** - Completion system configuration
-- **`lua/plugins/lsp.lua`** - LSP and diagnostics configuration
-- **`lua/plugins/snacks.lua`** - Snacks toolkit configuration
-- **`lua/plugins/tools.lua`** - Formatting and other tools
+- **`lua/plugins/ui.lua`** - UI-related plugins (theme, status bar, icons, Treesitter, rainbow brackets, etc.)
+- **`lua/plugins/cmp.lua`** - Completion system configuration (blink.cmp, Copilot, auto-pairs)
+- **`lua/plugins/lsp.lua`** - LSP and diagnostics configuration (lspconfig, Mason, Trouble, diagnostics display)
+- **`lua/plugins/snacks.lua`** - Snacks toolkit configuration (file explorer, picker, notifications, terminal, etc.)
+- **`lua/plugins/tools.lua`** - Formatting and other tools (conform, wildfire, PEP8 indent)
 
 ### Quick Modification Guide
 1. **Change Theme**: Edit nord.nvim configuration in `lua/plugins/ui.lua`
 2. **Add LSP**: Add servers to ensure_installed in `lua/plugins/lsp.lua`
 3. **Modify Keybindings**: Edit `lua/config/keymaps.lua` to add custom mappings
 4. **Adjust Formatting**: Modify formatters_by_ft in `lua/plugins/tools.lua`
-5. **Disable Transparency**: Comment out the loading of `lua/config/transparency.lua`
+5. **Disable Transparency**: Comment out `require("config.transparency")` loading in `init.lua`
+6. **Configure Copilot**: Adjust Copilot settings in `lua/plugins/cmp.lua`
+7. **Customize File Explorer**: Modify explorer configuration in `lua/plugins/snacks.lua`
 
 This configuration provides a complete, modern development environment with excellent performance and usability. All components have been carefully tuned to ensure compatibility and stability.
 
@@ -321,7 +363,7 @@ Automatically installs the following language parsers:
 
 ### Code Formatting Support
 - **Python**: ruff (ignores F401 unused import warnings)
-- **JavaScript/TypeScript**: prettier
+- **JavaScript/TypeScript**: prettier (stop after first successful formatter)
 - **Lua**: stylua (2-space indentation)
 - **Shell**: shfmt (2-space indentation)
 

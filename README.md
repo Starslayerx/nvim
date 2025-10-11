@@ -4,18 +4,19 @@
 
 ## 🎯 配置概览
 
-- **包管理器**: lazy.nvim
+- **包管理器**: lazy.nvim (自动检查更新)
 - **主题**: nord.nvim (Nord 主题)
 - **Leader 键**: 空格键 (LocalLeader: `\`)
 - **透明度**: 已启用
-- **补全引擎**: blink.cmp (现代补全系统)
+- **补全引擎**: blink.cmp (现代补全系统，集成 GitHub Copilot)
 - **工具集**: snacks.nvim (一体化工具集合)
+- **AI 辅助**: GitHub Copilot (代码补全和建议)
 
 ## 🔌 插件列表
 
 ### UI & 外观
 - **nord.nvim** - Nord 主题，支持斜体注释和粗体 lualine
-- **lualine.nvim** - 状态栏，使用 nord 主题
+- **lualine.nvim** - 状态栏，使用 nord 主题，集成 Copilot 状态显示
 - **nvim-colorizer.lua** - 颜色高亮，使用自定义版本 (Starslayerx/nvim-colorizer.lua)
 - **nvim-web-devicons** - 文件图标
 - **mini.nvim** - 图标支持
@@ -23,21 +24,25 @@
 - **which-key.nvim** - 快捷键提示，使用 `<leader>?` 查看本地映射
 
 ### 代码补全 & LSP
-- **blink.cmp** - 现代代码补全引擎 (版本 1.*)，使用 default 预设快捷键
-- **nvim-autopairs** - 自动括号补全，禁用在宏中运行
+- **blink.cmp** - 现代代码补全引擎 (版本 1.*)，使用 default 预设快捷键，集成 Copilot
+- **blink-copilot** - Blink.cmp 的 Copilot 集成
+- **copilot.lua** - GitHub Copilot 支持
+- **copilot-lualine** - Lualine 中的 Copilot 状态显示
+- **nvim-autopairs** - 自动括号补全，禁用在宏和替换模式中运行
 - **nvim-lspconfig** - LSP 配置，支持 pyright 和 lua_ls
 - **mason.nvim** - LSP 服务器管理，带有自定义图标
 - **mason-lspconfig.nvim** - 自动安装 LSP (clangd, pyright, gopls, eslint, lua_ls, rust_analyzer, marksman)
 - **trouble.nvim** - 诊断界面，支持多种视图模式
-- **tiny-inline-diagnostic.nvim** - 行内诊断，使用 ghost 预设
+- **tiny-inline-diagnostic.nvim** - 行内诊断，使用 ghost 预设，支持多行显示
 - **lspsaga.nvim** - LSP UI 美化，圆角边框，禁用灯泡提示
 - **noice.nvim** - 消息和命令行美化，多种预设启用
 - **friendly-snippets** - 代码片段支持
 
 ### 语法高亮 & 编辑
-- **nvim-treesitter** - 高级语法高亮 (main 分支)，内置渐进式代码选择
+- **nvim-treesitter** - 高级语法高亮 (main 分支)，内置渐进式代码选择，支持折叠
 - **rainbow-delimiters.nvim** - 彩虹括号，使用 nord 和 Catppuccin Frappé 配色
 - **内置 treesitter 选择** - 使用 `<CR>`/`<BS>`/`<TAB>` 进行渐进式代码选择
+- **wildfire.nvim** - 快速选择括号内容 (自定义版本)
 
 ### 一体化工具集
 - **snacks.nvim** - 一体化工具集，包含:
@@ -54,6 +59,8 @@
   - 单词高亮 (带跳转功能)
   - 草稿缓冲区
   - 快速文件渲染
+  - 禅模式和窗口缩放
+  - Git 浏览和 Lazygit 集成
 
 ### 格式化 & 工具
 - **conform.nvim** - 代码格式化，支持保存时自动格式化
@@ -97,7 +104,7 @@ insert 模式:
 - `<C-l>` - 向右移动一个字符
 - `<C-b>` - 移动到行首
 
-### Treesitter 代码选择
+### Treesitter 代码选择 & Wildfire
 - `<CR>` - 初始化选择/扩展选择 (普通模式和可视模式)
 - `<BS>` - 缩小选择 (可视模式)
 - `<TAB>` - 作用域增量选择 (可视模式)
@@ -110,6 +117,7 @@ insert 模式:
 - `<C-k>` - 切换签名帮助
 
 ### Snacks 快捷键
+#### 文件查找和导航
 - `<leader><space>` - 智能文件查找
 - `<leader>,` - 缓冲区列表
 - `<leader>/` - 全局搜索
@@ -122,6 +130,32 @@ insert 模式:
 - `<leader>fc` - 查找配置文件
 - `<leader>fp` - 项目列表
 - `<leader>fr` - 最近文件
+
+#### 文件浏览器操作 (在 explorer 中)
+- `<CR>` - 进入目录/打开文件
+- `<BS>` - 打开上级目录
+- `h` - 关闭目录
+- `l` - 打开文件
+- `t` - 新 tab 打开文件
+- `s` - 横向分屏打开
+- `v` - 纵向分屏打开
+- `a` - 添加文件/目录
+- `d` - 删除文件/目录
+- `r` - 重命名文件/目录
+- `c` - 复制文件/目录
+- `y` - 复制文件路径
+- `p` - 粘贴文件/目录
+- `u` - 更新文件树
+- `P` - 预览文件
+- `I` - 显示 .gitignore 的文件
+- `H` - 显示隐藏文件
+- `Z` - 收起所有子文件夹
+- `]g` / `[g` - 跳转到下一个/上一个 git 修改的文件
+- `]d` / `[d` - 跳转到下一个/上一个有诊断信息的文件
+- `]w` / `[w` - 跳转到下一个/上一个有警告的文件
+- `]e` / `[e` - 跳转到下一个/上一个有错误的文件
+
+#### 其他功能
 - `<leader>z` - 禅模式
 - `<leader>Z` - 缩放模式
 - `<leader>gg` - Lazygit
@@ -171,7 +205,7 @@ insert 模式:
 - Tab 宽度: 4 空格
 - 智能缩进: 禁用 (nosmartindent)
 - C 语言缩进: 禁用 (nocindent)
-- 折叠方法: 缩进 (级别 99，默认展开)
+- 折叠方法: treesitter expr (级别 99，默认不折叠)
 - 自动缩进: 启用
 - 显示不可见字符: 启用 (Tab 显示为两个空格，尾随空格显示为 ▫)
 - 自动注释: 禁用
@@ -201,6 +235,7 @@ insert 模式:
 ### 补全设置
 - 补全选项: longest, noinsert, menuone, noselect, preview
 - 虚拟编辑: block 模式启用
+- GitHub Copilot: 集成到 blink.cmp，支持智能补全
 
 ### 透明度效果
 - 主窗口背景透明 (Normal, NormalFloat)
@@ -211,15 +246,15 @@ insert 模式:
 
 ## 🎨 特色功能
 
-1. **一体化工具集**: 使用 snacks.nvim 整合了文件浏览器、选择器、通知系统、终端、调试工具等
+1. **一体化工具集**: 使用 snacks.nvim 整合了文件浏览器、选择器、通知系统、终端、调试工具、禅模式等
 2. **现代化 LSP**: 完整的语言服务器支持，包含自动安装和 UI 美化
 3. **代码格式化**: 支持多种语言的自动格式化 (保存时触发)
 4. **透明界面**: 支持窗口透明效果，自动应用于颜色主题
-5. **智能补全**: 基于 blink.cmp 的现代补全系统，支持 LSP、路径、片段和缓冲区
-6. **自动括号补全**: 智能括号配对和补全，禁用在特定文件类型和宏中
+5. **智能补全**: 基于 blink.cmp 的现代补全系统，支持 LSP、路径、片段、缓冲区和 GitHub Copilot
+6. **自动括号补全**: 智能括号配对和补全，禁用在特定文件类型、宏和替换模式中
 7. **彩虹括号**: 彩色括号高亮，使用 Nord 和 Catppuccin Frappé 配色方案
 8. **快速内容选择**: 使用 `<CR>`/`<BS>`/`<TAB>` 进行渐进式代码选择，支持作用域检测
-9. **行内诊断**: 在代码行内显示诊断信息，使用 ghost 预设样式
+9. **行内诊断**: 在代码行内显示诊断信息，使用 ghost 预设样式，支持多行显示
 10. **窗口选择器**: 快速切换和管理窗口 (版本 2.*)
 11. **快捷键提示**: 实时显示可用快捷键，使用 `<leader>?` 查看本地映射
 12. **终端内图片显示**: 支持在终端中直接显示图片 (Ghostty 后端)
@@ -228,6 +263,9 @@ insert 模式:
 15. **自动 LSP 安装**: Mason 自动安装和配置多种语言服务器
 16. **光标位置记忆**: 重新打开文件时恢复上次的光标位置
 17. **终端集成**: 智能终端管理，支持分割和快速切换
+18. **Treesitter 折叠**: 基于语法树的智能代码折叠
+19. **禅模式**: 无干扰的专注编辑模式
+20. **GitHub Copilot**: AI 代码补全和建议
 
 ## 📁 项目结构
 
@@ -271,10 +309,12 @@ insert 模式:
    - 使用 `<leader><space>` 智能查找文件
 
 ### 自动功能
-- **自动完成**: 代码补全会自动触发
-- **自动格式化**: 保存文件时自动格式化代码
-- **自动诊断**: LSP 诊断信息实时显示
+- **自动完成**: 代码补全会自动触发，包含 LSP、片段、路径、缓冲区和 Copilot 建议
+- **自动格式化**: 保存文件时自动格式化代码 (支持 Python, JS/TS, Lua, Shell)
+- **自动诊断**: LSP 诊断信息实时显示，支持行内多行显示
 - **文件类型检测**: 自动启用对应的语法高亮和 LSP
+- **自动折叠**: 基于 Treesitter 的智能代码折叠
+- **自动启动终端**: TermOpen 时自动进入插入模式
 
 ## 🔧 自定义配置
 
@@ -285,18 +325,20 @@ insert 模式:
 - **`lua/config/lazy.lua`** - 包管理器初始化 (Leader 键设置)
 
 ### 插件配置文件
-- **`lua/plugins/ui.lua`** - UI 相关插件 (主题、状态栏、图标等)
-- **`lua/plugins/cmp.lua`** - 补全系统配置
-- **`lua/plugins/lsp.lua`** - LSP 和诊断配置
-- **`lua/plugins/snacks.lua`** - Snacks 工具集配置
-- **`lua/plugins/tools.lua`** - 格式化和其他工具
+- **`lua/plugins/ui.lua`** - UI 相关插件 (主题、状态栏、图标、Treesitter、彩虹括号等)
+- **`lua/plugins/cmp.lua`** - 补全系统配置 (blink.cmp、Copilot、自动括号)
+- **`lua/plugins/lsp.lua`** - LSP 和诊断配置 (lspconfig、Mason、Trouble、诊断显示)
+- **`lua/plugins/snacks.lua`** - Snacks 工具集配置 (文件浏览器、选择器、通知、终端等)
+- **`lua/plugins/tools.lua`** - 格式化和其他工具 (conform、wildfire、PEP8 缩进)
 
 ### 快速修改指南
 1. **修改主题**: 编辑 `lua/plugins/ui.lua` 中的 nord.nvim 配置
 2. **添加 LSP**: 在 `lua/plugins/lsp.lua` 的 ensure_installed 中添加服务器
 3. **修改快捷键**: 编辑 `lua/config/keymaps.lua` 添加自定义映射
 4. **调整格式化**: 修改 `lua/plugins/tools.lua` 中的 formatters_by_ft
-5. **禁用透明度**: 注释掉 `lua/config/transparency.lua` 的加载
+5. **禁用透明度**: 注释掉 `init.lua` 中的 `require("config.transparency")` 加载
+6. **配置 Copilot**: 在 `lua/plugins/cmp.lua` 中调整 Copilot 设置
+7. **自定义文件浏览器**: 在 `lua/plugins/snacks.lua` 中修改 explorer 配置
 
 此配置提供了一个完整、现代化的开发环境，具有出色的性能和可用性。所有组件都经过精心调试，确保兼容性和稳定性。
 
@@ -321,8 +363,8 @@ insert 模式:
 
 ### 代码格式化支持
 - **Python**: ruff (忽略 F401 未使用导入警告)
-- **JavaScript/TypeScript**: prettier
-- **Lua**: stylua (2空格缩进)
-- **Shell**: shfmt (2空格缩进)
+- **JavaScript/TypeScript**: prettier (首个成功的格式化器)
+- **Lua**: stylua (2 空格缩进)
+- **Shell**: shfmt (2 空格缩进)
 
 所有格式化工具支持保存时自动格式化，超时时间 500ms，LSP 作为后备格式化选项。
