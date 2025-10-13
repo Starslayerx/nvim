@@ -26,10 +26,10 @@
 ### 代码补全 & LSP
 - **blink.cmp** - 现代代码补全引擎 (版本 1.*)，使用 default 预设快捷键，集成 Copilot
 - **blink-copilot** - Blink.cmp 的 Copilot 集成
-- **copilot.lua** - GitHub Copilot 支持
+- **copilot.lua** - GitHub Copilot 支持 (懒加载，使用 `:Copilot` 命令启动)
 - **copilot-lualine** - Lualine 中的 Copilot 状态显示
 - **nvim-autopairs** - 自动括号补全，禁用在宏和替换模式中运行
-- **nvim-lspconfig** - LSP 配置，支持 pyright 和 lua_ls
+- **nvim-lspconfig** - LSP 配置，使用新版 API (vim.lsp.config/enable)，支持 pyright (关闭类型检查) 和 lua_ls
 - **mason.nvim** - LSP 服务器管理，带有自定义图标
 - **mason-lspconfig.nvim** - 自动安装 LSP (clangd, pyright, gopls, eslint, lua_ls, rust_analyzer, marksman)
 - **trouble.nvim** - 诊断界面，支持多种视图模式
@@ -43,6 +43,7 @@
 - **rainbow-delimiters.nvim** - 彩虹括号，使用 nord 和 Catppuccin Frappé 配色
 - **内置 treesitter 选择** - 使用 `<CR>`/`<BS>`/`<TAB>` 进行渐进式代码选择
 - **wildfire.nvim** - 快速选择括号内容 (自定义版本)
+- **nvim-surround** - 快速操作：选择后用符号包围内容
 
 ### 一体化工具集
 - **snacks.nvim** - 一体化工具集，包含:
@@ -104,10 +105,79 @@ insert 模式:
 - `<C-l>` - 向右移动一个字符
 - `<C-b>` - 移动到行首
 
-### Treesitter 代码选择 & Wildfire
+### Treesitter 代码选择 & 编辑
 - `<CR>` - 初始化选择/扩展选择 (普通模式和可视模式)
 - `<BS>` - 缩小选择 (可视模式)
 - `<TAB>` - 作用域增量选择 (可视模式)
+
+### nvim-surround 快捷键
+
+#### 添加包围符号
+- `ys{motion}{char}` - 在指定范围添加包围符号
+  - `ysiw"` - 给当前单词加双引号
+  - `ysa")` - 给引号内容加圆括号 (around quotes with parentheses)
+  - `yst;}` - 给当前位置到分号的内容加花括号
+- `yss{char}` - 给整行添加包围符号 (忽略首尾空格)
+- `yS{motion}{char}` - 添加包围符号，分隔到新行
+- `ySS{char}` - 给整行添加包围符号，分隔到新行
+- `<C-g>s{char}` - 插入模式：在光标位置添加包围符号
+- `<C-g>S{char}` - 插入模式：在光标位置添加包围符号，分隔到新行
+- `S{char}` - 可视模式：给选中内容添加包围符号
+- `gS{char}` - 可视模式：给选中内容添加包围符号，分隔到新行
+
+#### 删除包围符号
+- `ds{char}` - 删除指定的包围符号
+  - `ds"` - 删除双引号
+  - `ds)` - 删除圆括号
+  - `dst` - 删除 HTML 标签
+
+#### 修改包围符号
+- `cs{old}{new}` - 修改包围符号
+  - `cs"'` - 将双引号改为单引号
+  - `cs)}` - 将圆括号改为花括号
+  - `cst<div>` - 将 HTML 标签改为 div 标签
+- `cS{old}{new}` - 修改包围符号，分隔到新行
+
+#### 特殊符号说明
+- **括号/方括号/花括号/尖括号**：
+  - 使用闭合符号 (`)`, `]`, `}`, `>`) - 紧贴内容：`{text}`
+  - 使用开启符号 (`(`, `[`, `{`, `<`) - 添加空格：`{ text }`
+- **HTML 标签** (`t`/`T`)：
+  - `ysiwt` - 添加标签 (会提示输入标签名和属性)
+  - `dst` - 删除标签
+  - `cst` - 只修改标签类型 (保留属性)
+  - `csT` - 修改整个标签 (包括属性)
+- **函数调用** (`f`)：
+  - `ysiwf` - 添加函数调用 (会提示输入函数名)
+  - `dsf` - 删除函数调用，保留参数
+  - `csf` - 修改函数名
+- **自定义包围** (`i`)：
+  - `yssi` - 自定义左右包围内容 (会分别提示输入左右内容)
+
+#### 别名快捷键
+- `b` → `)` (圆括号)
+- `B` → `}` (花括号)
+- `r` → `]` (方括号)
+- `a` → `>` (尖括号)
+- `q` → `"`, `'`, `` ` `` (任意引号)
+- `s` → `}`, `]`, `)`, `>`, `"`, `'`, `` ` `` (任意包围符号)
+
+#### 使用示例
+```
+旧文本                    命令         新文本
+-------                   ----         ------
+local str = H*ello        ysiw"        local str = "Hello"
+require"nvim-surroun*d"   ysa")        require("nvim-surround")
+*sample_text              ysiw}        {sample_text}
+*sample_text              ysiw{        { sample_text }
+local x = ({ *32 })       ds)          local x = { 32 }
+'*some string'            cs'"         "some string"
+"Nested '*quotes'"        dsq          "Nested quotes"
+div cont*ents             ysstdiv      <div>div contents</div>
+<div>d*iv contents</div>  dst          div contents
+arg*s                     ysiwffunc    func(args)
+f*unc_name(a, b, x)       dsf          a, b, x
+```
 
 ### Blink.cmp 补全快捷键 (Default 预设)
 - `<C-y>` - 确认选择
@@ -254,18 +324,24 @@ insert 模式:
 6. **自动括号补全**: 智能括号配对和补全，禁用在特定文件类型、宏和替换模式中
 7. **彩虹括号**: 彩色括号高亮，使用 Nord 和 Catppuccin Frappé 配色方案
 8. **快速内容选择**: 使用 `<CR>`/`<BS>`/`<TAB>` 进行渐进式代码选择，支持作用域检测
-9. **行内诊断**: 在代码行内显示诊断信息，使用 ghost 预设样式，支持多行显示
-10. **窗口选择器**: 快速切换和管理窗口 (版本 2.*)
-11. **快捷键提示**: 实时显示可用快捷键，使用 `<leader>?` 查看本地映射
-12. **终端内图片显示**: 支持在终端中直接显示图片 (Ghostty 后端)
-13. **草稿缓冲区**: 临时记事和快速计算功能
-14. **文件浏览器增强**: 完整的文件操作支持 (添加、删除、重命名、复制、移动等)
-15. **自动 LSP 安装**: Mason 自动安装和配置多种语言服务器
-16. **光标位置记忆**: 重新打开文件时恢复上次的光标位置
-17. **终端集成**: 智能终端管理，支持分割和快速切换
-18. **Treesitter 折叠**: 基于语法树的智能代码折叠
-19. **禅模式**: 无干扰的专注编辑模式
-20. **GitHub Copilot**: AI 代码补全和建议
+9. **符号包围编辑**: 使用 nvim-surround 快速操作包围符号
+   - 支持添加、删除、修改各种括号、引号、HTML 标签
+   - 智能空格处理 (开启/闭合符号行为不同)
+   - 内置别名快捷键 (如 `b`→`)`，`q`→任意引号)
+   - 支持函数调用和自定义包围符号
+   - 可视模式、插入模式、普通模式全面支持
+10. **行内诊断**: 在代码行内显示诊断信息，使用 ghost 预设样式，支持多行显示
+11. **窗口选择器**: 快速切换和管理窗口 (版本 2.*)
+12. **快捷键提示**: 实时显示可用快捷键，使用 `<leader>?` 查看本地映射
+13. **终端内图片显示**: 支持在终端中直接显示图片 (Ghostty 后端)
+14. **草稿缓冲区**: 临时记事和快速计算功能
+15. **文件浏览器增强**: 完整的文件操作支持 (添加、删除、重命名、复制、移动等)
+16. **自动 LSP 安装**: Mason 自动安装和配置多种语言服务器
+17. **光标位置记忆**: 重新打开文件时恢复上次的光标位置
+18. **终端集成**: 智能终端管理，支持分割和快速切换
+19. **Treesitter 折叠**: 基于语法树的智能代码折叠
+20. **禅模式**: 无干扰的专注编辑模式
+21. **GitHub Copilot**: AI 代码补全和建议 (懒加载)
 
 ## 📁 项目结构
 
@@ -309,7 +385,7 @@ insert 模式:
    - 使用 `<leader><space>` 智能查找文件
 
 ### 自动功能
-- **自动完成**: 代码补全会自动触发，包含 LSP、片段、路径、缓冲区和 Copilot 建议
+- **自动完成**: 代码补全会自动触发，包含 LSP、片段、路径、缓冲区补全。Copilot 需要使用 `:Copilot` 命令手动启动
 - **自动格式化**: 保存文件时自动格式化代码 (支持 Python, JS/TS, Lua, Shell)
 - **自动诊断**: LSP 诊断信息实时显示，支持行内多行显示
 - **文件类型检测**: 自动启用对应的语法高亮和 LSP
@@ -347,7 +423,7 @@ insert 模式:
 ### LSP 服务器自动安装
 配置自动安装以下 LSP 服务器：
 - **clangd** - C/C++ 语言服务器
-- **pyright** - Python 语言服务器
+- **pyright** - Python 语言服务器 (已关闭类型检查，仅提供基础 LSP 功能)
 - **gopls** - Go 语言服务器
 - **eslint** - JavaScript/TypeScript 代码检查
 - **lua_ls** - Lua 语言服务器 (特别配置支持 Neovim API)

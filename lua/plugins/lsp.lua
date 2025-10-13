@@ -11,7 +11,17 @@ return {
     end,
     opts = {
       servers = {
-        pyright = {},
+        pyright = {
+          settings = {
+            python = {
+              analysis = {
+                typeCheckingMode = "off", -- 关闭类型检查，只保留 LSP 功能
+                diagnosticMode = "openFilesOnly", -- 只检查打开的文件
+                useLibraryCodeForTypes = true, -- 从库代码推断类型
+              },
+            },
+          },
+        },
         lua_ls = {
           settings = {
             Lua = {

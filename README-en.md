@@ -26,10 +26,10 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 ### Code Completion & LSP
 - **blink.cmp** - Modern completion engine (version 1.*) with default preset keybindings and Copilot integration
 - **blink-copilot** - Copilot integration for Blink.cmp
-- **copilot.lua** - GitHub Copilot support
+- **copilot.lua** - GitHub Copilot support (lazy-loaded, use `:Copilot` command to start)
 - **copilot-lualine** - Copilot status display in Lualine
 - **nvim-autopairs** - Auto bracket completion, disabled in macros and replace mode
-- **nvim-lspconfig** - LSP configuration supporting pyright and lua_ls
+- **nvim-lspconfig** - LSP configuration using new API (vim.lsp.config/enable), supporting pyright (type checking disabled) and lua_ls
 - **mason.nvim** - LSP server management with custom icons
 - **mason-lspconfig.nvim** - Auto-install LSP (clangd, pyright, gopls, eslint, lua_ls, rust_analyzer, marksman)
 - **trouble.nvim** - Diagnostic interface with multiple view modes
@@ -43,6 +43,7 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - **rainbow-delimiters.nvim** - Rainbow parentheses using Nord and Catppuccin Frappé colors
 - **Built-in treesitter selection** - Progressive code selection using `<CR>`/`<BS>`/`<TAB>`
 - **wildfire.nvim** - Quick bracket content selection (custom version)
+- **nvim-surround** - Quick operations: surround selections with delimiters
 
 ### All-in-one Toolkit
 - **snacks.nvim** - All-in-one toolkit, including:
@@ -104,10 +105,79 @@ insert mode:
 - `<C-l>` - Move one character to the right
 - `<C-b>` - Move to beginning of line
 
-### Treesitter Code Selection & Wildfire
+### Treesitter Code Selection & Editing
 - `<CR>` - Initialize/Expand selection (normal and visual modes)
 - `<BS>` - Shrink selection (visual mode)
 - `<TAB>` - Scope incremental selection (visual mode)
+
+### nvim-surround Keymaps
+
+#### Add Surroundings
+- `ys{motion}{char}` - Add surrounding to specified range
+  - `ysiw"` - Add double quotes around current word
+  - `ysa")` - Add parentheses around quotes content
+  - `yst;}` - Add braces from cursor to semicolon
+- `yss{char}` - Add surrounding to entire line (ignoring leading/trailing whitespace)
+- `yS{motion}{char}` - Add surrounding on new lines
+- `ySS{char}` - Add surrounding to entire line on new lines
+- `<C-g>s{char}` - Insert mode: add surrounding at cursor
+- `<C-g>S{char}` - Insert mode: add surrounding at cursor on new lines
+- `S{char}` - Visual mode: add surrounding to selection
+- `gS{char}` - Visual mode: add surrounding to selection on new lines
+
+#### Delete Surroundings
+- `ds{char}` - Delete specified surrounding
+  - `ds"` - Delete double quotes
+  - `ds)` - Delete parentheses
+  - `dst` - Delete HTML tag
+
+#### Change Surroundings
+- `cs{old}{new}` - Change surrounding
+  - `cs"'` - Change double quotes to single quotes
+  - `cs)}` - Change parentheses to braces
+  - `cst<div>` - Change HTML tag to div tag
+- `cS{old}{new}` - Change surrounding on new lines
+
+#### Special Characters
+- **Parentheses/Brackets/Braces/Angle brackets**:
+  - Use closing char (`)`, `]`, `}`, `>`) - tight: `{text}`
+  - Use opening char (`(`, `[`, `{`, `<`) - add space: `{ text }`
+- **HTML tags** (`t`/`T`):
+  - `ysiwt` - Add tag (prompts for tag name and attributes)
+  - `dst` - Delete tag
+  - `cst` - Change only tag type (preserves attributes)
+  - `csT` - Change entire tag (including attributes)
+- **Function calls** (`f`):
+  - `ysiwf` - Add function call (prompts for function name)
+  - `dsf` - Delete function call, keep arguments
+  - `csf` - Change function name
+- **Custom surroundings** (`i`):
+  - `yssi` - Custom left/right surroundings (prompts for each side)
+
+#### Alias Shortcuts
+- `b` → `)` (parentheses)
+- `B` → `}` (braces)
+- `r` → `]` (brackets)
+- `a` → `>` (angle brackets)
+- `q` → `"`, `'`, `` ` `` (any quote)
+- `s` → `}`, `]`, `)`, `>`, `"`, `'`, `` ` `` (any surrounding)
+
+#### Usage Examples
+```
+Old text                    Command         New text
+--------                    -------         --------
+local str = H*ello          ysiw"           local str = "Hello"
+require"nvim-surroun*d"     ysa")           require("nvim-surround")
+*sample_text                ysiw}           {sample_text}
+*sample_text                ysiw{           { sample_text }
+local x = ({ *32 })         ds)             local x = { 32 }
+'*some string'              cs'"            "some string"
+"Nested '*quotes'"          dsq             "Nested quotes"
+div cont*ents               ysstdiv         <div>div contents</div>
+<div>d*iv contents</div>    dst             div contents
+arg*s                       ysiwffunc       func(args)
+f*unc_name(a, b, x)         dsf             a, b, x
+```
 
 ### Blink.cmp Completion Keys (Default preset)
 - `<C-y>` - Accept completion
@@ -254,18 +324,24 @@ insert mode:
 6. **Auto Bracket Completion**: Smart bracket pairing and completion, disabled in specific filetypes, macros, and replace mode
 7. **Rainbow Parentheses**: Colorful parentheses highlighting using Nord and Catppuccin Frappé color schemes
 8. **Quick Content Selection**: Use `<CR>`/`<BS>`/`<TAB>` for progressive code selection with scope detection
-9. **Inline Diagnostics**: Show diagnostic information within code lines using ghost preset style with multiline support
-10. **Window Selector**: Quickly switch and manage windows (version 2.*)
-11. **Keybinding Hints**: Real-time display of available keybindings, use `<leader>?` for local mappings
-12. **In-terminal Image Display**: Support for displaying images directly in terminal (Ghostty backend)
-13. **Scratch Buffer**: Temporary note-taking and quick calculations
-14. **Enhanced File Explorer**: Complete file operations support (add, delete, rename, copy, move, etc.)
-15. **Auto LSP Installation**: Mason automatically installs and configures multiple language servers
-16. **Cursor Position Memory**: Restores last cursor position when reopening files
-17. **Terminal Integration**: Smart terminal management with split and quick switching support
-18. **Treesitter Folding**: Intelligent code folding based on syntax tree
-19. **Zen Mode**: Distraction-free focused editing mode
-20. **GitHub Copilot**: AI code completion and suggestions
+9. **Surrounding Operations**: Use nvim-surround for quick surrounding operations
+   - Support for adding, deleting, changing brackets, quotes, HTML tags
+   - Smart space handling (different behavior for opening/closing characters)
+   - Built-in alias shortcuts (e.g., `b`→`)`, `q`→any quote)
+   - Support for function calls and custom surroundings
+   - Full support across visual, insert, and normal modes
+10. **Inline Diagnostics**: Show diagnostic information within code lines using ghost preset style with multiline support
+11. **Window Selector**: Quickly switch and manage windows (version 2.*)
+12. **Keybinding Hints**: Real-time display of available keybindings, use `<leader>?` for local mappings
+13. **In-terminal Image Display**: Support for displaying images directly in terminal (Ghostty backend)
+14. **Scratch Buffer**: Temporary note-taking and quick calculations
+15. **Enhanced File Explorer**: Complete file operations support (add, delete, rename, copy, move, etc.)
+16. **Auto LSP Installation**: Mason automatically installs and configures multiple language servers
+17. **Cursor Position Memory**: Restores last cursor position when reopening files
+18. **Terminal Integration**: Smart terminal management with split and quick switching support
+19. **Treesitter Folding**: Intelligent code folding based on syntax tree
+20. **Zen Mode**: Distraction-free focused editing mode
+21. **GitHub Copilot**: AI code completion and suggestions (lazy-loaded)
 
 ## 📁 Project Structure
 
@@ -309,7 +385,7 @@ insert mode:
    - Use `<leader><space>` for smart file finding
 
 ### Automatic Features
-- **Auto Completion**: Code completion triggers automatically, including LSP, snippets, path, buffer, and Copilot suggestions
+- **Auto Completion**: Code completion triggers automatically, including LSP, snippets, path, and buffer completion. Copilot requires manual start using `:Copilot` command
 - **Auto Formatting**: Code auto-formats on file save (supports Python, JS/TS, Lua, Shell)
 - **Auto Diagnostics**: LSP diagnostics display in real-time with multiline inline support
 - **File Type Detection**: Automatically enables corresponding syntax highlighting and LSP
@@ -347,7 +423,7 @@ This configuration provides a complete, modern development environment with exce
 ### Auto-installed LSP Servers
 Configuration automatically installs the following LSP servers:
 - **clangd** - C/C++ language server
-- **pyright** - Python language server
+- **pyright** - Python language server (type checking disabled, basic LSP features only)
 - **gopls** - Go language server
 - **eslint** - JavaScript/TypeScript linting
 - **lua_ls** - Lua language server (specially configured for Neovim API support)
