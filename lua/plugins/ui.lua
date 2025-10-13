@@ -214,8 +214,9 @@ return {
           "diff",
           {
             "diagnostics",
-            sources = { "nvim_diagnostic" },
-            symbols = { error = " ", warn = " ", info = " ", hint = " " },
+            sources = { "nvim_lsp" },
+            symbols = { error = " ", warn = " ", info = " ", hint = "󰊠 " },
+            -- symbols = { error = " ", warn = " ", info = " ", hint = " " },
           },
         },
         lualine_c = { "filename" },
