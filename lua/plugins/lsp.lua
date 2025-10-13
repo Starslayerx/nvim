@@ -65,6 +65,21 @@ return {
           local capabilities = require("blink.cmp").get_lsp_capabilities()
           require("lspconfig")[server_name].setup({ capabilities = capabilities })
         end,
+        ["pyright"] = function()
+          local capabilities = require("blink.cmp").get_lsp_capabilities()
+          require("lspconfig").pyright.setup({
+            capabilities = capabilities,
+            settings = {
+              python = {
+                analysis = {
+                  typeCheckingMode = "off",  -- 关闭类型检查
+                  diagnosticMode = "openFilesOnly",
+                  useLibraryCodeForTypes = true,
+                },
+              },
+            },
+          })
+        end,
         ["lua_ls"] = function()
           local capabilities = require("blink.cmp").get_lsp_capabilities()
           require("lspconfig").lua_ls.setup({
