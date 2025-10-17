@@ -58,14 +58,14 @@ vim.keymap.set("n", "<leader>t", ":split | terminal<CR>", { silent = true, desc 
 vim.keymap.set("n", "<leader>T", ":vsplit | terminal<CR>", { silent = true, desc = "Open terminal" })
 -- 终端模式下使用 ESC 退出插入模式
 keymap("t", "<Esc>", "<C-\\><C-n>", { noremap = true })
--- 终端模式下用 Ctrl + 方向键切换窗口
-keymap("t", "<C-h>", "<C-\\><C-n><C-w>h", { noremap = true })
-keymap("t", "<C-j>", "<C-\\><C-n><C-w>j", { noremap = true })
-keymap("t", "<C-k>", "<C-\\><C-n><C-w>k", { noremap = true })
-keymap("t", "<C-l>", "<C-\\><C-n><C-w>l", { noremap = true })
+-- 终端模式下用 Ctrl + 方向键切换窗口（已禁用，使用原生 <C-w> + hjkl）
+-- keymap("t", "<C-h>", "<C-\\><C-n><C-w>h", { noremap = true })
+-- keymap("t", "<C-j>", "<C-\\><C-n><C-w>j", { noremap = true })
+-- keymap("t", "<C-k>", "<C-\\><C-n><C-w>k", { noremap = true })
+-- keymap("t", "<C-l>", "<C-\\><C-n><C-w>l", { noremap = true })
 
--- 普通模式的窗口切换
-keymap("n", "<C-h>", "<C-w>h", { noremap = true })
-keymap("n", "<C-j>", "<C-w>j", { noremap = true })
-keymap("n", "<C-k>", "<C-w>k", { noremap = true })
-keymap("n", "<C-l>", "<C-w>l", { noremap = true })
+-- 普通模式的窗口切换（已禁用，使用原生 <C-w> + hjkl）
+-- keymap("n", "<C-h>", "<C-w>h", { noremap = true })
+-- keymap("n", "<C-j>", "<C-w>j", { noremap = true })
+-- keymap("n", "<C-k>", "<C-w>k", { noremap = true })
+-- keymap("n", "<C-l>", "<C-w>l", { noremap = true })

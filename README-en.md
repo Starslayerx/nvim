@@ -84,10 +84,37 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - `tmh/tml` - Move tab left/right
 
 ### Window Management
-- `<C-h/j/k/l>` - Switch windows (normal and terminal modes)
+
+#### Basic Window Operations
 - `<leader>t` - Open terminal (horizontal split)
 - `<leader>T` - Open terminal (vertical split)
 - `<Esc>` - Exit to normal mode in terminal
+
+#### Window Switching (Native Vim Way)
+- `<C-w>h` - Switch to left window
+- `<C-w>j` - Switch to bottom window
+- `<C-w>k` - Switch to top window
+- `<C-w>l` - Switch to right window
+- `<C-w>w` - Cycle to next window
+- `<C-w>p` - Switch to previous window
+
+#### Window Layout Adjustment
+- `<C-w>=` - Equalize all window sizes
+- `<C-w>_` - Maximize current window height
+- `<C-w>|` - Maximize current window width
+- `<C-w>+` - Increase current window height
+- `<C-w>-` - Decrease current window height
+- `<C-w>>` - Increase current window width
+- `<C-w><` - Decrease current window width
+
+#### Window Movement and Closing
+- `<C-w>H/J/K/L` - Move current window to far left/bottom/top/right
+- `<C-w>r` - Rotate windows clockwise
+- `<C-w>R` - Rotate windows counter-clockwise
+- `<C-w>x` - Exchange window with next one
+- `<C-w>o` - Close all other windows (only)
+- `<C-w>q` - Quit current window
+- `<C-w>c` - Close current window
 
 ### Page Navigation
 normal mode:
