@@ -268,6 +268,23 @@ f*unc_name(a, b, x)         dsf             a, b, x
 - `]]` / `[[` - Jump to next/previous word reference
 
 ### LSP Keymaps
+
+#### View Source Code and Documentation (lspsaga)
+- `gh` - View documentation (auto-focus to floating window, scrollable)
+- `gd` - Go to definition (open in vertical split)
+- `gp` - Peek definition (floating window, no jump, press `t`/`s`/`v` to open in new tab/split)
+- `gr` - Find all references and implementations (floating window list)
+
+#### Code Actions (lspsaga)
+- `<leader>rn` - Rename variable/function
+- `<leader>ca` - Code actions
+- `<leader>o` - Toggle file outline (show all symbols)
+
+#### Diagnostic Navigation (lspsaga)
+- `[d` - Jump to previous diagnostic
+- `]d` - Jump to next diagnostic
+
+#### Diagnostic Panels (Trouble)
 - `<leader>xx` - Toggle diagnostics panel
 - `<leader>xX` - Buffer diagnostics
 - `<leader>cs` - Symbols list

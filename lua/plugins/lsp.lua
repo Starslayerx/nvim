@@ -153,9 +153,69 @@ return {
       require("lspsaga").setup({
         ui = { border = "rounded" },
         lightbulb = { enable = false },
+        hover = {
+          open_link = "gx",
+          open_cmd = "!open", -- macOS 用 open，Linux 用 xdg-open
+          max_width = 0.6,
+          max_height = 0.8,
+        },
       })
     end,
-    keys = {}, -- 不定义快捷键避免冲突
+    keys = {
+      -- 查看文档（替代原来的 K）- 自动聚焦到浮动窗口
+      {
+        "gh",
+        function()
+          vim.cmd("Lspsaga hover_doc ++keep")
+          -- 延迟后查找并聚焦到 hover 窗口
+          vim.defer_fn(function()
+            for _, win in ipairs(vim.api.nvim_list_wins()) do
+              local buf = vim.api.nvim_win_get_buf(win)
+              local ft = vim.bo[buf].filetype
+              -- lspsaga hover 窗口的 filetype
+              if ft == "hover" or ft == "markdown" then
+                local win_config = vim.api.nvim_win_get_config(win)
+                -- 确保是浮动窗口
+                if win_config.relative ~= "" then
+                  vim.api.nvim_set_current_win(win)
+                  break
+                end
+              end
+            end
+          end, 50)
+        end,
+        desc = "Hover Documentation",
+      },
+
+      -- 跳转到定义（垂直分屏打开）
+      {
+        "gd",
+        function()
+          vim.cmd("vsplit")
+          vim.cmd("Lspsaga goto_definition")
+        end,
+        desc = "Goto Definition (vsplit)",
+      },
+
+      -- 预览定义（不跳转，浮动窗口显示）
+      { "gp", "<cmd>Lspsaga peek_definition<cr>", desc = "Peek Definition" },
+
+      -- 查找引用和实现
+      { "gr", "<cmd>Lspsaga finder<cr>", desc = "LSP Finder (References/Implementation)" },
+
+      -- 重命名变量
+      { "<leader>rn", "<cmd>Lspsaga rename<cr>", desc = "LSP Rename" },
+
+      -- 代码操作（Code Action）
+      { "<leader>ca", "<cmd>Lspsaga code_action<cr>", desc = "Code Action", mode = { "n", "v" } },
+
+      -- 诊断跳转
+      { "[d", "<cmd>Lspsaga diagnostic_jump_prev<cr>", desc = "Previous Diagnostic" },
+      { "]d", "<cmd>Lspsaga diagnostic_jump_next<cr>", desc = "Next Diagnostic" },
+
+      -- 大纲（文件结构）
+      { "<leader>o", "<cmd>Lspsaga outline<cr>", desc = "Toggle Outline" },
+    },
   },
 
   -- Noice: cmdline, messages, popupmenu
