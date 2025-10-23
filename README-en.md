@@ -483,8 +483,41 @@ Automatically installs the following language parsers:
 
 ### Code Formatting Support
 - **Python**: ruff (ignores F401 unused import warnings)
-- **JavaScript/TypeScript**: prettier (stop after first successful formatter)
+- **JavaScript/TypeScript**: prettier
+- **JavaScript React (JSX)**: prettier
+- **TypeScript React (TSX)**: prettier
+- **HTML**: prettier
+- **CSS/SCSS**: prettier
+- **JSON**: prettier
+- **Markdown**: prettier
+- **YAML**: prettier
 - **Lua**: stylua (2-space indentation)
 - **Shell**: shfmt (2-space indentation)
 
 All formatting tools support auto-format on save with 500ms timeout, LSP as fallback formatting option.
+
+#### Batch Format Project Files
+```bash
+# Format all supported files using prettier
+npx prettier --write .
+
+# Format specific file types
+npx prettier --write "**/*.{js,jsx,ts,tsx,html,css,scss,json,md}"
+
+# Check which files need formatting (without modifying files)
+npx prettier --check .
+```
+
+#### ESLint Code Linting
+```bash
+# Check all files
+npx eslint .
+
+# Auto-fix fixable issues
+npx eslint . --fix
+
+# Show only errors, hide warnings
+npx eslint . --quiet
+```
+
+**Tip**: It's recommended to create `.eslintignore` and `.prettierignore` files in your project root to exclude directories that shouldn't be checked (such as `node_modules/`, `.next/`, `dist/`, `build/`, etc.).

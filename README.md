@@ -483,8 +483,41 @@ f*unc_name(a, b, x)       dsf          a, b, x
 
 ### 代码格式化支持
 - **Python**: ruff (忽略 F401 未使用导入警告)
-- **JavaScript/TypeScript**: prettier (首个成功的格式化器)
+- **JavaScript/TypeScript**: prettier
+- **JavaScript React (JSX)**: prettier
+- **TypeScript React (TSX)**: prettier
+- **HTML**: prettier
+- **CSS/SCSS**: prettier
+- **JSON**: prettier
+- **Markdown**: prettier
+- **YAML**: prettier
 - **Lua**: stylua (2 空格缩进)
 - **Shell**: shfmt (2 空格缩进)
 
 所有格式化工具支持保存时自动格式化，超时时间 500ms，LSP 作为后备格式化选项。
+
+#### 批量格式化项目文件
+```bash
+# 使用 prettier 格式化所有支持的文件
+npx prettier --write .
+
+# 格式化特定类型的文件
+npx prettier --write "**/*.{js,jsx,ts,tsx,html,css,scss,json,md}"
+
+# 检查哪些文件需要格式化（不修改文件）
+npx prettier --check .
+```
+
+#### ESLint 代码检查
+```bash
+# 检查所有文件
+npx eslint .
+
+# 自动修复可修复的问题
+npx eslint . --fix
+
+# 只显示错误，不显示警告
+npx eslint . --quiet
+```
+
+**提示**: 建议在项目根目录创建 `.eslintignore` 和 `.prettierignore` 文件来排除不需要检查的目录（如 `node_modules/`, `.next/`, `dist/`, `build/` 等）。
