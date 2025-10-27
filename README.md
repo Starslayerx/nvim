@@ -1,3 +1,13 @@
+# Fix tips
+
+当你的 neovim 出现报错的解决方案：
+
+1. 首先法确定报错原因
+2. 根据错误信息定义到具体插件，可以通过暂时禁用插件的方式来实现
+3. 确定错误插件后，看看最近是否有更新，再去 github 上面的 issues 里面看看，以此确定是自己的配置问题，还是更新引入的 bug
+4. 如果是新 commit 的 bug，fork 代码仓库，使用自己仓库尝试修复然后测试，最后提交 pr
+5. 如果配置问题，应该详细阅读文档
+
 # Neovim 配置
 
 一个基于 lazy.nvim 包管理器构建的现代化、功能丰富的 Neovim 配置。
@@ -15,16 +25,18 @@
 ## 🔌 插件列表
 
 ### UI & 外观
+
 - **nord.nvim** - Nord 主题，支持斜体注释和粗体 lualine
 - **lualine.nvim** - 状态栏，使用 nord 主题，集成 Copilot 状态显示
 - **nvim-colorizer.lua** - 颜色高亮，使用自定义版本 (Starslayerx/nvim-colorizer.lua)
 - **nvim-web-devicons** - 文件图标
 - **mini.nvim** - 图标支持
-- **window-picker.nvim** - 窗口选择器 (版本 2.*)
+- **window-picker.nvim** - 窗口选择器 (版本 2.\*)
 - **which-key.nvim** - 快捷键提示，使用 `<leader>?` 查看本地映射
 
 ### 代码补全 & LSP
-- **blink.cmp** - 现代代码补全引擎 (版本 1.*)，使用 default 预设快捷键，集成 Copilot
+
+- **blink.cmp** - 现代代码补全引擎 (版本 1.\*)，使用 default 预设快捷键，集成 Copilot
 - **blink-copilot** - Blink.cmp 的 Copilot 集成
 - **copilot.lua** - GitHub Copilot 支持 (懒加载，使用 `:Copilot` 命令启动)
 - **copilot-lualine** - Lualine 中的 Copilot 状态显示
@@ -39,6 +51,7 @@
 - **friendly-snippets** - 代码片段支持
 
 ### 语法高亮 & 编辑
+
 - **nvim-treesitter** - 高级语法高亮 (main 分支)，内置渐进式代码选择，支持折叠
 - **rainbow-delimiters.nvim** - 彩虹括号，使用 nord 和 Catppuccin Frappé 配色
 - **内置 treesitter 选择** - 使用 `<CR>`/`<BS>`/`<TAB>` 进行渐进式代码选择
@@ -46,6 +59,7 @@
 - **nvim-surround** - 快速操作：选择后用符号包围内容
 
 ### 一体化工具集
+
 - **snacks.nvim** - 一体化工具集，包含:
   - 文件浏览器 (替换 netrw，支持完整文件操作)
   - 智能文件选择器 (类似 fzf/Telescope)
@@ -64,12 +78,14 @@
   - Git 浏览和 Lazygit 集成
 
 ### 格式化 & 工具
+
 - **conform.nvim** - 代码格式化，支持保存时自动格式化
 - **vim-python-pep8-indent** - Python PEP8 缩进
 
 ## ⌨️ 快捷键映射
 
 ### 基础操作
+
 - `S` - 保存文件
 - `Q` - 退出
 - `Y` - 全选并复制到系统剪贴板
@@ -78,6 +94,7 @@
 - `</>/` - 缩进/取消缩进
 
 ### 标签页管理
+
 - `tn` - 新建标签页
 - `tN` - 在当前标签页中分割
 - `th/tl` - 前后切换标签页
@@ -86,11 +103,13 @@
 ### 窗口管理
 
 #### 基础窗口操作
+
 - `<leader>t` - 水平分割打开终端
 - `<leader>T` - 垂直分割打开终端
 - `<Esc>` - 终端模式下退出到普通模式
 
 #### 窗口切换 (原生 Vim 方式)
+
 - `<C-w>h` - 切换到左侧窗口
 - `<C-w>j` - 切换到下方窗口
 - `<C-w>k` - 切换到上方窗口
@@ -99,6 +118,7 @@
 - `<C-w>p` - 切换到上一个访问的窗口
 
 #### 窗口布局调整
+
 - `<C-w>=` - 平均分配所有窗口大小
 - `<C-w>_` - 最大化当前窗口高度
 - `<C-w>|` - 最大化当前窗口宽度
@@ -108,6 +128,7 @@
 - `<C-w><` - 减少当前窗口宽度
 
 #### 窗口移动和关闭
+
 - `<C-w>H/J/K/L` - 将当前窗口移动到最左/下/上/右
 - `<C-w>r` - 顺时针旋转窗口
 - `<C-w>R` - 逆时针旋转窗口
@@ -117,22 +138,27 @@
 - `<C-w>c` - 关闭当前窗口
 
 ### 翻页功能
+
 normal 模式:
-- `<C-f>` - forward   向下翻一整屏
-- `<C-b>` - backward  向上翻一整屏
+
+- `<C-f>` - forward 向下翻一整屏
+- `<C-b>` - backward 向上翻一整屏
 - `<C-d>` - down half 向下翻半屏
-- `<C-u>` - up half   向上翻半屏
+- `<C-u>` - up half 向上翻半屏
 
 insert 模式:
-- `<C-j>` - forward   向下翻一整屏
-- `<C-k>` - backward  向上翻一整屏
+
+- `<C-j>` - forward 向下翻一整屏
+- `<C-k>` - backward 向上翻一整屏
 
 ### 光标移动 (Insert 模式)
+
 - `<C-f>` - 移动到行尾
 - `<C-l>` - 向右移动一个字符
 - `<C-b>` - 移动到行首
 
 ### Treesitter 代码选择 & 编辑
+
 - `<CR>` - 初始化选择/扩展选择 (普通模式和可视模式)
 - `<BS>` - 缩小选择 (可视模式)
 - `<TAB>` - 作用域增量选择 (可视模式)
@@ -140,6 +166,7 @@ insert 模式:
 ### nvim-surround 快捷键
 
 #### 添加包围符号
+
 - `ys{motion}{char}` - 在指定范围添加包围符号
   - `ysiw"` - 给当前单词加双引号
   - `ysa")` - 给引号内容加圆括号 (around quotes with parentheses)
@@ -153,12 +180,14 @@ insert 模式:
 - `gS{char}` - 可视模式：给选中内容添加包围符号，分隔到新行
 
 #### 删除包围符号
+
 - `ds{char}` - 删除指定的包围符号
   - `ds"` - 删除双引号
   - `ds)` - 删除圆括号
   - `dst` - 删除 HTML 标签
 
 #### 修改包围符号
+
 - `cs{old}{new}` - 修改包围符号
   - `cs"'` - 将双引号改为单引号
   - `cs)}` - 将圆括号改为花括号
@@ -166,6 +195,7 @@ insert 模式:
 - `cS{old}{new}` - 修改包围符号，分隔到新行
 
 #### 特殊符号说明
+
 - **括号/方括号/花括号/尖括号**：
   - 使用闭合符号 (`)`, `]`, `}`, `>`) - 紧贴内容：`{text}`
   - 使用开启符号 (`(`, `[`, `{`, `<`) - 添加空格：`{ text }`
@@ -182,6 +212,7 @@ insert 模式:
   - `yssi` - 自定义左右包围内容 (会分别提示输入左右内容)
 
 #### 别名快捷键
+
 - `b` → `)` (圆括号)
 - `B` → `}` (花括号)
 - `r` → `]` (方括号)
@@ -190,6 +221,7 @@ insert 模式:
 - `s` → `}`, `]`, `)`, `>`, `"`, `'`, `` ` `` (任意包围符号)
 
 #### 使用示例
+
 ```
 旧文本                    命令         新文本
 -------                   ----         ------
@@ -207,6 +239,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 ```
 
 ### Blink.cmp 补全快捷键 (Default 预设)
+
 - `<C-y>` - 确认选择
 - `<C-Space>` - 打开菜单或切换文档
 - `<C-n>/<C-p>` 或 `Up/Down` - 选择下一个/上一个项目
@@ -214,7 +247,9 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - `<C-k>` - 切换签名帮助
 
 ### Snacks 快捷键
+
 #### 文件查找和导航
+
 - `<leader><space>` - 智能文件查找
 - `<leader>,` - 缓冲区列表
 - `<leader>/` - 全局搜索
@@ -229,6 +264,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - `<leader>fr` - 最近文件
 
 #### 文件浏览器操作 (在 explorer 中)
+
 - `<CR>` - 进入目录/打开文件
 - `<BS>` - 打开上级目录
 - `h` - 关闭目录
@@ -253,6 +289,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - `]e` / `[e` - 跳转到下一个/上一个有错误的文件
 
 #### 其他功能
+
 - `<leader>z` - 禅模式
 - `<leader>Z` - 缩放模式
 - `<leader>gg` - Lazygit
@@ -270,21 +307,25 @@ f*unc_name(a, b, x)       dsf          a, b, x
 ### LSP 快捷键
 
 #### 查看源码和文档 (lspsaga)
+
 - `gh` - 查看文档（自动聚焦到浮动窗口，可翻页查看）
 - `gd` - 跳转到定义（垂直分屏打开）
 - `gp` - 预览定义（浮动窗口，不跳转，可按 `t`/`s`/`v` 在新 tab/分屏中打开）
 - `gr` - 查找所有引用和实现（浮动窗口列表）
 
 #### 代码操作 (lspsaga)
+
 - `<leader>rn` - 重命名变量/函数
 - `<leader>ca` - 代码操作（Code Action）
 - `<leader>o` - 切换文件大纲（显示所有符号）
 
 #### 诊断导航 (lspsaga)
+
 - `[d` - 跳转到上一个错误/警告
 - `]d` - 跳转到下一个错误/警告
 
 #### 诊断面板 (Trouble)
+
 - `<leader>xx` - 切换诊断面板
 - `<leader>xX` - 缓冲区诊断
 - `<leader>cs` - 符号列表
@@ -293,6 +334,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - `<leader>xQ` - 快速修复列表
 
 ### 切换快捷键
+
 - `<leader>us` - 拼写检查
 - `<leader>uw` - 自动换行
 - `<leader>uL` - 相对行号
@@ -308,6 +350,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 ## ⚙️ 配置选项
 
 ### 显示设置
+
 - 行号 + 相对行号
 - 光标行高亮
 - 100 列标记线
@@ -316,6 +359,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - 滚动偏移量: 8 行
 
 ### 编辑设置
+
 - Tab 宽度: 4 空格
 - 智能缩进: 禁用 (nosmartindent)
 - C 语言缩进: 禁用 (nocindent)
@@ -327,16 +371,19 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - 光标位置记忆: 启用
 
 ### 搜索设置
+
 - 区分大小写 (ignorecase = false)
 - 智能大小写: 禁用 (smartcase = false)
 - 实时搜索预览 (inccommand = "split")
 - 搜索高亮: 启用
 
 ### 分割窗口
+
 - 垂直分割: 向右打开
 - 水平分割: 向下打开
 
 ### 性能优化
+
 - 禁用备份文件和交换文件
 - 启用隐藏缓冲区
 - 更新时间: 300ms
@@ -347,11 +394,13 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - 禁用 lazyredraw 避免 UI 插件异常
 
 ### 补全设置
+
 - 补全选项: longest, noinsert, menuone, noselect, preview
 - 虚拟编辑: block 模式启用
 - GitHub Copilot: 集成到 blink.cmp，支持智能补全
 
 ### 透明度效果
+
 - 主窗口背景透明 (Normal, NormalFloat)
 - 符号列透明 (SignColumn)
 - 非当前窗口透明 (NormalNC)
@@ -375,7 +424,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
    - 支持函数调用和自定义包围符号
    - 可视模式、插入模式、普通模式全面支持
 10. **行内诊断**: 在代码行内显示诊断信息，使用 ghost 预设样式，支持多行显示
-11. **窗口选择器**: 快速切换和管理窗口 (版本 2.*)
+11. **窗口选择器**: 快速切换和管理窗口 (版本 2.\*)
 12. **快捷键提示**: 实时显示可用快捷键，使用 `<leader>?` 查看本地映射
 13. **终端内图片显示**: 支持在终端中直接显示图片 (Ghostty 后端)
 14. **草稿缓冲区**: 临时记事和快速计算功能
@@ -429,6 +478,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
    - 使用 `<leader><space>` 智能查找文件
 
 ### 自动功能
+
 - **自动完成**: 代码补全会自动触发，包含 LSP、片段、路径、缓冲区补全。Copilot 需要使用 `:Copilot` 命令手动启动
 - **自动格式化**: 保存文件时自动格式化代码 (支持 Python, JS/TS, Lua, Shell)
 - **自动诊断**: LSP 诊断信息实时显示，支持行内多行显示
@@ -439,12 +489,14 @@ f*unc_name(a, b, x)       dsf          a, b, x
 ## 🔧 自定义配置
 
 ### 核心配置文件
+
 - **`lua/config/options.lua`** - 通用设置 (显示、编辑、搜索等)
 - **`lua/config/keymaps.lua`** - 快捷键映射
 - **`lua/config/transparency.lua`** - 透明度效果设置
 - **`lua/config/lazy.lua`** - 包管理器初始化 (Leader 键设置)
 
 ### 插件配置文件
+
 - **`lua/plugins/ui.lua`** - UI 相关插件 (主题、状态栏、图标、Treesitter、彩虹括号等)
 - **`lua/plugins/cmp.lua`** - 补全系统配置 (blink.cmp、Copilot、自动括号)
 - **`lua/plugins/lsp.lua`** - LSP 和诊断配置 (lspconfig、Mason、Trouble、诊断显示)
@@ -452,6 +504,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - **`lua/plugins/tools.lua`** - 格式化和其他工具 (conform、wildfire、PEP8 缩进)
 
 ### 快速修改指南
+
 1. **修改主题**: 编辑 `lua/plugins/ui.lua` 中的 nord.nvim 配置
 2. **添加 LSP**: 在 `lua/plugins/lsp.lua` 的 ensure_installed 中添加服务器
 3. **修改快捷键**: 编辑 `lua/config/keymaps.lua` 添加自定义映射
@@ -465,7 +518,9 @@ f*unc_name(a, b, x)       dsf          a, b, x
 ## 📝 语言支持
 
 ### LSP 服务器自动安装
+
 配置自动安装以下 LSP 服务器：
+
 - **clangd** - C/C++ 语言服务器
 - **pyright** - Python 语言服务器 (已关闭类型检查，仅提供基础 LSP 功能)
 - **gopls** - Go 语言服务器
@@ -475,13 +530,16 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - **marksman** - Markdown 语言服务器
 
 ### Treesitter 语法高亮
+
 自动安装以下语言解析器：
+
 - Lua, Vim, Vimdoc (Neovim 核心)
 - Python, JavaScript, TypeScript
 - HTML, CSS, JSON, Markdown
 - Bash, C, C++, Rust, Go, Java
 
 ### 代码格式化支持
+
 - **Python**: ruff (忽略 F401 未使用导入警告)
 - **JavaScript/TypeScript**: prettier
 - **JavaScript React (JSX)**: prettier
@@ -497,6 +555,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 所有格式化工具支持保存时自动格式化，超时时间 500ms，LSP 作为后备格式化选项。
 
 #### 批量格式化项目文件
+
 ```bash
 # 使用 prettier 格式化所有支持的文件
 npx prettier --write .
@@ -509,6 +568,7 @@ npx prettier --check .
 ```
 
 #### ESLint 代码检查
+
 ```bash
 # 检查所有文件
 npx eslint .

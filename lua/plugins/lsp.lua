@@ -3,34 +3,6 @@ return {
   {
     "neovim/nvim-lspconfig",
     dependencies = { "saghen/blink.cmp" },
-    config = function(_, opts)
-      for server, server_opts in pairs(opts.servers or {}) do
-        vim.lsp.config(server, server_opts or {})
-        vim.lsp.enable(server)
-      end
-    end,
-    opts = {
-      servers = {
-        pyright = {
-          settings = {
-            python = {
-              analysis = {
-                typeCheckingMode = "off", -- 关闭类型检查，只保留 LSP 功能
-                diagnosticMode = "openFilesOnly", -- 只检查打开的文件
-                useLibraryCodeForTypes = true, -- 从库代码推断类型
-              },
-            },
-          },
-        },
-        lua_ls = {
-          settings = {
-            Lua = {
-              diagnostics = { globals = { "vim" } },
-            },
-          },
-        },
-      },
-    },
   },
 
   -- Mason: LSP server 管理
@@ -72,7 +44,7 @@ return {
             settings = {
               python = {
                 analysis = {
-                  typeCheckingMode = "off",  -- 关闭类型检查
+                  typeCheckingMode = "off", -- 关闭类型检查
                   diagnosticMode = "openFilesOnly",
                   useLibraryCodeForTypes = true,
                 },
@@ -128,11 +100,20 @@ return {
     event = "VeryLazy",
     priority = 1000,
     config = function()
+      -- 禁用 vim 默认的 virtual text 诊断（由 tiny-inline-diagnostic 接管）
+      vim.diagnostic.config({
+        virtual_text = false, -- 禁用默认的 virtual text
+        signs = true, -- 保留左侧符号栏的诊断标记
+        underline = true, -- 保留下划线
+        update_in_insert = false, -- 不在插入模式更新诊断
+        severity_sort = true, -- 按严重程度排序
+      })
+
       require("tiny-inline-diagnostic").setup({
         preset = "ghost",
         options = {
           show_source = { enabled = true, if_many = true },
-          throttle = 20,
+          throttle = 150, -- 增加延迟到 150ms，减少闪现频率
           softwrap = 30,
           multilines = { enabled = true, always_show = true },
           show_all_diags_on_cursorline = false,
@@ -140,6 +121,31 @@ return {
           overflow = { mode = "wrap" },
           virt_texts = { priority = 2048 },
         },
+      })
+
+      -- 添加智能延迟：在输入时延迟显示诊断，减少闪现
+      local last_insert_time = 0
+      local insert_timeout = vim.fn.timer_start
+
+      vim.api.nvim_create_autocmd("InsertEnter", {
+        callback = function()
+          last_insert_time = vim.loop.hrtime()
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("InsertLeave", {
+        callback = function()
+          local current_time = vim.loop.hrtime()
+          local elapsed = (current_time - last_insert_time) / 1000000 -- 转换为毫秒
+
+          -- 如果插入时间很短（快速输入），延迟更长时间才显示诊断
+          if elapsed < 200 then
+            vim.defer_fn(function()
+              -- 触发诊断刷新
+              vim.diagnostic.show()
+            end, 300)
+          end
+        end,
       })
     end,
   },

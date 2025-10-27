@@ -121,3 +121,12 @@ vim.cmd("syntax on")
 
 -- 正则表达式引擎
 vim.opt.re = 0
+
+-- 诊断显示配置（全局默认）
+vim.diagnostic.config({
+  virtual_text = true, -- 启用默认的 virtual text（当 tiny-inline-diagnostic 禁用时）
+  signs = true,
+  underline = true,
+  update_in_insert = false, -- 不在插入模式更新诊断
+  severity_sort = true,
+})

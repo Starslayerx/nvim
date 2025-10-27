@@ -67,13 +67,9 @@ return {
     branch = "main",
     build = ":TSUpdate",
     config = function()
-      -- 基础配置
+      -- 新版 main 分支的 setup（可选，使用默认值也可以）
       require("nvim-treesitter").setup({
         install_dir = vim.fn.stdpath("data") .. "/site",
-        indent = {
-          enable = true,
-          disable = { "python" }, -- 禁用有问题的语言
-        },
       })
 
       -- 安装需要的 parsers
@@ -96,7 +92,7 @@ return {
         "java",
       })
 
-      -- 启用语法高亮
+      -- 启用语法高亮（新版需要手动启用）
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "*",
         callback = function()
