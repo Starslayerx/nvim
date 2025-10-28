@@ -32,46 +32,66 @@ return {
         "rust_analyzer",
         "marksman",
       },
-      handlers = {
-        function(server_name)
-          local capabilities = require("blink.cmp").get_lsp_capabilities()
-          require("lspconfig")[server_name].setup({ capabilities = capabilities })
-        end,
-        ["pyright"] = function()
-          local capabilities = require("blink.cmp").get_lsp_capabilities()
-          require("lspconfig").pyright.setup({
-            capabilities = capabilities,
-            settings = {
-              python = {
-                analysis = {
-                  typeCheckingMode = "off", -- 关闭类型检查
-                  diagnosticMode = "openFilesOnly",
-                  useLibraryCodeForTypes = true,
-                },
-              },
-            },
-          })
-        end,
-        ["lua_ls"] = function()
-          local capabilities = require("blink.cmp").get_lsp_capabilities()
-          require("lspconfig").lua_ls.setup({
-            capabilities = capabilities,
-            settings = {
-              Lua = {
-                runtime = { version = "LuaJIT" },
-                diagnostics = { globals = { "vim" } },
-                workspace = {
-                  library = vim.api.nvim_get_runtime_file("", true),
-                  checkThirdParty = false,
-                },
-                telemetry = { enable = false },
-              },
-            },
-          })
-        end,
-      },
+      automatic_enable = false, -- 禁用自动启用，手动配置
     },
     dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
+    config = function(_, opts)
+      require("mason-lspconfig").setup(opts)
+
+      -- 使用新版 API: vim.lsp.config + vim.lsp.enable
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
+
+      -- Pyright 特殊配置
+      vim.lsp.config.pyright = {
+        capabilities = capabilities,
+        settings = {
+          python = {
+            analysis = {
+              typeCheckingMode = "off",
+              diagnosticMode = "openFilesOnly",
+              useLibraryCodeForTypes = false,
+              autoSearchPaths = true,
+              diagnosticSeverityOverrides = {
+                reportGeneralTypeIssues = "none",
+                reportOptionalMemberAccess = "none",
+                reportOptionalSubscript = "none",
+                reportOptionalCall = "none",
+                reportUnboundVariable = "none",
+                reportAttributeAccessIssue = "none",
+              },
+            },
+          },
+        },
+      }
+
+      -- Lua_ls 特殊配置
+      vim.lsp.config.lua_ls = {
+        capabilities = capabilities,
+        settings = {
+          Lua = {
+            runtime = { version = "LuaJIT" },
+            diagnostics = { globals = { "vim" } },
+            workspace = {
+              library = vim.api.nvim_get_runtime_file("", true),
+              checkThirdParty = false,
+            },
+            telemetry = { enable = false },
+          },
+        },
+      }
+
+      -- 其他服务器使用默认配置
+      for _, server in ipairs(opts.ensure_installed) do
+        if server ~= "pyright" and server ~= "lua_ls" then
+          vim.lsp.config[server] = { capabilities = capabilities }
+        end
+      end
+
+      -- 启用所有服务器
+      for _, server in ipairs(opts.ensure_installed) do
+        vim.lsp.enable(server)
+      end
+    end,
   },
 
   -- Trouble: LSP/diagnostic 界面

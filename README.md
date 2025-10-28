@@ -8,6 +8,42 @@
 4. 如果是新 commit 的 bug，fork 代码仓库，使用自己仓库尝试修复然后测试，最后提交 pr
 5. 如果配置问题，应该详细阅读文档
 
+## 常见问题：Pyright 类型检查错误
+
+**问题**: 在 Python 文件中看到类似 `Cannot access attribute "aclose"` 的类型错误，但代码实际运行正常。
+
+**原因**: Pyright 的静态类型分析无法推断动态属性（如 Redis 的 `aclose()` 方法）。
+
+**解决方案**: 本配置已经通过以下方式禁用 Pyright 的类型检查：
+
+```lua
+-- lua/plugins/lsp.lua 中的配置
+vim.lsp.config.pyright = {
+  settings = {
+    python = {
+      analysis = {
+        typeCheckingMode = "off",
+        diagnosticSeverityOverrides = {
+          reportAttributeAccessIssue = "none",  -- 关键配置
+          reportGeneralTypeIssues = "none",
+          -- ... 其他禁用规则
+        },
+      },
+    },
+  },
+}
+```
+
+**重要**: 本配置使用 **新版 LSP API** (`vim.lsp.config` + `vim.lsp.enable`)，而不是旧版的 `lspconfig.*.setup()` 方式。如果遇到配置不生效的问题：
+
+1. 确认使用的是 `vim.lsp.config.*` 而不是 `require("lspconfig").*.setup()`
+2. 清理 Mason 的符号链接残留：
+   ```bash
+   rm -f ~/.local/share/nvim/mason/bin/pyright*
+   rm -f ~/.local/share/nvim/mason/share/mason-schemas/lsp/pyright.json
+   ```
+3. 重新安装：`:MasonInstall pyright`
+
 # Neovim 配置
 
 一个基于 lazy.nvim 包管理器构建的现代化、功能丰富的 Neovim 配置。

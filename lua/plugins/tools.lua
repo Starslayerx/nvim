@@ -73,7 +73,9 @@ return {
       format_on_save = { timeout_ms = 500 },
       formatters = {
         ruff = {
-          append_args = { "--ignore", "F401" }, -- unused import
+          append_args = {
+            "--ignore", "F401", -- unused import
+          },
         },
         shfmt = {
           append_args = { "-i", "2" },
