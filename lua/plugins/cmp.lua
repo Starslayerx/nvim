@@ -12,7 +12,10 @@ return {
       appearance = {
         nerd_font_variant = "mono",
       },
-      completion = { documentation = { auto_show = false } },
+      completion = {
+        documentation = { auto_show = false },
+        accept = { auto_brackets = { enabled = true } }, -- 启用内置括号补全（处理函数/方法补全）
+      },
       sources = {
         -- 移除 copilot，只在需要时手动添加
         default = { "lsp", "path", "snippets", "buffer" },

@@ -2,6 +2,53 @@
 
 A modern and feature-rich Neovim configuration built with lazy.nvim package manager.
 
+## 💡 FAQ
+
+### blink.cmp and nvim-autopairs Integration
+
+**Issue**: After using blink.cmp completion engine, auto-brackets are not added when completing Python code.
+
+**Cause**: blink.cmp is a newer completion engine that doesn't have official nvim-autopairs integration support like nvim-cmp. blink.cmp lacks the `event:on('confirm_done')` event system, and the `nvim-autopairs.completion.cmp` module depends on the nvim-cmp plugin.
+
+**Solution**: This configuration uses a **combination approach** where the two plugins work together:
+
+```lua
+-- Configuration in lua/plugins/cmp.lua
+{
+  "saghen/blink.cmp",
+  opts = {
+    completion = {
+      accept = { auto_brackets = { enabled = true } }, -- blink.cmp built-in bracket completion
+    },
+    -- ... other options
+  },
+}
+```
+
+**How it works**:
+- **blink.cmp built-in auto_brackets**: Automatically adds `()` when selecting functions or methods from completion menu
+- **nvim-autopairs**: Handles all other bracket pairing scenarios
+  - Auto-completes `)` when manually typing `(`
+  - Formats to multiline when pressing `<CR>` at `{|}` position
+  - Auto-deletes closing bracket when deleting opening bracket
+
+**Test scenarios**:
+```python
+# 1. Auto-brackets after completion
+# Type pri, select print → print(|)
+
+# 2. Manual bracket pairing
+# Type ( → (|)
+
+# 3. Format on enter between brackets
+# Press <CR> at {|} →
+# {
+#     |
+# }
+```
+
+**Note**: Currently nvim-autopairs hasn't added native support for blink.cmp ([GitHub Issue #477](https://github.com/windwp/nvim-autopairs/issues/477) still open). The combination approach used in this configuration is the most stable solution available.
+
 ## 🎯 Overview
 
 - **Package Manager**: lazy.nvim (Auto-check for updates)
@@ -24,11 +71,11 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - **which-key.nvim** - Keybinding hints, use `<leader>?` for local mappings
 
 ### Code Completion & LSP
-- **blink.cmp** - Modern completion engine (version 1.*) with default preset keybindings and Copilot integration
+- **blink.cmp** - Modern completion engine (version 1.*) with default preset keybindings and Copilot integration, built-in auto_brackets feature for function/method completion
 - **blink-copilot** - Copilot integration for Blink.cmp
 - **copilot.lua** - GitHub Copilot support (lazy-loaded, use `:Copilot` command to start)
 - **copilot-lualine** - Copilot status display in Lualine
-- **nvim-autopairs** - Auto bracket completion, disabled in macros and replace mode
+- **nvim-autopairs** - Auto bracket completion, works in combination with blink.cmp to handle manual bracket input, enter formatting, and other scenarios, disabled in macros and replace mode
 - **nvim-lspconfig** - LSP configuration using new API (vim.lsp.config/enable), supporting pyright (type checking disabled) and lua_ls
 - **mason.nvim** - LSP server management with custom icons
 - **mason-lspconfig.nvim** - Auto-install LSP (clangd, pyright, gopls, eslint, lua_ls, rust_analyzer, marksman)
@@ -365,7 +412,7 @@ f*unc_name(a, b, x)         dsf             a, b, x
 3. **Code Formatting**: Auto-formatting for multiple languages (triggers on save)
 4. **Transparent Interface**: Window transparency effects automatically applied to color themes
 5. **Smart Completion**: Modern completion system based on blink.cmp with LSP, path, snippets, buffer, and GitHub Copilot support
-6. **Auto Bracket Completion**: Smart bracket pairing and completion, disabled in specific filetypes, macros, and replace mode
+6. **Auto Bracket Completion**: blink.cmp built-in auto_brackets handles function/method completion brackets, nvim-autopairs handles manual bracket pairing, enter formatting, etc., disabled in specific filetypes, macros, and replace mode
 7. **Rainbow Parentheses**: Colorful parentheses highlighting using Nord and Catppuccin Frappé color schemes
 8. **Quick Content Selection**: Use `<CR>`/`<BS>`/`<TAB>` for progressive code selection with scope detection
 9. **Surrounding Operations**: Use nvim-surround for quick surrounding operations

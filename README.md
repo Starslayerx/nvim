@@ -8,7 +8,9 @@
 4. 如果是新 commit 的 bug，fork 代码仓库，使用自己仓库尝试修复然后测试，最后提交 pr
 5. 如果配置问题，应该详细阅读文档
 
-## 常见问题：Pyright 类型检查错误
+## 常见问题
+
+### Pyright 类型检查错误
 
 **问题**: 在 Python 文件中看到类似 `Cannot access attribute "aclose"` 的类型错误，但代码实际运行正常。
 
@@ -44,6 +46,51 @@ vim.lsp.config.pyright = {
    ```
 3. 重新安装：`:MasonInstall pyright`
 
+### blink.cmp 与 nvim-autopairs 集成
+
+**问题**: 使用 blink.cmp 补全引擎后，Python 代码补全时不自动添加括号。
+
+**原因**: blink.cmp 是较新的补全引擎，不像 nvim-cmp 那样有官方的 nvim-autopairs 集成支持。blink.cmp 没有 `event:on('confirm_done')` 事件系统，而 `nvim-autopairs.completion.cmp` 模块依赖 nvim-cmp 插件。
+
+**解决方案**: 本配置采用 **组合方案**，让两个插件分工合作：
+
+```lua
+-- lua/plugins/cmp.lua 中的配置
+{
+  "saghen/blink.cmp",
+  opts = {
+    completion = {
+      accept = { auto_brackets = { enabled = true } }, -- blink.cmp 内置括号补全
+    },
+    -- ... 其他配置
+  },
+}
+```
+
+**工作方式**:
+- **blink.cmp 内置 auto_brackets**: 当你从补全菜单选择函数或方法时，自动添加 `()`
+- **nvim-autopairs**: 处理其他所有括号配对场景
+  - 手动输入 `(` 时自动补全 `)`
+  - 在 `{|}` 位置按 `<CR>` 时格式化成多行
+  - 删除左括号时自动删除右括号
+
+**测试场景**:
+```python
+# 1. 补全函数后添加括号
+# 输入 pri，选择 print 补全 → print(|)
+
+# 2. 手动输入括号配对
+# 输入 ( → (|)
+
+# 3. 括号间回车格式化
+# 在 {|} 中按 <CR> →
+# {
+#     |
+# }
+```
+
+**注意**: 目前 nvim-autopairs 还没有添加对 blink.cmp 的原生支持（[GitHub Issue #477](https://github.com/windwp/nvim-autopairs/issues/477) 仍开放中）。本配置使用的组合方案是目前最稳定的解决办法。
+
 # Neovim 配置
 
 一个基于 lazy.nvim 包管理器构建的现代化、功能丰富的 Neovim 配置。
@@ -72,11 +119,11 @@ vim.lsp.config.pyright = {
 
 ### 代码补全 & LSP
 
-- **blink.cmp** - 现代代码补全引擎 (版本 1.\*)，使用 default 预设快捷键，集成 Copilot
+- **blink.cmp** - 现代代码补全引擎 (版本 1.\*)，使用 default 预设快捷键，集成 Copilot，内置 auto_brackets 功能处理函数/方法补全后的括号
 - **blink-copilot** - Blink.cmp 的 Copilot 集成
 - **copilot.lua** - GitHub Copilot 支持 (懒加载，使用 `:Copilot` 命令启动)
 - **copilot-lualine** - Lualine 中的 Copilot 状态显示
-- **nvim-autopairs** - 自动括号补全，禁用在宏和替换模式中运行
+- **nvim-autopairs** - 自动括号补全，与 blink.cmp 组合使用，处理手动输入括号、回车格式化等场景，禁用在宏和替换模式中运行
 - **nvim-lspconfig** - LSP 配置，使用新版 API (vim.lsp.config/enable)，支持 pyright (关闭类型检查) 和 lua_ls
 - **mason.nvim** - LSP 服务器管理，带有自定义图标
 - **mason-lspconfig.nvim** - 自动安装 LSP (clangd, pyright, gopls, eslint, lua_ls, rust_analyzer, marksman)
@@ -450,7 +497,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 3. **代码格式化**: 支持多种语言的自动格式化 (保存时触发)
 4. **透明界面**: 支持窗口透明效果，自动应用于颜色主题
 5. **智能补全**: 基于 blink.cmp 的现代补全系统，支持 LSP、路径、片段、缓冲区和 GitHub Copilot
-6. **自动括号补全**: 智能括号配对和补全，禁用在特定文件类型、宏和替换模式中
+6. **自动括号补全**: blink.cmp 内置 auto_brackets 处理函数/方法补全后的括号，nvim-autopairs 处理手动输入的括号配对、回车格式化等，禁用在特定文件类型、宏和替换模式中
 7. **彩虹括号**: 彩色括号高亮，使用 Nord 和 Catppuccin Frappé 配色方案
 8. **快速内容选择**: 使用 `<CR>`/`<BS>`/`<TAB>` 进行渐进式代码选择，支持作用域检测
 9. **符号包围编辑**: 使用 nvim-surround 快速操作包围符号
