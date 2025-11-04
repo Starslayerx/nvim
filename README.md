@@ -52,7 +52,7 @@ vim.lsp.config.pyright = {
 
 **原因**: blink.cmp 是较新的补全引擎，不像 nvim-cmp 那样有官方的 nvim-autopairs 集成支持。blink.cmp 没有 `event:on('confirm_done')` 事件系统，而 `nvim-autopairs.completion.cmp` 模块依赖 nvim-cmp 插件。
 
-**解决方案**: 本配置采用 **组合方案**，让两个插件分工合作：
+**解决方案**: 本配置采用 **组合方案**，让两个插件分工合作。使用完整的 `auto_brackets` 配置确保在所有文件类型中都能正常工作：
 
 ```lua
 -- lua/plugins/cmp.lua 中的配置
@@ -60,7 +60,24 @@ vim.lsp.config.pyright = {
   "saghen/blink.cmp",
   opts = {
     completion = {
-      accept = { auto_brackets = { enabled = true } }, -- blink.cmp 内置括号补全
+      accept = {
+        auto_brackets = {
+          enabled = true,
+          default_brackets = { "(", ")" },
+          override_brackets_for_filetypes = {},
+          -- 使用 kind 字段判断是否添加括号
+          kind_resolution = {
+            enabled = true,
+            blocked_filetypes = {}, -- 清空阻止列表，确保所有语言都能使用
+          },
+          -- 使用语义 token 异步判断（更准确）
+          semantic_token_resolution = {
+            enabled = true,
+            blocked_filetypes = {}, -- 清空阻止列表
+            timeout_ms = 400,
+          },
+        },
+      },
     },
     -- ... 其他配置
   },
@@ -69,6 +86,9 @@ vim.lsp.config.pyright = {
 
 **工作方式**:
 - **blink.cmp 内置 auto_brackets**: 当你从补全菜单选择函数或方法时，自动添加 `()`
+  - `kind_resolution`: 根据补全项的 `kind` 字段立即判断
+  - `semantic_token_resolution`: 异步使用 LSP 语义 token 进行更准确判断（400ms 超时）
+  - 清空 `blocked_filetypes` 确保在所有语言（包括 Python、TS、Vue 等）中都能工作
 - **nvim-autopairs**: 处理其他所有括号配对场景
   - 手动输入 `(` 时自动补全 `)`
   - 在 `{|}` 位置按 `<CR>` 时格式化成多行
@@ -89,7 +109,10 @@ vim.lsp.config.pyright = {
 # }
 ```
 
-**注意**: 目前 nvim-autopairs 还没有添加对 blink.cmp 的原生支持（[GitHub Issue #477](https://github.com/windwp/nvim-autopairs/issues/477) 仍开放中）。本配置使用的组合方案是目前最稳定的解决办法。
+**注意**:
+- 目前 nvim-autopairs 还没有添加对 blink.cmp 的原生支持（[GitHub Issue #477](https://github.com/windwp/nvim-autopairs/issues/477) 仍开放中）
+- 本配置使用的组合方案是目前最稳定的解决办法
+- 如果插件更新后括号补全失效，检查是否需要清空 `blocked_filetypes` 列表（默认阻止 `typescriptreact`、`javascriptreact`、`vue` 等）
 
 # Neovim 配置
 

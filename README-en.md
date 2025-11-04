@@ -10,7 +10,7 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 
 **Cause**: blink.cmp is a newer completion engine that doesn't have official nvim-autopairs integration support like nvim-cmp. blink.cmp lacks the `event:on('confirm_done')` event system, and the `nvim-autopairs.completion.cmp` module depends on the nvim-cmp plugin.
 
-**Solution**: This configuration uses a **combination approach** where the two plugins work together:
+**Solution**: This configuration uses a **combination approach** where the two plugins work together. Use the complete `auto_brackets` configuration to ensure it works across all file types:
 
 ```lua
 -- Configuration in lua/plugins/cmp.lua
@@ -18,7 +18,24 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
   "saghen/blink.cmp",
   opts = {
     completion = {
-      accept = { auto_brackets = { enabled = true } }, -- blink.cmp built-in bracket completion
+      accept = {
+        auto_brackets = {
+          enabled = true,
+          default_brackets = { "(", ")" },
+          override_brackets_for_filetypes = {},
+          -- Use kind field to determine bracket insertion
+          kind_resolution = {
+            enabled = true,
+            blocked_filetypes = {}, -- Clear blocklist to support all languages
+          },
+          -- Use semantic tokens for async resolution (more accurate)
+          semantic_token_resolution = {
+            enabled = true,
+            blocked_filetypes = {}, -- Clear blocklist
+            timeout_ms = 400,
+          },
+        },
+      },
     },
     -- ... other options
   },
@@ -27,6 +44,9 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 
 **How it works**:
 - **blink.cmp built-in auto_brackets**: Automatically adds `()` when selecting functions or methods from completion menu
+  - `kind_resolution`: Immediately determines based on completion item's `kind` field
+  - `semantic_token_resolution`: Asynchronously uses LSP semantic tokens for more accurate determination (400ms timeout)
+  - Clear `blocked_filetypes` to ensure it works in all languages (including Python, TS, Vue, etc.)
 - **nvim-autopairs**: Handles all other bracket pairing scenarios
   - Auto-completes `)` when manually typing `(`
   - Formats to multiline when pressing `<CR>` at `{|}` position
@@ -47,7 +67,10 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 # }
 ```
 
-**Note**: Currently nvim-autopairs hasn't added native support for blink.cmp ([GitHub Issue #477](https://github.com/windwp/nvim-autopairs/issues/477) still open). The combination approach used in this configuration is the most stable solution available.
+**Note**:
+- Currently nvim-autopairs hasn't added native support for blink.cmp ([GitHub Issue #477](https://github.com/windwp/nvim-autopairs/issues/477) still open)
+- The combination approach used in this configuration is the most stable solution available
+- If bracket completion stops working after plugin updates, check if you need to clear the `blocked_filetypes` list (by default blocks `typescriptreact`, `javascriptreact`, `vue`, etc.)
 
 ## 🎯 Overview
 

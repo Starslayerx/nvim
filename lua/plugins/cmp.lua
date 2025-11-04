@@ -14,7 +14,24 @@ return {
       },
       completion = {
         documentation = { auto_show = false },
-        accept = { auto_brackets = { enabled = true } }, -- 启用内置括号补全（处理函数/方法补全）
+        accept = {
+          auto_brackets = {
+            enabled = true,
+            default_brackets = { "(", ")" },
+            override_brackets_for_filetypes = {},
+            -- 使用 kind 字段判断是否添加括号
+            kind_resolution = {
+              enabled = true,
+              blocked_filetypes = {}, -- 清空阻止列表，确保 Python 也能使用
+            },
+            -- 使用语义 token 异步判断（更准确）
+            semantic_token_resolution = {
+              enabled = true,
+              blocked_filetypes = {}, -- 清空阻止列表
+              timeout_ms = 400,
+            },
+          },
+        },
       },
       sources = {
         -- 移除 copilot，只在需要时手动添加
