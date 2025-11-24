@@ -68,11 +68,14 @@ return {
         yaml = { "prettier", stop_after_first = true },
         lua = { "stylua" },
         sh = { "shfmt" },
+        dockerfile = { "dprint" },
+        sql = { "sqlfluff" },
+        toml = { "taplo" },
       },
       default_format_opts = {
         lsp_format = "fallback",
       },
-      format_on_save = { timeout_ms = 500 },
+      format_on_save = { timeout_ms = 2000 },
       formatters = {
         ["clang-format"] = {
           prepend_args = {
@@ -89,6 +92,9 @@ return {
         },
         stylua = {
           append_args = { "--indent-width", "2", "--indent-type", "Spaces" },
+        },
+        sqlfluff = {
+          args = { "format", "--dialect=postgres", "-" },
         },
       },
     },
