@@ -53,6 +53,8 @@ return {
     },
     opts = {
       formatters_by_ft = {
+        c = { "clang-format" },
+        cpp = { "clang-format" },
         python = { "ruff" },
         javascript = { "prettier", stop_after_first = true },
         typescript = { "prettier", stop_after_first = true },
@@ -72,6 +74,11 @@ return {
       },
       format_on_save = { timeout_ms = 500 },
       formatters = {
+        ["clang-format"] = {
+          prepend_args = {
+            "--style={IndentWidth: 4, TabWidth: 4, UseTab: Never, AllowShortFunctionsOnASingleLine: Inline}",
+          },
+        },
         ruff = {
           append_args = {
             "--ignore", "F401", -- unused import
