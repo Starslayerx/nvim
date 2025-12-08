@@ -65,7 +65,7 @@ return {
         scss = { "prettier", stop_after_first = true },
         json = { "prettier", stop_after_first = true },
         markdown = { "prettier", stop_after_first = true },
-        yaml = { "prettier", stop_after_first = true },
+        yaml = { "yamlfmt" },
         lua = { "stylua" },
         sh = { "shfmt" },
         dockerfile = { "dprint" },
