@@ -556,6 +556,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 │   └── plugins/
 │       ├── cmp.lua       # 补全插件
 │       ├── lsp.lua       # LSP 插件
+│       ├── debug.lua     # 调试器插件
 │       ├── snacks.lua    # Snacks 工具集
 │       ├── tools.lua     # 工具插件
 │       └── ui.lua        # UI 插件
@@ -606,6 +607,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - **`lua/plugins/ui.lua`** - UI 相关插件 (主题、状态栏、图标、Treesitter、彩虹括号等)
 - **`lua/plugins/cmp.lua`** - 补全系统配置 (blink.cmp、Copilot、自动括号)
 - **`lua/plugins/lsp.lua`** - LSP 和诊断配置 (lspconfig、Mason、Trouble、诊断显示)
+- **`lua/plugins/debug.lua`** - 调试器配置 (nvim-dap、nvim-dap-ui、nvim-dap-python)
 - **`lua/plugins/snacks.lua`** - Snacks 工具集配置 (文件浏览器、选择器、通知、终端等)
 - **`lua/plugins/tools.lua`** - 格式化和其他工具 (conform、wildfire、PEP8 缩进)
 
@@ -660,7 +662,44 @@ f*unc_name(a, b, x)       dsf          a, b, x
 
 所有格式化工具支持保存时自动格式化，超时时间 500ms，LSP 作为后备格式化选项。
 
-#### 批量格式化项目文件
+### 调试器支持
+
+- **Python**: debugpy (通过 Mason 自动安装)
+  - 支持断点调试
+  - 支持条件断点和日志点
+  - 支持测试方法/类调试
+  - 自动打开/关闭调试 UI
+  - 使用 Nord 主题配色的断点标记
+
+#### 调试快捷键
+
+| 快捷键 | 功能 |
+|--------|------|
+| `<leader>dc` | 启动/继续调试 |
+| `<leader>dv` | 单步跳过 (Step Over) |
+| `<leader>di` | 单步进入 (Step Into) |
+| `<leader>do` | 单步跳出 (Step Out) |
+| `<leader>db` | 切换断点 |
+| `<leader>dB` | 设置条件断点 |
+| `<leader>dl` | 设置日志点 |
+| `<leader>du` | 切换调试 UI |
+| `<leader>de` | 计算表达式 |
+| `<leader>dr` | 打开 REPL |
+| `<leader>dt` | 终止调试会话 |
+| `<leader>dtm` | 调试测试方法 (Python) |
+| `<leader>dtc` | 调试测试类 (Python) |
+
+#### 断点标记说明
+
+- **●** 红色圆点 - 普通断点
+- **◆** 橙色菱形 - 条件断点
+- **○** 灰色空心圆 - 被拒绝的断点
+- **➜** 绿色箭头 - 当前执行位置
+- **◉** 黄色圆点 - 日志点
+
+所有标记使用 Nord 主题配色，不会高亮行号，避免干扰相对行号的显示。
+
+批量格式化项目文件
 
 ```bash
 # 使用 prettier 格式化所有支持的文件
