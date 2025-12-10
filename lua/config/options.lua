@@ -6,6 +6,8 @@ g.mapleader = " "
 
 -- 编码和系统
 opt.encoding = "utf-8"
+opt.fileencoding = "utf-8"
+opt.fileencodings = "utf-8,ucs-bom"
 opt.autochdir = false
 
 -- 显示设置
