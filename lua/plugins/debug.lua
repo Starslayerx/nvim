@@ -169,6 +169,23 @@ return {
             dap.listeners.before.event_exited["dapui_config"] = function()
                 dapui.close()
             end
+
+            -- Force redraw on DAP events to fix rendering issues
+            local function force_redraw()
+                vim.cmd("redraw!")
+            end
+
+            -- Redraw after stopped event (when execution pauses at breakpoint)
+            dap.listeners.after.event_stopped["force_redraw"] = force_redraw
+
+            -- Redraw after continue (when execution resumes)
+            dap.listeners.after.continue["force_redraw"] = force_redraw
+
+            -- Redraw after stepping
+            dap.listeners.after.next["force_redraw"] = force_redraw
+            dap.listeners.after.stepIn["force_redraw"] = force_redraw
+            dap.listeners.after.stepOut["force_redraw"] = force_redraw
+            dap.listeners.after.stepBack["force_redraw"] = force_redraw
         end,
         keys = {
             -- Basic debugging
