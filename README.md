@@ -85,6 +85,7 @@ vim.lsp.config.pyright = {
 ```
 
 **工作方式**:
+
 - **blink.cmp 内置 auto_brackets**: 当你从补全菜单选择函数或方法时，自动添加 `()`
   - `kind_resolution`: 根据补全项的 `kind` 字段立即判断
   - `semantic_token_resolution`: 异步使用 LSP 语义 token 进行更准确判断（400ms 超时）
@@ -95,6 +96,7 @@ vim.lsp.config.pyright = {
   - 删除左括号时自动删除右括号
 
 **测试场景**:
+
 ```python
 # 1. 补全函数后添加括号
 # 输入 pri，选择 print 补全 → print(|)
@@ -110,6 +112,7 @@ vim.lsp.config.pyright = {
 ```
 
 **注意**:
+
 - 目前 nvim-autopairs 还没有添加对 blink.cmp 的原生支持（[GitHub Issue #477](https://github.com/windwp/nvim-autopairs/issues/477) 仍开放中）
 - 本配置使用的组合方案是目前最稳定的解决办法
 - 如果插件更新后括号补全失效，检查是否需要清空 `blocked_filetypes` 列表（默认阻止 `typescriptreact`、`javascriptreact`、`vue` 等）
@@ -125,6 +128,7 @@ vim.lsp.config.pyright = {
 - **Leader 键**: 空格键 (LocalLeader: `\`)
 - **透明度**: 已启用
 - **补全引擎**: blink.cmp (现代补全系统，集成 GitHub Copilot)
+- **调试器**: nvim-dap (支持 Python debugpy，自动安装)
 - **工具集**: snacks.nvim (一体化工具集合)
 - **AI 辅助**: GitHub Copilot (代码补全和建议)
 
@@ -163,6 +167,14 @@ vim.lsp.config.pyright = {
 - **内置 treesitter 选择** - 使用 `<CR>`/`<BS>`/`<TAB>` 进行渐进式代码选择
 - **wildfire.nvim** - 快速选择括号内容 (自定义版本)
 - **nvim-surround** - 快速操作：选择后用符号包围内容
+
+### 调试器
+
+- **nvim-dap** - Debug Adapter Protocol 客户端，核心调试功能
+- **nvim-dap-ui** - 调试界面，提供变量作用域、断点、调用栈、监视表达式等面板
+- **nvim-nio** - nvim-dap-ui 的异步 I/O 依赖
+- **nvim-dap-python** - Python 调试扩展，支持测试方法/类调试
+- **mason-nvim-dap.nvim** - Mason 集成，自动安装和配置调试适配器 (debugpy)
 
 ### 一体化工具集
 
@@ -673,21 +685,21 @@ f*unc_name(a, b, x)       dsf          a, b, x
 
 #### 调试快捷键
 
-| 快捷键 | 功能 |
-|--------|------|
-| `<leader>dc` | 启动/继续调试 |
-| `<leader>dv` | 单步跳过 (Step Over) |
-| `<leader>di` | 单步进入 (Step Into) |
-| `<leader>do` | 单步跳出 (Step Out) |
-| `<leader>db` | 切换断点 |
-| `<leader>dB` | 设置条件断点 |
-| `<leader>dl` | 设置日志点 |
-| `<leader>du` | 切换调试 UI |
-| `<leader>de` | 计算表达式 |
-| `<leader>dr` | 打开 REPL |
-| `<leader>dt` | 终止调试会话 |
+| 快捷键        | 功能                  |
+| ------------- | --------------------- |
+| `<leader>dc`  | 启动/继续调试         |
+| `<leader>dv`  | 单步跳过 (Step Over)  |
+| `<leader>di`  | 单步进入 (Step Into)  |
+| `<leader>do`  | 单步跳出 (Step Out)   |
+| `<leader>db`  | 切换断点              |
+| `<leader>dB`  | 设置条件断点          |
+| `<leader>dl`  | 设置日志点            |
+| `<leader>du`  | 切换调试 UI           |
+| `<leader>de`  | 计算表达式            |
+| `<leader>dr`  | 打开 REPL             |
+| `<leader>dt`  | 终止调试会话          |
 | `<leader>dtm` | 调试测试方法 (Python) |
-| `<leader>dtc` | 调试测试类 (Python) |
+| `<leader>dtc` | 调试测试类 (Python)   |
 
 #### 断点标记说明
 
@@ -699,7 +711,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 
 所有标记使用 Nord 主题配色，不会高亮行号，避免干扰相对行号的显示。
 
-批量格式化项目文件
+### 批量格式化项目文件
 
 ```bash
 # 使用 prettier 格式化所有支持的文件
