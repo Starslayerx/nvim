@@ -106,11 +106,15 @@ return {
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "*",
         callback = function()
-          if vim.bo.filetype ~= "" then
-            vim.wo.foldmethod = "expr"
-            vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-            vim.wo.foldenable = false -- 默认不折叠
+          -- 排除可能导致索引越界的文件类型
+          local excluded = { "markdown", "text", "" }
+          if vim.tbl_contains(excluded, vim.bo.filetype) then
+            return
           end
+
+          vim.wo.foldmethod = "expr"
+          vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+          vim.wo.foldenable = false -- 默认不折叠
         end,
       })
     end,
