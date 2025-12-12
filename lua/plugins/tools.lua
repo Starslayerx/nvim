@@ -69,13 +69,19 @@ return {
         lua = { "stylua" },
         sh = { "shfmt" },
         dockerfile = { "dprint" },
-        sql = { "sqlfluff" },
+        sql = { "sql_formatter" },
         toml = { "taplo" },
       },
       default_format_opts = {
         lsp_format = "fallback",
       },
-      format_on_save = { timeout_ms = 2000 },
+      format_on_save = function(bufnr)
+        -- 对 SQL 文件禁用自动格式化,避免语法错误导致保存失败
+        if vim.bo[bufnr].filetype == "sql" then
+          return nil
+        end
+        return { timeout_ms = 2000 }
+      end,
       formatters = {
         ["clang-format"] = {
           prepend_args = {
@@ -93,8 +99,9 @@ return {
         stylua = {
           append_args = { "--indent-width", "2", "--indent-type", "Spaces" },
         },
-        sqlfluff = {
-          args = { "format", "--dialect=postgres", "-" },
+        sql_formatter = {
+          command = "sql-formatter",
+          args = { "--language", "sql" },  -- 使用通用 SQL,最宽松的语法支持
         },
       },
     },
