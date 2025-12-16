@@ -177,13 +177,21 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("lspsaga").setup({
-        ui = { border = "rounded" },
+        ui = {
+          border = "rounded",
+          winblend = 0, -- 不透明，避免透过窗口看到下面的代码造成混淆
+        },
         lightbulb = { enable = false },
         hover = {
           open_link = "gx",
           open_cmd = "!open", -- macOS 用 open，Linux 用 xdg-open
-          max_width = 0.6,
-          max_height = 0.8,
+          max_width = 0.4,
+          max_height = 0.6,
+          -- 窗口位置：优先下方，增加偏移避免覆盖当前行
+          position = "auto",
+          prefer_above = false, -- 优先下方
+          offset_y = 1, -- 向下偏移 1 行，确保不覆盖当前行
+          offset_x = 0, -- 水平不偏移
         },
       })
     end,
@@ -261,7 +269,7 @@ return {
         command_palette = true,
         long_message_to_split = true,
         inc_rename = false,
-        lsp_doc_border = false,
+        lsp_doc_border = true,
       },
     },
     dependencies = {
