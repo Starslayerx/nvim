@@ -44,6 +44,30 @@ return {
       -- Pyright 特殊配置
       vim.lsp.config.pyright = {
         capabilities = capabilities,
+        before_init = function(_, config)
+          -- 向上查找虚拟环境（最多 3 层）
+          local function find_venv(start_path)
+            local path = start_path
+            for _ = 1, 3 do
+              for _, venv_name in ipairs({ ".venv", "venv", "env" }) do
+                local venv_path = path .. "/" .. venv_name
+                if vim.fn.isdirectory(venv_path) == 1 and vim.fn.filereadable(venv_path .. "/bin/python") == 1 then
+                  return venv_path
+                end
+              end
+              path = vim.fn.fnamemodify(path, ":h")
+              if path == "/" then
+                break
+              end
+            end
+            return nil
+          end
+
+          local venv = find_venv(config.root_dir)
+          if venv then
+            config.settings.python.pythonPath = venv .. "/bin/python"
+          end
+        end,
         settings = {
           python = {
             analysis = {
