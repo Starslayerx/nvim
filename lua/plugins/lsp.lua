@@ -63,9 +63,12 @@ return {
             return nil
           end
 
-          local venv = find_venv(config.root_dir)
-          if venv then
-            config.settings.python.pythonPath = venv .. "/bin/python"
+          -- 只在 root_dir 存在时才查找虚拟环境
+          if config.root_dir then
+            local venv = find_venv(config.root_dir)
+            if venv then
+              config.settings.python.pythonPath = venv .. "/bin/python"
+            end
           end
         end,
         settings = {
