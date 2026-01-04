@@ -39,16 +39,16 @@ keymap("i", "<C-k>", "<C-o><C-b>", { noremap = true, silent = true, desc = "Page
 -- === Tab management
 -- ===
 -- Create new tab
-keymap("n", "tn", ":tabe<CR>", { desc = "New tab" })
-keymap("n", "tN", ":tab split<CR>", { desc = "Split current buffer in new tab" })
+keymap("n", "tn", ":tabe<CR>", { noremap = true, silent = true, desc = "New tab" })
+keymap("n", "tN", ":tab split<CR>", { noremap = true, silent = true, desc = "Split current buffer in new tab" })
 
 -- Move around tabs
-keymap("n", "th", ":-tabnext<CR>", { desc = "Previous tab" })
-keymap("n", "tl", ":+tabnext<CR>", { desc = "Next tab" })
+keymap("n", "th", ":-tabnext<CR>", { noremap = true, silent = true, desc = "Previous tab" })
+keymap("n", "tl", ":+tabnext<CR>", { noremap = true, silent = true, desc = "Next tab" })
 
 -- Move tabs
-keymap("n", "tmh", ":-tabmove<CR>", { desc = "Move tab left" })
-keymap("n", "tml", ":+tabmove<CR>", { desc = "Move tab right" })
+keymap("n", "tmh", ":-tabmove<CR>", { noremap = true, silent = true, desc = "Move tab left" })
+keymap("n", "tml", ":+tabmove<CR>", { noremap = true, silent = true, desc = "Move tab right" })
 
 -- ===
 -- === Window management

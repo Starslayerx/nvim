@@ -9,7 +9,7 @@ return {
     ---@class snacks.Config: table
     opts = { -- 这里配置要启动的插件
       bigfile = { enabled = true }, -- 大文件友好模式
-      dashboard = { enabled = true }, -- 欢迎界面
+      dashboard = { enabled = false }, -- 暂时禁用欢迎界面，排查问题
       explorer = { -- 文件浏览器
         enabled = true,
         side = "left",

@@ -55,6 +55,7 @@ opt.listchars = { tab = "  ", trail = "▫" }
 opt.ttyfast = true
 opt.updatetime = 300
 opt.ttimeoutlen = 50
+opt.timeoutlen = 300  -- 减少映射序列等待时间到300ms
 opt.timeout = true
 
 -- 避免导致 UI 插件渲染异常
