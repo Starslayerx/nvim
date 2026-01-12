@@ -282,7 +282,7 @@ return {
   -- Noice: cmdline, messages, popupmenu
   {
     "folke/noice.nvim",
-    enabled = false, -- 禁用 noice.nvim，使用 snacks.nvim 的 notifier
+    enabled = true, -- 启用 noice.nvim 的命令行美化
     event = "VeryLazy",
     opts = {
       lsp = {

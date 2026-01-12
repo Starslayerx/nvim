@@ -32,4 +32,8 @@ require("lazy").setup({
   install = { colorscheme = { "habamax" } },
   -- automatically check for plugin updates
   checker = { enabled = true },
+  -- git 配置：禁用子模块（大部分插件的子模块是测试依赖，用户不需要）
+  git = {
+    submodules = false, -- 不更新插件的 git 子模块
+  },
 })

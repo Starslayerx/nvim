@@ -123,6 +123,7 @@ return {
   {
     -- 彩虹括号
     "HiPhish/rainbow-delimiters.nvim",
+    submodules = false, -- 禁用子模块（测试依赖，用户不需要）
     config = function()
       require("rainbow-delimiters.setup").setup({
         strategy = {
