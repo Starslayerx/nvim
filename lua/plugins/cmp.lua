@@ -65,28 +65,50 @@ return {
   {
     "windwp/nvim-autopairs",
     event = "InsertEnter",
-    config = true,
-    opts = {
-      enabled = function(bufnr)
-        return true
-      end,
-      disable_filetype = { "TelescopePrompt", "spectre_panel", "snacks_picker_input" },
-      disable_in_macro = true,
-      disable_in_visualblock = false,
-      disable_in_replace_mode = true,
-      ignored_next_char = [=[[%w%%%'%[%"%.%`%$]]=],
-      enable_moveright = true,
-      enable_afterquote = true,
-      enable_check_bracket_line = true,
-      enable_bracket_in_quote = true,
-      enable_abbr = false,
-      break_undo = true,
-      check_ts = false,
-      map_cr = true,
-      map_bs = true,
-      map_c_h = false,
-      map_c_w = false,
-    },
+    config = function()
+      local npairs = require("nvim-autopairs")
+      npairs.setup({
+        enabled = function(bufnr)
+          return true
+        end,
+        disable_filetype = { "TelescopePrompt", "spectre_panel", "snacks_picker_input" },
+        disable_in_macro = true,
+        disable_in_visualblock = false,
+        disable_in_replace_mode = true,
+        ignored_next_char = [=[[%w%%%'%[%"%.%`%$]]=],
+        enable_moveright = true,
+        enable_afterquote = true,
+        enable_check_bracket_line = true,
+        enable_bracket_in_quote = true,
+        enable_abbr = false,
+        break_undo = true,
+        check_ts = false,
+        map_cr = true,
+        map_bs = true,
+        map_c_h = false,
+        map_c_w = false,
+      })
+
+      -- 为 Python f-string 添加特殊规则
+      local Rule = require("nvim-autopairs.rule")
+      local cond = require("nvim-autopairs.conds")
+
+      -- 添加 f' 和 f" 的自动配对规则
+      npairs.add_rules({
+        -- 单引号规则
+        Rule("'", "'", "python"):with_pair(function(opts)
+          -- 检查前一个字符是否是 f/r/b/u 等字符串前缀
+          local prev_char = opts.line:sub(opts.col - 1, opts.col - 1)
+          return prev_char:match("[fFrRbBuU]") ~= nil
+        end),
+        -- 双引号规则
+        Rule('"', '"', "python"):with_pair(function(opts)
+          -- 检查前一个字符是否是 f/r/b/u 等字符串前缀
+          local prev_char = opts.line:sub(opts.col - 1, opts.col - 1)
+          return prev_char:match("[fFrRbBuU]") ~= nil
+        end),
+      })
+    end,
   },
   -- github copilot
   {

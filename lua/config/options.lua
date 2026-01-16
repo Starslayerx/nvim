@@ -92,13 +92,16 @@ opt.viewoptions = "cursor,folds,slash,unix"
 opt.termguicolors = true
 g.terminal_emulator = "nvim"
 
--- 禁用自动注释
+-- 禁用自动注释，并重置缩进表达式
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "*",
   callback = function()
     vim.opt_local.formatoptions:remove("c")
     vim.opt_local.formatoptions:remove("r")
     vim.opt_local.formatoptions:remove("o")
+
+    -- 强制清空 indentexpr，避免插件设置的缩进表达式导致过度缩进
+    vim.opt_local.indentexpr = ""
   end,
 })
 

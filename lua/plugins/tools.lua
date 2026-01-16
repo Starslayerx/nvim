@@ -111,5 +111,6 @@ return {
   {
     "Vimjas/vim-python-pep8-indent",
     ft = "python",
+    enabled = false, -- 临时禁用以测试是否是这个插件导致的问题
   },
 }
