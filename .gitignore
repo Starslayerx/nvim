@@ -9,3 +9,4 @@
 !lua/
 !lua/**
 !stylua.toml
+!CLAUDE.md
