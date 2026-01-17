@@ -71,7 +71,7 @@ return {
         enabled = function(bufnr)
           return true
         end,
-        disable_filetype = { "TelescopePrompt", "spectre_panel", "snacks_picker_input", "markdown" },
+        disable_filetype = { "TelescopePrompt", "spectre_panel", "snacks_picker_input" },
         disable_in_macro = true,
         disable_in_visualblock = false,
         disable_in_replace_mode = true,
@@ -82,28 +82,50 @@ return {
         enable_bracket_in_quote = true,
         enable_abbr = false,
         break_undo = true,
-        check_ts = false,
+        check_ts = true, -- 启用 treesitter 检查
         map_cr = true,
         map_bs = true,
         map_c_h = false,
         map_c_w = false,
       })
 
-      -- 为 Python f-string 添加特殊规则
       local Rule = require("nvim-autopairs.rule")
       local cond = require("nvim-autopairs.conds")
+      local ts_conds = require("nvim-autopairs.ts-conds")
 
-      -- 添加 f' 和 f" 的自动配对规则
+      -- 辅助函数：检查是否在代码块的编程语言中
+      local function is_in_code_lang()
+        return ts_conds.is_in_range(function(result)
+          if result and result.lang then
+            -- 支持的编程语言列表
+            local code_langs = { "python", "lua", "javascript", "typescript", "rust", "go", "c", "cpp", "java" }
+            return vim.tbl_contains(code_langs, result.lang)
+          end
+          return false
+        end, function()
+          local cursor = vim.api.nvim_win_get_cursor(0)
+          return { cursor[1] - 1, cursor[2] }
+        end)
+      end
+
+      -- Markdown 特殊处理：只在代码块内启用括号配对
       npairs.add_rules({
-        -- 单引号规则
+        -- 在 markdown 中，只有在代码块内才配对 {
+        Rule("{", "}", "markdown"):with_pair(is_in_code_lang()),
+        Rule("(", ")", "markdown"):with_pair(is_in_code_lang()),
+        Rule("[", "]", "markdown"):with_pair(is_in_code_lang()),
+        -- 引号也只在代码块内配对
+        Rule("'", "'", "markdown"):with_pair(is_in_code_lang()),
+        Rule('"', '"', "markdown"):with_pair(is_in_code_lang()),
+      })
+
+      -- Python f-string 特殊规则
+      npairs.add_rules({
         Rule("'", "'", "python"):with_pair(function(opts)
-          -- 检查前一个字符是否是 f/r/b/u 等字符串前缀
           local prev_char = opts.line:sub(opts.col - 1, opts.col - 1)
           return prev_char:match("[fFrRbBuU]") ~= nil
         end),
-        -- 双引号规则
         Rule('"', '"', "python"):with_pair(function(opts)
-          -- 检查前一个字符是否是 f/r/b/u 等字符串前缀
           local prev_char = opts.line:sub(opts.col - 1, opts.col - 1)
           return prev_char:match("[fFrRbBuU]") ~= nil
         end),
