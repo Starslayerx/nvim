@@ -71,7 +71,7 @@ return {
         enabled = function(bufnr)
           return true
         end,
-        disable_filetype = { "TelescopePrompt", "spectre_panel", "snacks_picker_input" },
+        disable_filetype = { "TelescopePrompt", "spectre_panel", "snacks_picker_input", "markdown" },
         disable_in_macro = true,
         disable_in_visualblock = false,
         disable_in_replace_mode = true,
