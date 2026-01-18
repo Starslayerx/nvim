@@ -111,19 +111,38 @@ return {
         },
       }
 
-      -- Jinja LSP 特殊配置：同时服务于 html 和 jinja 文件类型
+      -- Jinja LSP 特殊配置：同时服务于 html 和 htmldjango 文件类型
       vim.lsp.config.jinja_lsp = {
         capabilities = capabilities,
-        filetypes = { "html", "jinja", "htmldjango" },
+        filetypes = { "html", "htmldjango" },
         root_dir = function(fname)
           -- 在包含 templates/ 目录的项目中启用
           return vim.fs.root(fname, { "templates", ".git", "manage.py", "app.py" })
         end,
       }
 
+      -- HTML LSP 特殊配置：同时服务于 htmldjango
+      vim.lsp.config.html = {
+        capabilities = capabilities,
+        filetypes = { "html", "htmldjango" },
+      }
+
+      -- CSS LSP 特殊配置：同时服务于 htmldjango
+      vim.lsp.config.cssls = {
+        capabilities = capabilities,
+        filetypes = { "css", "scss", "less", "htmldjango" },
+      }
+
+      -- Emmet LSP 特殊配置：同时服务于 htmldjango
+      vim.lsp.config.emmet_language_server = {
+        capabilities = capabilities,
+        filetypes = { "html", "css", "scss", "less", "htmldjango" },
+      }
+
       -- 其他服务器使用默认配置
+      local special_servers = { "pyright", "lua_ls", "jinja_lsp", "html", "cssls", "emmet_language_server" }
       for _, server in ipairs(opts.ensure_installed) do
-        if server ~= "pyright" and server ~= "lua_ls" and server ~= "jinja_lsp" then
+        if not vim.tbl_contains(special_servers, server) then
           vim.lsp.config[server] = { capabilities = capabilities }
         end
       end

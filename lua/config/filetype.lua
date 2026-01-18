@@ -1,11 +1,11 @@
 -- Jinja2/Flask 模板文件类型配置
 
--- 纯 Jinja2 文件（.jinja, .jinja2, .j2）使用 jinja 文件类型
+-- 纯 Jinja2 文件（.jinja, .jinja2, .j2）使用 htmldjango 文件类型
 vim.filetype.add({
   extension = {
-    jinja = "jinja",
-    jinja2 = "jinja",
-    j2 = "jinja",
+    jinja = "htmldjango",
+    jinja2 = "htmldjango",
+    j2 = "htmldjango",
   },
 })
 
@@ -28,7 +28,7 @@ local function is_jinja_template(path, bufnr)
   return false
 end
 
--- HTML 文件的 Jinja2 处理
+-- HTML 文件的 Jinja2 处理：检测到 Jinja2 语法时，设置 filetype 为 htmldjango
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = "*.html",
   callback = function(args)
@@ -37,26 +37,22 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 
     -- 检测是否是 Jinja2 模板
     if is_jinja_template(path, bufnr) then
-      -- 保持 filetype 为 html（保留 HTML LSP 和格式化功能）
-      vim.bo[bufnr].filetype = "html"
-
-      -- 使用 htmldjango treesitter parser 进行语法高亮
-      vim.treesitter.language.register("htmldjango", "html")
-
-      -- 标记这是一个 Jinja2 模板（供其他插件使用）
-      vim.b[bufnr].is_jinja_template = true
+      -- 设置 filetype 为 htmldjango（treesitter 会自动使用 htmldjango parser）
+      vim.bo[bufnr].filetype = "htmldjango"
     end
   end,
 })
 
--- 纯 jinja 文件类型配置
+-- htmldjango 文件类型配置
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = "jinja",
-  callback = function()
-    -- 使用 htmldjango treesitter parser
-    vim.treesitter.language.register("htmldjango", "jinja")
+  pattern = "htmldjango",
+  callback = function(args)
     -- 设置注释格式（用于 gcc 等注释命令）
     vim.bo.commentstring = "{# %s #}"
+    -- 使用 html treesitter parser（比 htmldjango parser 更稳定）
+    vim.treesitter.language.register("html", "htmldjango")
+    -- 禁用 snacks words 高亮（在 htmldjango 中会有奇怪的高亮范围）
+    vim.b[args.buf].snacks_words = false
   end,
 })
 
