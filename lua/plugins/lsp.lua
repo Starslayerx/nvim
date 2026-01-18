@@ -31,6 +31,10 @@ return {
         "lua_ls",
         "rust_analyzer",
         "marksman",
+        "html",
+        "cssls",
+        "emmet_language_server",
+        "jinja_lsp",
       },
       automatic_enable = false, -- 禁用自动启用，手动配置
     },
@@ -107,9 +111,19 @@ return {
         },
       }
 
+      -- Jinja LSP 特殊配置：同时服务于 html 和 jinja 文件类型
+      vim.lsp.config.jinja_lsp = {
+        capabilities = capabilities,
+        filetypes = { "html", "jinja", "htmldjango" },
+        root_dir = function(fname)
+          -- 在包含 templates/ 目录的项目中启用
+          return vim.fs.root(fname, { "templates", ".git", "manage.py", "app.py" })
+        end,
+      }
+
       -- 其他服务器使用默认配置
       for _, server in ipairs(opts.ensure_installed) do
-        if server ~= "pyright" and server ~= "lua_ls" then
+        if server ~= "pyright" and server ~= "lua_ls" and server ~= "jinja_lsp" then
           vim.lsp.config[server] = { capabilities = capabilities }
         end
       end

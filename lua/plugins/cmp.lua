@@ -130,6 +130,23 @@ return {
           return prev_char:match("[fFrRbBuU]") ~= nil
         end),
       })
+
+      -- Jinja2 模板空格规则：在 {{ }} 和 {% %} 中按空格自动两边加空格
+      npairs.add_rules({
+        -- 当在 {{|}} 中按空格时，变成 {{ | }}
+        Rule(" ", " ")
+          :with_pair(function(opts)
+            local pair = opts.line:sub(opts.col - 2, opts.col - 1)
+            return vim.tbl_contains({ "{{", "{%", "{#" }, pair)
+          end)
+          :with_move(cond.none())
+          :with_cr(cond.none())
+          :with_del(function(opts)
+            local col = vim.api.nvim_win_get_cursor(0)[2]
+            local context = opts.line:sub(col - 1, col + 2)
+            return vim.tbl_contains({ "{{  }}", "{%  %}", "{#  #}" }, context)
+          end),
+      })
     end,
   },
   -- github copilot
