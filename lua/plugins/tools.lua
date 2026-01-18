@@ -60,7 +60,9 @@ return {
         typescript = { "prettier", stop_after_first = true },
         javascriptreact = { "prettier", stop_after_first = true },
         typescriptreact = { "prettier", stop_after_first = true },
-        html = { "prettier", stop_after_first = true },
+        html = { "djlint" },
+        jinja = { "djlint" },
+        htmldjango = { "djlint" },
         css = { "prettier", stop_after_first = true },
         scss = { "prettier", stop_after_first = true },
         json = { "prettier", stop_after_first = true },
@@ -86,6 +88,12 @@ return {
         ["clang-format"] = {
           prepend_args = {
             "--style={IndentWidth: 4, TabWidth: 4, UseTab: Never, AllowShortFunctionsOnASingleLine: Inline}",
+          },
+        },
+        djlint = {
+          prepend_args = {
+            "--profile=jinja",
+            "--indent=2",
           },
         },
         ruff = {
