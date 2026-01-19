@@ -50,9 +50,12 @@ vim.api.nvim_create_autocmd("FileType", {
     -- 设置注释格式（用于 gcc 等注释命令）
     vim.bo.commentstring = "{# %s #}"
     -- 使用 html treesitter parser（比 htmldjango parser 更稳定）
+    -- htmldjango parser 的高亮质量不稳定，彩虹括号也会失效
     vim.treesitter.language.register("html", "htmldjango")
     -- 禁用 snacks words 高亮（在 htmldjango 中会有奇怪的高亮范围）
     vim.b[args.buf].snacks_words = false
+    -- 禁用彩虹括号（html parser 在遇到 Jinja2 语法时会打断，导致括号匹配混乱）
+    vim.b[args.buf].rainbow_delimiters = { enabled = false }
   end,
 })
 
