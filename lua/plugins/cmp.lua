@@ -119,17 +119,8 @@ return {
         Rule('"', '"', "markdown"):with_pair(is_in_code_lang()),
       })
 
-      -- Python f-string 特殊规则
-      npairs.add_rules({
-        Rule("'", "'", "python"):with_pair(function(opts)
-          local prev_char = opts.line:sub(opts.col - 1, opts.col - 1)
-          return prev_char:match("[fFrRbBuU]") ~= nil
-        end),
-        Rule('"', '"', "python"):with_pair(function(opts)
-          local prev_char = opts.line:sub(opts.col - 1, opts.col - 1)
-          return prev_char:match("[fFrRbBuU]") ~= nil
-        end),
-      })
+      -- Python f-string 会由默认的引号配对规则处理
+      -- 删除了之前有问题的特殊规则，该规则会阻止普通引号输入
 
       -- Jinja2 模板空格规则：在 {{ }} 和 {% %} 中按空格自动两边加空格
       npairs.add_rules({
