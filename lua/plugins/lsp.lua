@@ -127,10 +127,10 @@ return {
         filetypes = { "html", "htmldjango" },
       }
 
-      -- CSS LSP 特殊配置：同时服务于 htmldjango
+      -- CSS LSP 特殊配置：不服务于 htmldjango（避免在 HTML 模板中出现 CSS 属性补全）
       vim.lsp.config.cssls = {
         capabilities = capabilities,
-        filetypes = { "css", "scss", "less", "htmldjango" },
+        filetypes = { "css", "scss", "less" },
       }
 
       -- Emmet LSP 特殊配置：同时服务于 htmldjango
