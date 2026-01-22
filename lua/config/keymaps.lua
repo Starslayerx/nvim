@@ -15,6 +15,8 @@ keymap("n", "Y", 'ggVG"+y', opts)
 -- Indentation
 keymap("n", "<", "<<", opts)
 keymap("n", ">", ">>", opts)
+keymap("v", "<", "<gv", opts)
+keymap("v", ">", ">gv", opts)
 
 -- Search un-highlight
 keymap("n", "<LEADER><CR>", ":nohlsearch<CR>", opts)

@@ -38,7 +38,7 @@ opt.indentexpr = ""
 -- 折叠设置
 opt.foldmethod = "indent"
 opt.foldlevel = 99
-opt.foldenable = true
+opt.foldenable = false
 
 -- 分割窗口
 opt.splitright = true
