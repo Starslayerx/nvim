@@ -318,7 +318,16 @@ return {
     enabled = true, -- 启用 noice.nvim 的命令行美化
     event = "VeryLazy",
     opts = {
+      views = {
+        notify = {
+          replace = true, -- 关键配置：合并/替换重复通知，避免堆叠
+        },
+      },
       lsp = {
+        progress = {
+          enabled = true, -- 启用 LSP 进度通知
+          view = "notify",
+        },
         override = {
           ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
           ["vim.lsp.util.stylize_markdown"] = true,

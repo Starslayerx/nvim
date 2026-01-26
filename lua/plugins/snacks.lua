@@ -22,7 +22,7 @@ return {
       },
       image = { enabled = true, backend = "ghostty" }, -- 终端内显示图片
       input = { enabled = true }, -- 改善 vim.ui.input: 更好的弹窗、占位、样式
-      notifier = { enabled = true, timeout = 3000 }, -- 更漂亮的 vim.notify 与历史
+      notifier = { enabled = false }, -- 禁用，避免与 noice.nvim 冲突导致重复通知
       picker = { -- like fzf or Telescope
         enabled = true,
         sources = {
@@ -213,13 +213,14 @@ return {
         end,
         desc = "Select Scratch Buffer",
       },
-      {
-        "<leader>n",
-        function()
-          Snacks.notifier.show_history()
-        end,
-        desc = "Notification History",
-      },
+      -- 移除：notifier 已禁用，使用上面的 picker.notifications 代替
+      -- {
+      --   "<leader>n",
+      --   function()
+      --     Snacks.notifier.show_history()
+      --   end,
+      --   desc = "Notification History",
+      -- },
       {
         "<leader>bd",
         function()
@@ -249,13 +250,14 @@ return {
         end,
         desc = "Lazygit",
       },
-      {
-        "<leader>un",
-        function()
-          Snacks.notifier.hide()
-        end,
-        desc = "Dismiss All Notifications",
-      },
+      -- 移除：notifier 已禁用，使用 noice.nvim 的通知系统
+      -- {
+      --   "<leader>un",
+      --   function()
+      --     Snacks.notifier.hide()
+      --   end,
+      --   desc = "Dismiss All Notifications",
+      -- },
       {
         "<c-/>",
         function()
