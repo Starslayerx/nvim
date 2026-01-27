@@ -30,9 +30,10 @@ keymap("v", "J", "5j", opts)
 -- ===
 -- === Insert Mode Cursor Movement
 -- ===
-keymap("i", "<C-f>", "<ESC>A", opts)
-keymap("i", "<C-l>", "<ESC>la", opts)
-keymap("i", "<C-b>", "<ESC>i", opts)
+keymap("i", "<C-a>", "<ESC>I", opts)
+keymap("i", "<C-e>", "<ESC>A", opts)
+keymap("i", "<C-h>", "<Left>", opts)
+keymap("i", "<C-l>", "<Right>", opts)
 -- Page up & down keymaps
 keymap("i", "<C-j>", "<C-o><C-f>", { noremap = true, silent = true, desc = "PageDown" })
 keymap("i", "<C-k>", "<C-o><C-b>", { noremap = true, silent = true, desc = "Pageup" })
