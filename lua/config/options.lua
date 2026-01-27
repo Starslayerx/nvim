@@ -85,7 +85,8 @@ opt.completeopt = { "longest", "noinsert", "menuone", "noselect", "preview" }
 -- 其他设置
 opt.virtualedit = "block"
 -- 确保搜索计数显示，移除可能抑制显示的选项
-opt.shortmess = "filnxxtToO"  -- 移除了 "c"，保留搜索计数显示
+-- F: 隐藏文件读写消息 (避免显示 "xxx lines written" 等)
+opt.shortmess = "filnxxtToOF"  -- 移除了 "c"，保留搜索计数显示，添加 "F" 隐藏文件消息
 opt.viewoptions = "cursor,folds,slash,unix"
 
 -- 终端相关
