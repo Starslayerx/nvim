@@ -8,6 +8,7 @@ g.mapleader = " "
 opt.encoding = "utf-8"
 opt.fileencoding = "utf-8"
 opt.fileencodings = "utf-8,ucs-bom"
+opt.clipboard = "unnamedplus"
 opt.autochdir = false
 
 -- 显示设置
@@ -58,7 +59,7 @@ opt.ttimeoutlen = 50
 opt.timeoutlen = 300  -- 减少映射序列等待时间到300ms
 opt.timeout = true
 
--- 避免导致 UI 插件渲染异常
+-- 避免导致 UI 插件渲染异常（noice.nvim 需要 lazyredraw = false）
 opt.lazyredraw = false
 
 -- 文件备份和历史
