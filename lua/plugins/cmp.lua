@@ -8,7 +8,10 @@ return {
     },
     version = "1.*",
     opts = {
-      keymap = { preset = "default" },
+      keymap = {
+        preset = "default",
+        ["<C-e>"] = {}, -- 禁用 <C-e>，让它用于跳转行尾
+      },
       appearance = {
         nerd_font_variant = "mono",
       },

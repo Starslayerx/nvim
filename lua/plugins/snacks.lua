@@ -20,7 +20,7 @@ return {
           provider = "devicons",
         },
       },
-      image = { enabled = true, backend = "ghostty" }, -- 终端内显示图片
+      image = { enabled = false }, -- 禁用：SVG 渲染不支持，会显示空白框
       input = { enabled = true }, -- 改善 vim.ui.input: 更好的弹窗、占位、样式
       notifier = { enabled = false }, -- 禁用，避免与 noice.nvim 冲突导致重复通知
       picker = { -- like fzf or Telescope
