@@ -120,21 +120,5 @@ return {
     "Vimjas/vim-python-pep8-indent",
     ft = "python",
     enabled = true,
-    config = function()
-      -- indent/python.vim 会设置 indentkeys 包含 <:>，导致输入冒号时触发错误的重新缩进
-      -- 注意: 条目是 <:> 不是裸的 :，必须用 setlocal 命令移除
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = "python",
-        callback = function()
-          vim.schedule(function()
-            vim.cmd("setlocal indentkeys-=<:>")
-          end)
-        end,
-      })
-      -- 当前 buffer 也立即处理
-      vim.schedule(function()
-        vim.cmd("setlocal indentkeys-=<:>")
-      end)
-    end,
   },
 }

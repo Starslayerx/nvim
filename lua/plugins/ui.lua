@@ -99,6 +99,13 @@ return {
         callback = function()
           if vim.bo.filetype ~= "" then
             pcall(vim.treesitter.start)
+            -- 对 Python 重新启用 vim 语法引擎，让 pep8-indent 的 synID() 正常工作
+            -- 用 vim.schedule 延迟到 treesitter.start() 完全处理完之后
+            if vim.bo.filetype == "python" then
+              vim.schedule(function()
+                vim.bo.syntax = "python"
+              end)
+            end
           end
         end,
       })
