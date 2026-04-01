@@ -254,6 +254,18 @@ return {
           offset_x = 0, -- 水平不偏移
         },
       })
+
+      local saga_util = require("lspsaga.util")
+      local get_max_content_length = saga_util.get_max_content_length
+
+      -- lspsaga outline 的预览内容偶尔会是空表；原实现会返回 nil 并在 math.min() 处报错。
+      saga_util.get_max_content_length = function(contents)
+        if type(contents) ~= "table" or vim.tbl_isempty(contents) then
+          return 1
+        end
+
+        return get_max_content_length(contents) or 1
+      end
     end,
     keys = {
       -- 查看文档（替代原来的 K）- 自动聚焦到浮动窗口
