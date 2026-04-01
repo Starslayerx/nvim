@@ -318,6 +318,16 @@ return {
     enabled = true, -- 启用 noice.nvim 的命令行美化
     event = "VeryLazy",
     opts = {
+      routes = {
+        {
+          filter = {
+            event = "msg_show",
+            kind = "",
+            find = "written$",
+          },
+          opts = { skip = true },
+        },
+      },
       views = {
         notify = {
           replace = true, -- 关键配置：合并/替换重复通知，避免堆叠
