@@ -129,7 +129,7 @@ vim.lsp.config.pyright = {
 - **透明度**: 已启用
 - **补全引擎**: blink.cmp (现代补全系统，集成 GitHub Copilot)
 - **调试器**: nvim-dap (支持 Python debugpy，自动安装)
-- **工具集**: snacks.nvim (一体化工具集合)
+- **工具集**: snacks.nvim + fzf-lua (一体化工具集合 + 原生 fzf 搜索)
 - **AI 辅助**: GitHub Copilot (代码补全和建议)
 
 ## 🔌 插件列表
@@ -194,6 +194,7 @@ vim.lsp.config.pyright = {
   - 快速文件渲染
   - 禅模式和窗口缩放
   - Git 浏览和 Lazygit 集成
+- **fzf-lua** - 基于系统 `fzf` 的原生模糊搜索器，现作为主检索入口，负责文件/缓冲区/命令历史/实时 grep/最近文件
 
 ### 格式化 & 工具
 
@@ -364,22 +365,30 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - `<C-e>` - 隐藏菜单
 - `<C-k>` - 切换签名帮助
 
-### Snacks 快捷键
+### 搜索与浏览快捷键
 
-#### 文件查找和导航
+#### fzf-lua 主检索
 
-- `<leader><space>` - 智能文件查找
+- `<leader><space>` - 全局检索（文件 / buffer / LSP symbols）
 - `<leader>,` - 缓冲区列表
-- `<leader>/` - 全局搜索
+- `<leader>/` - 实时全文搜索
 - `<leader>:` - 命令历史
-- `<leader>n` - 通知历史
-- `<leader>e` - 文件浏览器
 - `<leader>ff` - 查找文件
 - `<leader>fg` - 查找 git 文件
 - `<leader>fb` - 查找缓冲区
 - `<leader>fc` - 查找配置文件
-- `<leader>fp` - 项目列表
 - `<leader>fr` - 最近文件
+- `<leader>fs` - 当前文件符号，优先 LSP document symbols，回退到 Treesitter/ctags
+- `<leader>fS` - 项目符号，优先 LSP workspace symbols，回退到 ctags
+- `<leader>ft` - 当前文件 Treesitter 符号
+- `<leader>fT` - 项目 tags
+- `<leader>fR` - 恢复上一次 fzf-lua 搜索
+
+#### Snacks 专属
+
+- `<leader>n` - 通知历史
+- `<leader>e` - 文件浏览器
+- `<leader>fp` - 项目列表
 
 #### 文件浏览器操作 (在 explorer 中)
 

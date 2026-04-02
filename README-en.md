@@ -79,7 +79,7 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - **Leader Key**: Space (LocalLeader: `\`)
 - **Transparency**: Enabled
 - **Completion Engine**: blink.cmp (Modern completion system with GitHub Copilot integration)
-- **Toolkit**: snacks.nvim (All-in-one toolkit)
+- **Toolkit**: snacks.nvim + fzf-lua (All-in-one toolkit + native fzf search)
 - **AI Assistant**: GitHub Copilot (Code completion and suggestions)
 
 ## 🔌 Plugins
@@ -132,6 +132,7 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
   - Quick file rendering
   - Zen mode and window zoom
   - Git browse and Lazygit integration
+- **fzf-lua** - Native fuzzy finder powered by system `fzf`, now used as the primary search layer for files, buffers, command history, live grep, and recent files
 
 ### Formatting & Tools
 - **conform.nvim** - Code formatter with auto-format on save
@@ -283,20 +284,27 @@ f*unc_name(a, b, x)         dsf             a, b, x
 - `<C-e>` - Hide menu
 - `<C-k>` - Toggle signature help
 
-### Snacks Keymaps
-#### File Finding and Navigation
-- `<leader><space>` - Smart file find
+### Search and Navigation Keymaps
+#### fzf-lua Primary Search
+- `<leader><space>` - Global picker (files / buffers / LSP symbols)
 - `<leader>,` - Buffer list
-- `<leader>/` - Global search
+- `<leader>/` - Live grep
 - `<leader>:` - Command history
-- `<leader>n` - Notification history
-- `<leader>e` - File explorer
 - `<leader>ff` - Find files
 - `<leader>fg` - Find git files
 - `<leader>fb` - Find buffers
 - `<leader>fc` - Find configuration files
-- `<leader>fp` - Project list
 - `<leader>fr` - Recent files
+- `<leader>fs` - Current file symbols, preferring LSP document symbols with Treesitter/ctags fallback
+- `<leader>fS` - Project symbols, preferring LSP workspace symbols with ctags fallback
+- `<leader>ft` - Current file Treesitter symbols
+- `<leader>fT` - Project tags
+- `<leader>fR` - Resume the last fzf-lua picker
+
+#### Snacks-specific
+- `<leader>n` - Notification history
+- `<leader>e` - File explorer
+- `<leader>fp` - Project list
 
 #### File Explorer Operations (in explorer)
 - `<CR>` - Enter directory/Open file

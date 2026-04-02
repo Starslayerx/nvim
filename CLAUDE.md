@@ -22,7 +22,7 @@ This is a Neovim configuration built with **lazy.nvim** as the package manager. 
    - `ui.lua` - Theme, statusline, icons, treesitter, rainbow brackets
    - `cmp.lua` - Completion system (blink.cmp, Copilot, autopairs)
    - `lsp.lua` - LSP servers, Mason, diagnostics, Trouble, lspsaga, noice
-   - `snacks.lua` - Snacks.nvim toolkit (explorer, picker, terminal, notifications)
+   - `snacks.lua` - Snacks.nvim toolkit + fzf-lua integration (explorer, terminal, fuzzy search)
    - `tools.lua` - Formatters (conform.nvim), wildfire, PEP8 indent
    - `debug.lua` - nvim-dap debugging setup (Python debugpy)
 
@@ -141,6 +141,7 @@ To manually update plugins:
 :Lazy               " Open lazy.nvim UI
 :checkhealth lazy   " Check lazy.nvim health
 :checkhealth lsp    " Check LSP configuration
+:checkhealth fzf_lua " Check fzf-lua integration and external binary support
 ```
 
 ### Format Code
@@ -181,7 +182,8 @@ When adding new plugins:
 
 Core keybindings are in `lua/config/keymaps.lua`, but many plugins define their own in their config:
 - Trouble: `<leader>x*` prefix (diagnostics)
-- Snacks: `<leader>e` (explorer), `<leader><space>` (find files), `<leader>gg` (lazygit)
+- fzf-lua: primary search mappings (`<leader><space>`, `<leader>,`, `<leader>/`, `<leader>:`, `<leader>ff`, `<leader>fg`, `<leader>fb`, `<leader>fc`, `<leader>fr`, `<leader>fs`, `<leader>fS`, `<leader>ft`, `<leader>fT`, `<leader>fR`)
+- Snacks: `<leader>e` (explorer), `<leader>n` (notifications), `<leader>fp` (projects), `<leader>gg` (lazygit)
 - LSP/lspsaga: `gh` (hover), `gd` (definition), `gp` (peek), `gr` (references), `<leader>rn` (rename), `<leader>ca` (code action)
 - Debug: `<leader>d*` prefix (all debug operations)
 - LSP is defined in plugin specs (see `keys = {}` tables)
@@ -215,7 +217,6 @@ Transparency is managed separately in `lua/config/transparency.lua` and applied 
 
 This config heavily uses **snacks.nvim** for:
 - File explorer (replaces netrw completely, left sidebar, devicons enabled)
-- File picker (replaces Telescope, smart find with git-aware behavior)
 - Terminal management (`<C-/>` toggle)
 - Notification system (3s timeout, history accessible)
 - Dashboard (currently disabled)
@@ -227,7 +228,8 @@ This config heavily uses **snacks.nvim** for:
 - Zen mode and zoom
 - Scratch buffers
 
-Most file/buffer operations should use Snacks keybindings (`<leader>e`, `<leader><space>`, `<leader>/`, etc.)
+Use **fzf-lua** as the default picker layer for files, buffers, grep, command history, and recent files.
+Use Snacks for explorer/projects/notifications and the rest of the toolkit.
 
 Explorer keybindings:
 - `<CR>`: enter dir/open file, `<BS>`: up one level, `h`/`l`: close/open

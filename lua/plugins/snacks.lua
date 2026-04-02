@@ -1,5 +1,47 @@
 ---@diagnostic disable: undefined-global
 ---@diagnostic disable: duplicate-set-field
+local function fzf()
+  return require("fzf-lua")
+end
+
+local function has_lsp_method(method, bufnr)
+  local ok, clients = pcall(vim.lsp.get_clients, { bufnr = bufnr, method = method })
+  return ok and type(clients) == "table" and #clients > 0
+end
+
+local function pick_document_symbols()
+  if has_lsp_method("textDocument/documentSymbol", vim.api.nvim_get_current_buf()) then
+    fzf().lsp_document_symbols()
+    return
+  end
+
+  local ok = pcall(fzf().treesitter)
+  if ok then
+    return
+  end
+
+  if vim.fn.executable("ctags") == 1 then
+    fzf().btags()
+    return
+  end
+
+  vim.notify("No LSP document symbols, treesitter symbols, or ctags support for this buffer.", vim.log.levels.WARN)
+end
+
+local function pick_workspace_symbols()
+  if has_lsp_method("workspace/symbol") then
+    fzf().lsp_live_workspace_symbols()
+    return
+  end
+
+  if vim.fn.executable("ctags") == 1 then
+    fzf().tags()
+    return
+  end
+
+  vim.notify("No LSP workspace symbol support or ctags binary available.", vim.log.levels.WARN)
+end
+
 return {
   -- Snacks: 常用插件集合, 功能混杂, 因此使用单独文件配置
   {
@@ -98,35 +140,7 @@ return {
       words = { enabled = true }, -- 高亮光标单词, 显示计数
     },
     keys = {
-      -- Top Pickers & Explorer
-      {
-        "<leader><space>",
-        function()
-          Snacks.picker.smart()
-        end,
-        desc = "Smart Find Files",
-      },
-      {
-        "<leader>,",
-        function()
-          Snacks.picker.buffers()
-        end,
-        desc = "Buffers",
-      },
-      {
-        "<leader>/",
-        function()
-          Snacks.picker.grep()
-        end,
-        desc = "Grep",
-      },
-      {
-        "<leader>:",
-        function()
-          Snacks.picker.command_history()
-        end,
-        desc = "Command History",
-      },
+      -- Explorer & snacks-specific pickers
       {
         "<leader>n",
         function()
@@ -143,46 +157,11 @@ return {
       },
       -- find
       {
-        "<leader>fb",
-        function()
-          Snacks.picker.buffers()
-        end,
-        desc = "Buffers",
-      },
-      {
-        "<leader>fc",
-        function()
-          Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
-        end,
-        desc = "Find Config File",
-      },
-      {
-        "<leader>ff",
-        function()
-          Snacks.picker.files()
-        end,
-        desc = "Find Files",
-      },
-      {
-        "<leader>fg",
-        function()
-          Snacks.picker.git_files()
-        end,
-        desc = "Find Git Files",
-      },
-      {
         "<leader>fp",
         function()
           Snacks.picker.projects()
         end,
         desc = "Projects",
-      },
-      {
-        "<leader>fr",
-        function()
-          Snacks.picker.recent()
-        end,
-        desc = "Recent",
       },
       -- Other
       {
@@ -345,5 +324,121 @@ return {
         end,
       })
     end,
+  },
+  {
+    "ibhagwan/fzf-lua",
+    cmd = "FzfLua",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    keys = {
+      {
+        "<leader><space>",
+        function()
+          fzf().global()
+        end,
+        desc = "Global Search",
+      },
+      {
+        "<leader>,",
+        function()
+          fzf().buffers()
+        end,
+        desc = "Buffers",
+      },
+      {
+        "<leader>/",
+        function()
+          fzf().live_grep()
+        end,
+        desc = "Live Grep",
+      },
+      {
+        "<leader>:",
+        function()
+          fzf().command_history()
+        end,
+        desc = "Command History",
+      },
+      {
+        "<leader>fb",
+        function()
+          fzf().buffers()
+        end,
+        desc = "Find Buffers",
+      },
+      {
+        "<leader>fc",
+        function()
+          fzf().files({ cwd = vim.fn.stdpath("config") })
+        end,
+        desc = "Find Config Files",
+      },
+      {
+        "<leader>ff",
+        function()
+          fzf().files()
+        end,
+        desc = "Find Files",
+      },
+      {
+        "<leader>fg",
+        function()
+          fzf().git_files()
+        end,
+        desc = "Find Git Files",
+      },
+      {
+        "<leader>fr",
+        function()
+          fzf().oldfiles()
+        end,
+        desc = "Recent Files",
+      },
+      {
+        "<leader>fs",
+        function()
+          pick_document_symbols()
+        end,
+        desc = "Document Symbols",
+      },
+      {
+        "<leader>fS",
+        function()
+          pick_workspace_symbols()
+        end,
+        desc = "Workspace Symbols",
+      },
+      {
+        "<leader>ft",
+        function()
+          fzf().treesitter()
+        end,
+        desc = "Treesitter Symbols",
+      },
+      {
+        "<leader>fT",
+        function()
+          fzf().tags()
+        end,
+        desc = "Project Tags",
+      },
+      {
+        "<leader>fR",
+        function()
+          fzf().resume()
+        end,
+        desc = "Fzf Resume",
+      },
+    },
+    opts = {
+      { "fzf-native", "hide" },
+      winopts = {
+        height = 0.9,
+        width = 0.9,
+        preview = {
+          layout = "vertical",
+          vertical = "down:45%",
+        },
+      },
+    },
   },
 }
