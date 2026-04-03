@@ -98,6 +98,7 @@ Important options in `lua/config/options.lua`:
 - **lspsaga**: LSP UI with rounded borders, winblend=0 (opaque)
   - Hover window: auto position, prefer below, offset_y=1 to avoid covering current line
   - Auto-focuses hover window after 50ms delay
+  - Outline auto-preview disabled to avoid tab-switch float-window height errors
 - **noice.nvim**: Enabled for cmdline/messages/popupmenu beautification
 
 ### Debugging Configuration
@@ -183,8 +184,9 @@ When adding new plugins:
 Core keybindings are in `lua/config/keymaps.lua`, but many plugins define their own in their config:
 - Trouble: `<leader>x*` prefix (diagnostics)
 - fzf-lua: primary search mappings (`<leader><space>`, `<leader>,`, `<leader>/`, `<leader>:`, `<leader>ff`, `<leader>fg`, `<leader>fb`, `<leader>fc`, `<leader>fr`, `<leader>fs`, `<leader>fS`, `<leader>ft`, `<leader>fT`, `<leader>fR`)
-- Snacks: `<leader>e` (explorer), `<leader>n` (notifications), `<leader>fp` (projects), `<leader>gg` (lazygit)
-- LSP/lspsaga: `gh` (hover), `gd` (definition), `gp` (peek), `gr` (references), `<leader>rn` (rename), `<leader>ca` (code action)
+- Neo-tree: `<leader>e` (filesystem reveal left toggle), `o` (open in new tab), `H` (toggle hidden/gitignored)
+- Snacks: `<leader>n` (notifications), `<leader>fp` (projects), `<leader>gg` (lazygit)
+- LSP/lspsaga: `gh` (hover), `gd` (definition), `gp` (peek), `gr` (references), `<leader>rn` (rename), `<leader>ca` (code action), `<leader>o` (outline)
 - Debug: `<leader>d*` prefix (all debug operations)
 - LSP is defined in plugin specs (see `keys = {}` tables)
 
@@ -213,10 +215,9 @@ vim.lsp.config.new_server = {
 
 Transparency is managed separately in `lua/config/transparency.lua` and applied via autocmd after ColorScheme load. To disable transparency, comment out the require in `init.lua`.
 
-## Snacks.nvim Integration
+## File Explorer And Snacks
 
 This config heavily uses **snacks.nvim** for:
-- File explorer (replaces netrw completely, left sidebar, devicons enabled)
 - Terminal management (`<C-/>` toggle)
 - Notification system (3s timeout, history accessible)
 - Dashboard (currently disabled)
@@ -229,20 +230,24 @@ This config heavily uses **snacks.nvim** for:
 - Scratch buffers
 
 Use **fzf-lua** as the default picker layer for files, buffers, grep, command history, and recent files.
-Use Snacks for explorer/projects/notifications and the rest of the toolkit.
+Use Snacks for projects, notifications, and the rest of the toolkit.
 
-Explorer keybindings:
-- `<CR>`: enter dir/open file, `<BS>`: up one level, `h`/`l`: close/open
-- `a`/`d`/`r`/`c`/`y`/`p`: add/delete/rename/copy/yank path/paste
-- `I`/`H`: toggle ignored/hidden, `Z`: close all subdirs
-- `]g`/`[g`: jump to git changes, `]d`/`[d`: jump to diagnostics
+File explorer is **neo-tree**, not Snacks explorer:
+- Snacks explorer is disabled in `lua/plugins/snacks.lua`
+- `<leader>e`: `:Neotree filesystem reveal left toggle`
+- `<CR>` / `l`: open in current window
+- `o`: open in a new tab
+- `s` / `S`: vertical / horizontal split
+- `H`: toggle hidden and gitignored files
+- Hidden files and gitignored files are filtered by default
+- `follow_current_file` is enabled so the tree can reveal the active buffer
+- `t` is intentionally unmapped inside neo-tree so tab navigation keeps working elsewhere
 
 ### Special Snacks Features
 
 - **scroll disabled**: Smooth scrolling is disabled to avoid search display issues
 - **bigfile mode**: Enabled for large file performance
 - **quickfile**: Instant file rendering
-- **explorer follow_file**: Tracks file location (only works when cwd matches)
 - **picker focus**: Explorer starts with list focused, not preview
 
 ## Debugging Tips
@@ -343,3 +348,9 @@ Test scenarios:
 **Problem**: Hover documentation covers the line being edited.
 
 **Solution**: Lspsaga is configured with `offset_y = 1` and `prefer_above = false` to prefer showing hover below and offset by 1 line. If still covering, increase `offset_y` value in `lua/plugins/lsp.lua`.
+
+### Lspsaga Outline Error After Switching Tabs
+
+**Problem**: `CursorMoved` in the outline buffer can trigger a float-window error like `'height' key must be a positive Integer` after switching tabs.
+
+**Solution**: Keep `outline.auto_preview = false` in `lua/plugins/lsp.lua`. This disables outline's automatic preview float, which avoids the tab-switch height calculation bug while preserving `<leader>o` outline navigation.

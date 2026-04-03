@@ -52,72 +52,12 @@ return {
     opts = { -- 这里配置要启动的插件
       bigfile = { enabled = true }, -- 大文件友好模式
       dashboard = { enabled = false }, -- 暂时禁用欢迎界面，排查问题
-      explorer = { -- 文件浏览器
-        enabled = true,
-        side = "left",
-        replace_netrw = true,
-        layout = "sidebar",
-        icons = {
-          enabled = true,
-          provider = "devicons",
-        },
-      },
+      explorer = { enabled = false }, -- 文件浏览器改用 neo-tree
       image = { enabled = false }, -- 禁用：SVG 渲染不支持，会显示空白框
       input = { enabled = true }, -- 改善 vim.ui.input: 更好的弹窗、占位、样式
       notifier = { enabled = false }, -- 禁用，避免与 noice.nvim 冲突导致重复通知
       picker = { -- like fzf or Telescope
         enabled = true,
-        sources = {
-          explorer = {
-            follow_file = true, -- 跟踪文件位置 (外层文件无法追踪, cwd 未改变)
-            auto_close = true, -- 打开文件后自动关闭 explorer
-            focus = "list",
-            win = {
-              list = {
-                keys = {
-                  ["<BS>"] = "explorer_up", -- 删除键打开上级目录
-                  ["h"] = "explorer_close", -- 关闭目录
-                  ["<CR>"] = "confirm", -- 回车进入目录/打开文件
-                  ["l"] = "tab", -- 打开文件
-                  ["t"] = "tab", -- 新 tab 打开文件
-                  ["s"] = "split", -- 横向分屏
-                  ["v"] = "vsplit", -- 纵向分屏
-
-                  ["o"] = false, -- 禁止使用系统工具打开文件
-                  ["a"] = "explorer_add", -- 添加文件
-                  ["d"] = "explorer_del", -- 删除文件
-                  ["r"] = "explorer_rename", -- 重命名文件
-                  ["c"] = "explorer_copy", -- 复制文件
-                  ["m"] = "kexplorer_move", -- 移动文件
-                  ["P"] = "toggle_preview", -- 预览文件
-                  ["y"] = { "explorer_yank", mode = { "n", "x" } }, -- 复制文件路径
-                  ["p"] = "explorer_paste", -- 粘贴文件: 使用上面复制即可（文件存在不会覆盖，会报错）
-                  ["u"] = "explorer_update", -- 更新文件树
-
-                  ["<leader>/"] = "picker_grep", -- 查找文件
-                  ["c-t"] = "terminal", -- 打开终端（使用C-d 关闭）
-                  ["."] = "explorer_focus", -- 进入文件架
-                  ["I"] = "toggle_ignored", -- 显示 .gitignore 的文件
-                  ["H"] = "toggle_hidden", -- 显示隐藏文件
-                  ["Z"] = "explorer_close_all", -- 收起子文件夹
-                  ["c-c"] = "tcd", -- 进入子文件夹
-                  -- 跳转到 git 修改的文件
-                  ["]g"] = "explorer_git_next",
-                  ["[g"] = "explorer_git_prev",
-                  -- 跳转到有诊断信息的文件
-                  ["]d"] = "explorer_diagnostic_next",
-                  ["[d"] = "explorer_diagnostic_prev",
-                  -- 跳转到有警告信息的文件
-                  ["]w"] = "explorer_warn_next",
-                  ["[w"] = "explorer_warn_prev",
-                  -- 跳转到有报错信息的文件
-                  ["]e"] = "explorer_error_next",
-                  ["[e"] = "explorer_error_prev",
-                },
-              },
-            },
-          },
-        },
       },
       indent = { enabled = true }, -- 视觉化缩进线 & 范围
       scope = { enabled = true }, -- 基于 treesitter/indent 的 scope 检测
@@ -140,20 +80,13 @@ return {
       words = { enabled = true }, -- 高亮光标单词, 显示计数
     },
     keys = {
-      -- Explorer & snacks-specific pickers
+      -- snacks-specific pickers
       {
         "<leader>n",
         function()
           Snacks.picker.notifications()
         end,
         desc = "Notification History",
-      },
-      {
-        "<leader>e",
-        function()
-          Snacks.picker.explorer()
-        end,
-        desc = "File Explorer",
       },
       -- find
       {
@@ -438,6 +371,61 @@ return {
           layout = "vertical",
           vertical = "down:45%",
         },
+      },
+    },
+  },
+
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      "nvim-tree/nvim-web-devicons",
+    },
+    lazy = false,
+    ---@module "neo-tree"
+    ---@type neotree.Config
+    opts = {
+      close_if_last_window = false,
+      popup_border_style = "rounded",
+      enable_git_status = true,
+      enable_diagnostics = true,
+      open_files_do_not_replace_types = { "terminal", "trouble", "qf" },
+      filesystem = {
+        follow_current_file = {
+          enabled = true,
+          leave_dirs_open = true,
+        },
+        hijack_netrw_behavior = "open_default",
+        use_libuv_file_watcher = true,
+        filtered_items = {
+          visible = false,
+          hide_dotfiles = true,
+          hide_gitignored = true,
+        },
+      },
+      window = {
+        position = "left",
+        width = 36,
+        mappings = {
+          ["<cr>"] = "open",
+          ["l"] = "open",
+          ["h"] = "close_node",
+          ["H"] = "toggle_hidden",
+          ["t"] = false,
+          ["o"] = "open_tabnew",
+          ["s"] = "open_vsplit",
+          ["S"] = "open_split",
+          ["P"] = { "toggle_preview", config = { use_float = true } },
+        },
+      },
+    },
+    keys = {
+      {
+        "<leader>e",
+        "<cmd>Neotree filesystem reveal left toggle<cr>",
+        desc = "File Explorer",
       },
     },
   },
