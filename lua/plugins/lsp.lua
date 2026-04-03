@@ -269,6 +269,69 @@ return {
 
         return get_max_content_length(contents) or 1
       end
+
+      local outline = require("lspsaga.symbol.outline")
+      local outline_mt = getmetatable(outline)
+
+      if outline_mt and not outline_mt._tab_refresh_guard_patched then
+        outline_mt._tab_refresh_guard_patched = true
+
+        local outline_group = vim.api.nvim_create_augroup("outline", { clear = false })
+
+        local function outline_tab_is_current(self)
+          return self.winid
+            and vim.api.nvim_win_is_valid(self.winid)
+            and vim.api.nvim_win_get_tabpage(self.winid) == vim.api.nvim_get_current_tabpage()
+        end
+
+        -- lspsaga outline 把状态存在单例里，原始 BufEnter/User 回调没有按 tab 隔离。
+        -- 切到别的 tab 时，其他 buffer 会把当前 outline 的 main_buf 覆盖掉，回来后看到旧结构。
+        outline_mt.refresh = function(self)
+          local api = vim.api
+          local symbol = require("lspsaga.symbol")
+
+          api.nvim_create_autocmd("User", {
+            group = outline_group,
+            pattern = "SagaSymbolUpdate",
+            callback = function(args)
+              if
+                not outline_tab_is_current(self)
+                or not self.bufnr
+                or not api.nvim_buf_is_valid(self.bufnr)
+                or api.nvim_get_current_buf() ~= args.data.bufnr
+              then
+                return
+              end
+
+              api.nvim_set_option_value("modifiable", true, { buf = self.bufnr })
+              vim.schedule(function()
+                self:parse(args.data.symbols)
+                self.main_buf = args.data.bufnr
+              end)
+            end,
+          })
+
+          api.nvim_create_autocmd("BufEnter", {
+            group = outline_group,
+            callback = function(args)
+              if not outline_tab_is_current(self) or args.buf == self.main_buf then
+                return
+              end
+
+              local res = not saga_util.nvim_ten() and symbol:get_buf_symbols(args.buf)
+                or require("lspsaga.symbol.head"):get_buf_symbols(args.buf)
+
+              if not res or not res.symbols or #res.symbols == 0 then
+                return
+              end
+
+              local curline = api.nvim_win_get_cursor(0)[1]
+              self.main_buf = args.buf
+              self:parse(res.symbols, curline)
+            end,
+          })
+        end
+      end
     end,
     keys = {
       -- 查看文档（替代原来的 K）- 自动聚焦到浮动窗口
