@@ -173,8 +173,7 @@ vim.lsp.config.pyright = {
 ### 调试器
 
 - **nvim-dap** - Debug Adapter Protocol 客户端，核心调试功能
-- **nvim-dap-ui** - 调试界面，提供变量作用域、断点、调用栈、监视表达式等面板
-- **nvim-nio** - nvim-dap-ui 的异步 I/O 依赖
+- **nvim-dap-view** - 单窗口调试视图，使用顶部标签切换 scopes、breakpoints、threads、watches、REPL、console
 - **nvim-dap-python** - Python 调试扩展，支持测试方法/类调试
 - **mason-nvim-dap.nvim** - Mason 集成，自动安装和配置调试适配器 (debugpy)
 
@@ -287,6 +286,8 @@ vim.lsp.config.pyright = {
 - `<leader>tf` - 运行当前文件测试
 - `<leader>ta` - 运行当前项目测试
 - `<leader>td` - 用 DAP 调试最近测试
+- `<leader>tm` - 调试当前测试方法（仅 Python）
+- `<leader>tc` - 调试当前测试类（仅 Python）
 - `<leader>ts` - 切换 neotest summary
 - `<leader>to` - 打开最近一次测试输出
 - `<leader>tO` - 切换 output panel
@@ -650,7 +651,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - **`lua/plugins/ui.lua`** - UI 相关插件 (主题、状态栏、图标、Treesitter、彩虹括号等)
 - **`lua/plugins/cmp.lua`** - 补全系统配置 (blink.cmp、Copilot、自动括号)
 - **`lua/plugins/lsp.lua`** - LSP 和诊断配置 (lspconfig、Mason、Trouble、诊断显示)
-- **`lua/plugins/debug.lua`** - 调试器配置 (nvim-dap、nvim-dap-ui、nvim-dap-python)
+- **`lua/plugins/debug.lua`** - 调试器配置 (nvim-dap、nvim-dap-view、nvim-dap-python)
 - **`lua/plugins/snacks.lua`** - Snacks 工具集配置 (文件浏览器、选择器、通知、终端等)
 - **`lua/plugins/tools.lua`** - 格式化和其他工具 (conform、wildfire、PEP8 缩进)
 
@@ -711,26 +712,26 @@ f*unc_name(a, b, x)       dsf          a, b, x
   - 支持断点调试
   - 支持条件断点和日志点
   - 支持测试方法/类调试
-  - 自动打开/关闭调试 UI
+  - 自动打开/关闭调试视图
+  - 单面板布局：右侧显示，console 合并进主调试窗口
   - 使用 Nord 主题配色的断点标记
 
 #### 调试快捷键
 
 | 快捷键        | 功能                  |
 | ------------- | --------------------- |
-| `<leader>dc`  | 启动/继续调试         |
-| `<leader>dv`  | 单步跳过 (Step Over)  |
+| `<leader>ds`  | 启动调试              |
+| `<leader>dc`  | 继续调试              |
+| `<leader>dn`  | 单步跳过 (Step Over)  |
 | `<leader>di`  | 单步进入 (Step Into)  |
 | `<leader>do`  | 单步跳出 (Step Out)   |
 | `<leader>db`  | 切换断点              |
 | `<leader>dB`  | 设置条件断点          |
 | `<leader>dl`  | 设置日志点            |
-| `<leader>du`  | 切换调试 UI           |
+| `<leader>du`  | 切换调试视图          |
 | `<leader>de`  | 计算表达式            |
-| `<leader>dr`  | 打开 REPL             |
-| `<leader>dt`  | 终止调试会话          |
-| `<leader>dtm` | 调试测试方法 (Python) |
-| `<leader>dtc` | 调试测试类 (Python)   |
+| `<leader>dp`  | 打开 REPL             |
+| `<leader>dq`  | 终止调试会话          |
 
 #### 断点标记说明
 

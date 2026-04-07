@@ -127,6 +127,14 @@ vim.api.nvim_create_autocmd("TermOpen", {
   command = "startinsert",
 })
 
+-- DAP 的终端缓冲区打开后不要停在插入模式，避免 `<leader>ds` 后看起来像被“带进”插入。
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "dap-view-term",
+  callback = function()
+    vim.cmd("stopinsert")
+  end,
+})
+
 -- 设置语法高亮
 vim.cmd("syntax on")
 

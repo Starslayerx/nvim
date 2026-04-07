@@ -106,77 +106,59 @@ return {
       -- 使用 Mason 安装的 debugpy
       local mason_path = vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
       require("dap-python").setup(mason_path)
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "python",
+        callback = function(args)
+          local opts = { buffer = args.buf, desc = "Debug Test Method" }
+          vim.keymap.set("n", "<leader>tm", function()
+            require("dap-python").test_method()
+          end, opts)
+          vim.keymap.set("n", "<leader>tc", function()
+            require("dap-python").test_class()
+          end, { buffer = args.buf, desc = "Debug Test Class" })
+        end,
+      })
     end,
   },
 
-  -- nvim-dap-ui: 调试界面
+  -- nvim-dap-view: 更轻量的单面板调试界面
   {
-    "rcarriga/nvim-dap-ui",
+    "igorlfs/nvim-dap-view",
+    version = "1.*",
     dependencies = {
       "mfussenegger/nvim-dap",
-      "nvim-neotest/nvim-nio",
     },
-    config = function()
+    opts = {
+      auto_toggle = true,
+      winbar = {
+        sections = { "scopes", "breakpoints", "threads", "watches", "repl", "console" },
+        default_section = "scopes",
+        show_keymap_hints = false,
+      },
+      windows = {
+        size = 0.5,
+        position = "right",
+      },
+    },
+    config = function(_, opts)
       local dap = require("dap")
-      local dapui = require("dapui")
-
-      -- Setup dap-ui
-      dapui.setup({
-        icons = { expanded = "▾", collapsed = "▸", current_frame = "▸" },
-        mappings = {
-          expand = { "<CR>", "<2-LeftMouse>" },
-          open = "o",
-          remove = "d",
-          edit = "e",
-          repl = "r",
-          toggle = "t",
-        },
-        layouts = {
-          {
-            elements = {
-              { id = "scopes", size = 0.25 },
-              { id = "breakpoints", size = 0.25 },
-              { id = "stacks", size = 0.25 },
-              { id = "watches", size = 0.25 },
-            },
-            size = 40,
-            position = "left",
-          },
-          {
-            elements = {
-              { id = "repl", size = 0.5 },
-              { id = "console", size = 0.5 },
-            },
-            size = 10,
-            position = "bottom",
-          },
-        },
-        floating = {
-          border = "single",
-          mappings = {
-            close = { "q", "<Esc>" },
-          },
-        },
-      })
-
-      -- Automatically open/close dap-ui
-      dap.listeners.after.event_initialized["dapui_config"] = function()
-        dapui.open()
-      end
-      dap.listeners.before.event_terminated["dapui_config"] = function()
-        dapui.close()
-      end
-      dap.listeners.before.event_exited["dapui_config"] = function()
-        dapui.close()
-      end
+      require("dap-view").setup(opts)
 
       -- Force redraw on DAP events to fix rendering issues
       local function force_redraw()
         vim.cmd("redraw!")
       end
 
+      local function schedule_redraw()
+        vim.schedule(function()
+          vim.cmd("redraw")
+        end)
+      end
+
       -- Redraw after stopped event (when execution pauses at breakpoint)
-      dap.listeners.after.event_stopped["force_redraw"] = force_redraw
+      dap.listeners.after.event_stopped["force_redraw"] = schedule_redraw
+      dap.listeners.after.setBreakpoints["force_redraw"] = schedule_redraw
 
       -- Redraw after continue (when execution resumes)
       dap.listeners.after.continue["force_redraw"] = force_redraw
@@ -190,14 +172,79 @@ return {
     keys = {
       -- Basic debugging
       {
-        "<leader>dc",
+        "<leader>ds",
         function()
-          require("dap").continue()
+          local dap = require("dap")
+          if dap.session() then
+            vim.notify("Debug session already active", vim.log.levels.INFO)
+            return
+          end
+          dap.continue()
         end,
-        desc = "Start/Continue",
+        desc = "Start",
       },
       {
-        "<leader>dv",
+        "<leader>dc",
+        function()
+          local dap = require("dap")
+          local session = dap.session()
+          if not session or session.stopped_thread_id then
+            dap.continue()
+            return
+          end
+
+          local choices = {
+            {
+              label = "Do nothing",
+              action = function() end,
+            },
+            {
+              label = "Terminate session",
+              action = dap.terminate,
+            },
+            {
+              label = "Pause a thread",
+              action = dap.pause,
+            },
+            {
+              label = "Restart session",
+              action = dap.restart,
+            },
+            {
+              label = "Disconnect (terminate = true)",
+              action = function()
+                dap.disconnect({ terminateDebuggee = true })
+              end,
+            },
+            {
+              label = "Disconnect (terminate = false)",
+              action = function()
+                dap.disconnect({ terminateDebuggee = false })
+              end,
+            },
+            {
+              label = "Start additional session",
+              action = function()
+                dap.continue({ new = true })
+              end,
+            },
+          }
+
+          vim.ui.select(choices, {
+            prompt = "Session active, but not stopped at breakpoint> ",
+            format_item = function(item)
+              return item.label
+            end,
+          }, function(choice)
+            if choice then
+              choice.action()
+            end
+          end)
+        end,
+        desc = "Continue",
+      },
+      {
+        "<leader>dn",
         function()
           require("dap").step_over()
         end,
@@ -223,6 +270,9 @@ return {
         "<leader>db",
         function()
           require("dap").toggle_breakpoint()
+          vim.schedule(function()
+            vim.cmd("redraw!")
+          end)
         end,
         desc = "Toggle Breakpoint",
       },
@@ -245,14 +295,27 @@ return {
       {
         "<leader>du",
         function()
-          require("dapui").toggle()
+          local state = require("dap-view.state")
+
+          if state.winnr and vim.api.nvim_win_is_valid(state.winnr) then
+            vim.cmd("DapViewClose")
+            return
+          end
+
+          vim.cmd("DapViewOpen")
+          vim.schedule(function()
+            local new_state = require("dap-view.state")
+            if new_state.winnr and vim.api.nvim_win_is_valid(new_state.winnr) then
+              vim.api.nvim_set_current_win(new_state.winnr)
+            end
+          end)
         end,
-        desc = "Toggle UI",
+        desc = "Toggle View",
       },
       {
         "<leader>de",
         function()
-          require("dapui").eval()
+          require("dap.ui.widgets").hover()
         end,
         mode = { "n", "v" },
         desc = "Evaluate Expression",
@@ -260,7 +323,7 @@ return {
 
       -- Session management
       {
-        "<leader>dr",
+        "<leader>dp",
         function()
           require("dap").repl.open()
         end,
@@ -274,27 +337,11 @@ return {
         desc = "Run Last",
       },
       {
-        "<leader>dt",
+        "<leader>dq",
         function()
           require("dap").terminate()
         end,
         desc = "Terminate",
-      },
-
-      -- Python specific
-      {
-        "<leader>dtm",
-        function()
-          require("dap-python").test_method()
-        end,
-        desc = "Test Method (Python)",
-      },
-      {
-        "<leader>dtc",
-        function()
-          require("dap-python").test_class()
-        end,
-        desc = "Test Class (Python)",
       },
     },
   },

@@ -106,9 +106,10 @@ Important options in `lua/config/options.lua`:
 - **nvim-dap**: Core debugging with Nord-themed breakpoint signs
   - Breakpoint signs: ● (red), ◆ (orange condition), ○ (gray rejected), ➜ (green stopped), ◉ (yellow logpoint)
   - Signs don't highlight line numbers to avoid interfering with relative numbers
-- **nvim-dap-ui**: Auto-opens on debug start, auto-closes on terminate/exit
-  - Left panel: scopes, breakpoints, stacks, watches
-  - Bottom panel: repl, console
+- **nvim-dap-view**: Unified debug panel with tab-like sections in a single window
+  - Auto-opens on debug start, auto-closes on terminate/exit
+  - Configured as a right-side panel with tab-like sections
+  - Sections: scopes, breakpoints, threads, watches, REPL, console
   - Force redraw after DAP events to fix rendering issues
 - **nvim-dap-python**: Uses Mason-installed debugpy at `~/.local/share/nvim/mason/packages/debugpy/venv/bin/python`
 - **mason-nvim-dap**: Auto-installs debugpy
@@ -125,6 +126,7 @@ Important options in `lua/config/options.lua`:
 - **neotest**: Test runner with Python, Go, and Vitest adapters
   - Run nearest/file/project: `<leader>tn`, `<leader>tf`, `<leader>ta`
   - Debug nearest test through DAP: `<leader>td`
+  - Python-only test debugging: `<leader>tm`, `<leader>tc`
   - Test UI: `<leader>ts`, `<leader>to`, `<leader>tO`
   - Watch/stop: `<leader>tw`, `<leader>tS`
 
@@ -171,9 +173,15 @@ Format current buffer:
 
 ```vim
 :DapInstall         " Install debug adapters via Mason
-<leader>dc          " Start/continue debugging
+<leader>ds          " Start debugging
+<leader>dc          " Continue debugging
+<leader>dn          " Step over
+<leader>di          " Step into
+<leader>do          " Step out
 <leader>db          " Toggle breakpoint
-<leader>du          " Toggle debug UI
+<leader>du          " Toggle debug view
+<leader>dp          " Open debug REPL
+<leader>dq          " Terminate debugging
 ```
 
 ### Test Commands
@@ -183,6 +191,8 @@ Format current buffer:
 <leader>tf          " Run current file
 <leader>ta          " Run current project
 <leader>td          " Debug nearest test
+<leader>tm          " Debug current test method (Python only)
+<leader>tc          " Debug current test class (Python only)
 <leader>ts          " Toggle neotest summary
 <leader>to          " Open latest output
 ```

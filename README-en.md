@@ -215,6 +215,8 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - `<leader>tf` - Run current file
 - `<leader>ta` - Run current project
 - `<leader>td` - Debug nearest test with DAP
+- `<leader>tm` - Debug current test method (Python only)
+- `<leader>tc` - Debug current test class (Python only)
 - `<leader>ts` - Toggle neotest summary
 - `<leader>to` - Open latest test output
 - `<leader>tO` - Toggle output panel

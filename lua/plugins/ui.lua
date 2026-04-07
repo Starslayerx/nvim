@@ -55,6 +55,30 @@ return {
         return ok and outline.winid and vim.api.nvim_win_is_valid(outline.winid) or false
       end
 
+      local function current_line_breakpoint()
+        local ok, breakpoints = pcall(require, "dap.breakpoints")
+        if not ok then
+          return nil
+        end
+
+        local bufnr = vim.api.nvim_get_current_buf()
+        local line = vim.api.nvim_win_get_cursor(0)[1]
+        local buf_breakpoints = breakpoints.get(bufnr)[bufnr] or {}
+
+        for _, bp in ipairs(buf_breakpoints) do
+          if bp.line == line then
+            return bp
+          end
+        end
+
+        return nil
+      end
+
+      local function dap_view_is_open()
+        local ok, state = pcall(require, "dap-view.state")
+        return ok and state.winnr and vim.api.nvim_win_is_valid(state.winnr) or false
+      end
+
       wk.setup(opts)
       wk.add({
         { "<leader>b", group = "Buffer", icon = { icon = "󰈚", color = "azure" } },
@@ -65,6 +89,41 @@ return {
         { "<leader>t", group = "Test", icon = { icon = "󰙨", color = "purple" } },
         { "<leader>u", group = "Toggle", icon = { icon = "", color = "cyan" } },
         { "<leader>x", group = "Diagnostics", icon = { icon = "", color = "yellow" } },
+        {
+          "<leader>db",
+          mode = "n",
+          icon = function()
+            local bp = current_line_breakpoint()
+            if not bp then
+              return { icon = "󰄱 ", color = "yellow" }
+            end
+            if bp.logMessage then
+              return { icon = "◉ ", color = "yellow" }
+            end
+            if bp.condition or bp.hitCondition then
+              return { icon = "◆ ", color = "orange" }
+            end
+            return { icon = "● ", color = "red" }
+          end,
+          desc = function()
+            local bp = current_line_breakpoint()
+            return bp and "Remove Breakpoint" or "Set Breakpoint"
+          end,
+        },
+        {
+          "<leader>du",
+          mode = "n",
+          icon = function()
+            local enabled = dap_view_is_open()
+            return {
+              icon = enabled and " " or " ",
+              color = enabled and "green" or "yellow",
+            }
+          end,
+          desc = function()
+            return dap_view_is_open() and "Close Debug View" or "Open Debug View"
+          end,
+        },
         {
           "<leader>o",
           mode = "n",
