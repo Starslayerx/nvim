@@ -36,8 +36,10 @@ return {
   -- 展示 key mapping
   {
     "folke/which-key.nvim",
-    event = "VeryLazy",
-    opts = {},
+    event = "VimEnter",
+    opts = {
+      delay = 150,
+    },
     keys = {
       {
         "<leader>?",
