@@ -112,6 +112,7 @@ Important options in `lua/config/options.lua`:
   - Force redraw after DAP events to fix rendering issues
 - **nvim-dap-python**: Uses Mason-installed debugpy at `~/.local/share/nvim/mason/packages/debugpy/venv/bin/python`
 - **mason-nvim-dap**: Auto-installs debugpy
+- **Terminal split shortcuts**: `<C-w>t` opens a horizontal terminal split and `<C-w>T` opens a vertical terminal split, intentionally overriding the built-in `CTRL-W_t` / `CTRL-W_T` window commands
 
 ### Git And Test Workflow
 
@@ -210,11 +211,11 @@ Core keybindings are in `lua/config/keymaps.lua`, but many plugins define their 
 - Gitsigns: `<leader>g*`
 - Neotest: `<leader>t*`
 - Trouble: `<leader>x*` prefix (diagnostics)
-- fzf-lua: primary search mappings (`<leader><space>`, `<leader>,`, `<leader>/`, `<leader>:`, `<leader>ff`, `<leader>fg`, `<leader>fb`, `<leader>fc`, `<leader>fr`, `<leader>fs`, `<leader>fS`, `<leader>ft`, `<leader>fT`, `<leader>fR`)
+- fzf-lua: primary search mappings (`<leader><space>`, `<leader>bb`, `<leader>/`, `<leader>:`, `<leader>ff`, `<leader>fg`, `<leader>fb`, `<leader>fc`, `<leader>fr`, `<leader>fs`, `<leader>fS`, `<leader>ft`, `<leader>fT`, `<leader>fR`)
 - Neo-tree: `<leader>e` (filesystem reveal left toggle), `o` (open in new tab), `H` (toggle hidden/gitignored)
-- Snacks: `<leader>n` (notifications), `<leader>fp` (projects), `<leader>gg` (lazygit)
+- Snacks: `<leader>n` (notifications), `<leader>fp` (projects), `<leader>z` (zoom), `<leader>Z` (zen), `<leader>gg` (lazygit)
 - LSP/lspsaga: `gh` (hover), `gd` (definition), `gp` (peek), `gr` (references), `<leader>rn` (rename), `<leader>ca` (code action), `<leader>o` (outline)
-- Debug: `<leader>d*` prefix (all debug operations)
+- DAP: `<leader>d*` prefix (all debug operations)
 - LSP is defined in plugin specs (see `keys = {}` tables)
 
 ### LSP Server Addition

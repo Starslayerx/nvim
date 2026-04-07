@@ -230,8 +230,8 @@ vim.lsp.config.pyright = {
 
 #### 基础窗口操作
 
-- `<leader>ot` - 水平分割打开终端
-- `<leader>oT` - 垂直分割打开终端
+- `<C-w>t` - 水平分割打开终端
+- `<C-w>T` - 垂直分割打开终端
 - `<Esc>` - 终端模式下退出到普通模式
 
 #### 窗口切换 (原生 Vim 方式)
@@ -407,7 +407,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 #### fzf-lua 主检索
 
 - `<leader><space>` - 全局检索（文件 / buffer / LSP symbols）
-- `<leader>,` - 缓冲区列表
+- `<leader>bb` - 缓冲区列表
 - `<leader>/` - 实时全文搜索
 - `<leader>:` - 命令历史
 - `<leader>ff` - 查找文件
@@ -439,8 +439,8 @@ f*unc_name(a, b, x)       dsf          a, b, x
 
 #### 其他功能
 
-- `<leader>z` - 禅模式
-- `<leader>Z` - 缩放模式
+- `<leader>z` - 缩放模式
+- `<leader>Z` - 禅模式
 - `<leader>gg` - Lazygit
 - `<leader>gB` - Git 浏览
 - `<leader>F` - 格式化代码

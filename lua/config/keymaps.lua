@@ -57,8 +57,8 @@ keymap("n", "tml", ":+tabmove<CR>", { noremap = true, silent = true, desc = "Mov
 -- === Window management
 -- ===
 -- 快速打开终端快捷键
-vim.keymap.set("n", "<leader>ot", ":split | terminal<CR>", { silent = true, desc = "Open terminal" })
-vim.keymap.set("n", "<leader>oT", ":vsplit | terminal<CR>", { silent = true, desc = "Open terminal" })
+vim.keymap.set("n", "<C-w>t", ":split | terminal<CR>", { silent = true, desc = "Open terminal" })
+vim.keymap.set("n", "<C-w>T", ":vsplit | terminal<CR>", { silent = true, desc = "Open terminal" })
 -- 终端模式下使用 ESC 退出插入模式
 keymap("t", "<Esc>", "<C-\\><C-n>", { noremap = true })
 -- 终端模式下用 Ctrl + 方向键切换窗口（已禁用，使用原生 <C-w> + hjkl）

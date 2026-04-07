@@ -163,8 +163,8 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 ### Window Management
 
 #### Basic Window Operations
-- `<leader>ot` - Open terminal (horizontal split)
-- `<leader>oT` - Open terminal (vertical split)
+- `<C-w>t` - Open terminal (horizontal split)
+- `<C-w>T` - Open terminal (vertical split)
 - `<Esc>` - Exit to normal mode in terminal
 
 #### Window Switching (Native Vim Way)
@@ -321,7 +321,7 @@ f*unc_name(a, b, x)         dsf             a, b, x
 ### Search and Navigation Keymaps
 #### fzf-lua Primary Search
 - `<leader><space>` - Global picker (files / buffers / LSP symbols)
-- `<leader>,` - Buffer list
+- `<leader>bb` - Buffer list
 - `<leader>/` - Live grep
 - `<leader>:` - Command history
 - `<leader>ff` - Find files
@@ -350,8 +350,8 @@ f*unc_name(a, b, x)         dsf             a, b, x
 - `H` - Toggle hidden and gitignored files
 
 #### Other Features
-- `<leader>z` - Zen mode
-- `<leader>Z` - Zoom mode
+- `<leader>z` - Zoom mode
+- `<leader>Z` - Zen mode
 - `<leader>gg` - Lazygit
 - `<leader>gB` - Git browser
 - `<leader>F` - Format code

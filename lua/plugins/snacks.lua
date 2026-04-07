@@ -100,16 +100,16 @@ return {
       {
         "<leader>z",
         function()
-          Snacks.zen()
+          Snacks.zen.zoom()
         end,
-        desc = "Toggle Zen Mode",
+        desc = "Toggle Zoom",
       },
       {
         "<leader>Z",
         function()
-          Snacks.zen.zoom()
+          Snacks.zen()
         end,
-        desc = "Toggle Zoom",
+        desc = "Toggle Zen Mode",
       },
       {
         "<leader>.",
@@ -271,7 +271,7 @@ return {
         desc = "Global Search",
       },
       {
-        "<leader>,",
+        "<leader>bb",
         function()
           fzf().buffers()
         end,
