@@ -131,7 +131,7 @@ vim.lsp.config.pyright = {
 - **调试器**: nvim-dap (支持 Python debugpy，自动安装)
 - **测试运行**: neotest (支持 Python / Go / Vitest，并可接入 DAP)
 - **Git 工作流**: gitsigns.nvim (hunk 预览、stage/reset、blame、diff)
-- **工具集**: snacks.nvim + fzf-lua (一体化工具集合 + 原生 fzf 搜索)
+- **搜索与文件**: fzf-lua + neo-tree (原生 fzf 搜索 + 文件树)
 - **AI 辅助**: GitHub Copilot (当前仅保留为可选补全源)
 
 ## 🔌 插件列表
@@ -166,6 +166,7 @@ vim.lsp.config.pyright = {
 
 - **nvim-treesitter** - 高级语法高亮 (main 分支)，内置渐进式代码选择，支持折叠
 - **rainbow-delimiters.nvim** - 彩虹括号，使用 nord 和 Catppuccin Frappé 配色
+- **vim-illuminate** - 当前词/引用高亮，支持 LSP、Treesitter、regex provider，并可在引用间跳转
 - **内置 treesitter 选择** - 使用 `<CR>`/`<BS>`/`<TAB>` 进行渐进式代码选择
 - **wildfire.nvim** - 快速选择括号内容 (自定义版本)
 - **nvim-surround** - 快速操作：选择后用符号包围内容
@@ -185,21 +186,9 @@ vim.lsp.config.pyright = {
 - **neotest-go** - Go 测试适配器
 - **neotest-vitest** - Vitest 测试适配器
 
-### 一体化工具集
+### 搜索与文件管理
 
-- **snacks.nvim** - 一体化工具集，包含:
-  - 项目选择器
-  - 内置终端
-  - 大文件友好模式
-  - 快速文件渲染
-  - 缩进可视化
-  - 作用域检测
-  - 状态栏美化 (带折叠、Git 标记)
-  - 单词高亮 (带跳转功能)
-  - 草稿缓冲区
-  - 禅模式和窗口缩放
-  - Git 浏览和 Lazygit 集成
-- **fzf-lua** - 基于系统 `fzf` 的原生模糊搜索器，现作为主检索入口，负责文件/缓冲区/命令历史/实时 grep/最近文件
+- **fzf-lua** - 基于系统 `fzf` 的原生模糊搜索器，负责文件/缓冲区/命令历史/实时 grep/最近文件
 - **neo-tree.nvim** - 当前文件树实现，`<leader>e` 打开，支持 reveal、split、tab 打开和隐藏文件切换
 
 ### 格式化 & 工具
@@ -422,11 +411,9 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - `<leader>fT` - 项目 tags
 - `<leader>fR` - 恢复上一次 fzf-lua 搜索
 
-#### Snacks 专属
+#### 搜索与文件
 
-- `<leader>n` - 通知历史
 - `<leader>e` - 文件浏览器
-- `<leader>fp` - 项目列表
 
 #### 文件浏览器操作 (Neo-tree)
 
@@ -440,19 +427,15 @@ f*unc_name(a, b, x)       dsf          a, b, x
 
 #### 其他功能
 
-- `<leader>z` - 缩放模式
-- `<leader>Z` - 禅模式
-- `<leader>gg` - Lazygit
-- `<leader>gB` - Git 浏览
 - `<leader>F` - 格式化代码
 - `<leader>bd` - 删除缓冲区
 - `<leader>cR` - 重命名文件
-- `<leader>un` - 关闭所有通知
-- `<c-/>` - 切换终端
-- `<leader>N` - Neovim 新闻
-- `<leader>.` - 切换草稿缓冲区
-- `<leader>S` - 选择草稿缓冲区
-- `]]` / `[[` - 跳转到下一个/上一个单词引用
+
+#### 单词/引用高亮
+
+- `]r` - 跳到下一个引用
+- `[r` - 跳到上一个引用
+- `<leader>ch` - 切换当前 buffer 的引用高亮
 
 ### LSP 快捷键
 
@@ -482,20 +465,6 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - `<leader>cl` - LSP 信息
 - `<leader>xL` - 位置列表
 - `<leader>xQ` - 快速修复列表
-
-### 切换快捷键
-
-- `<leader>us` - 拼写检查
-- `<leader>uw` - 自动换行
-- `<leader>uL` - 相对行号
-- `<leader>ud` - 诊断信息
-- `<leader>ul` - 行号显示
-- `<leader>uc` - 隐藏级别
-- `<leader>uT` - Treesitter
-- `<leader>ub` - 深色背景
-- `<leader>uh` - 内联提示
-- `<leader>ug` - 缩进线
-- `<leader>uD` - 暗淡模式
 
 ## ⚙️ 配置选项
 
@@ -559,7 +528,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 
 ## 🎨 特色功能
 
-1. **一体化工具集**: 使用 snacks.nvim 整合了项目选择、终端、状态栏增强、单词高亮、草稿缓冲区、禅模式等
+1. **搜索工作流**: 使用 fzf-lua 作为统一搜索入口，结合 neo-tree 提供文件树浏览
 2. **现代化 LSP**: 完整的语言服务器支持，包含自动安装和 UI 美化
 3. **代码格式化**: 支持多种语言的自动格式化 (保存时触发)
 4. **透明界面**: 支持窗口透明效果，自动应用于颜色主题
@@ -576,15 +545,12 @@ f*unc_name(a, b, x)       dsf          a, b, x
 10. **行内诊断**: 在代码行内显示诊断信息，使用 ghost 预设样式，支持多行显示
 11. **窗口选择器**: 快速切换和管理窗口 (版本 2.\*)
 12. **快捷键提示**: 实时显示可用快捷键，使用 `<leader>?` 查看本地映射
-13. **终端内图片显示**: 支持在终端中直接显示图片 (Ghostty 后端)
-14. **草稿缓冲区**: 临时记事和快速计算功能
-15. **文件浏览器增强**: 使用 neo-tree 提供文件浏览、分屏/标签页打开、预览和隐藏文件切换
-16. **自动 LSP 安装**: Mason 自动安装和配置多种语言服务器
-17. **光标位置记忆**: 重新打开文件时恢复上次的光标位置
-18. **终端集成**: 智能终端管理，支持分割和快速切换
-19. **Treesitter 折叠**: 基于语法树的智能代码折叠
-20. **禅模式**: 无干扰的专注编辑模式
-21. **GitHub Copilot**: AI 代码补全和建议 (懒加载)
+13. **引用高亮**: 使用 vim-illuminate 高亮当前词的其他引用，并支持前后跳转
+14. **文件浏览器增强**: 使用 neo-tree 提供文件浏览、分屏/标签页打开、预览和隐藏文件切换
+15. **自动 LSP 安装**: Mason 自动安装和配置多种语言服务器
+16. **光标位置记忆**: 重新打开文件时恢复上次的光标位置
+17. **Treesitter 折叠**: 基于语法树的智能代码折叠
+18. **GitHub Copilot**: AI 代码补全和建议 (懒加载)
 
 ## 📁 项目结构
 
@@ -601,7 +567,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 │       ├── cmp.lua       # 补全插件
 │       ├── lsp.lua       # LSP 插件
 │       ├── debug.lua     # 调试器插件
-│       ├── snacks.lua    # Snacks 工具集
+│       ├── snacks.lua    # fzf-lua 与 neo-tree 配置
 │       ├── tools.lua     # 工具插件
 │       └── ui.lua        # UI 插件
 └── README.md          # 本文档
@@ -652,7 +618,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - **`lua/plugins/cmp.lua`** - 补全系统配置 (blink.cmp、Copilot、自动括号)
 - **`lua/plugins/lsp.lua`** - LSP 和诊断配置 (lspconfig、Mason、Trouble、诊断显示)
 - **`lua/plugins/debug.lua`** - 调试器配置 (nvim-dap、nvim-dap-view、nvim-dap-python)
-- **`lua/plugins/snacks.lua`** - Snacks 工具集配置 (文件浏览器、选择器、通知、终端等)
+- **`lua/plugins/snacks.lua`** - fzf-lua 与 neo-tree 配置
 - **`lua/plugins/tools.lua`** - 格式化和其他工具 (conform、wildfire、PEP8 缩进)
 
 ### 快速修改指南
@@ -663,7 +629,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 4. **调整格式化**: 修改 `lua/plugins/tools.lua` 中的 formatters_by_ft
 5. **禁用透明度**: 注释掉 `init.lua` 中的 `require("config.transparency")` 加载
 6. **配置 Copilot**: 在 `lua/plugins/cmp.lua` 中调整 Copilot 设置
-7. **自定义文件浏览器**: 在 `lua/plugins/snacks.lua` 中修改 explorer 配置
+7. **自定义文件浏览器**: 在 `lua/plugins/snacks.lua` 中修改 neo-tree 配置
 
 此配置提供了一个完整、现代化的开发环境，具有出色的性能和可用性。所有组件都经过精心调试，确保兼容性和稳定性。
 

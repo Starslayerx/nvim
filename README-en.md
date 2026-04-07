@@ -81,7 +81,7 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - **Completion Engine**: blink.cmp (Modern completion system with GitHub Copilot integration)
 - **Test Runner**: neotest (Python / Go / Vitest, with DAP integration)
 - **Git Workflow**: gitsigns.nvim (hunk preview, stage/reset, blame, diff)
-- **Toolkit**: snacks.nvim + fzf-lua (All-in-one toolkit + native fzf search)
+- **Search & Files**: fzf-lua + neo-tree (native fzf search + file tree)
 - **AI Assistant**: GitHub Copilot (currently kept as an optional completion source)
 
 ## 🔌 Plugins
@@ -113,6 +113,7 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 ### Syntax Highlighting & Editing
 - **nvim-treesitter** - Advanced syntax highlighting (main branch) with built-in progressive selection and folding support
 - **rainbow-delimiters.nvim** - Rainbow parentheses using Nord and Catppuccin Frappé colors
+- **vim-illuminate** - Current word/reference highlighting with LSP, Treesitter, and regex providers plus reference navigation
 - **Built-in treesitter selection** - Progressive code selection using `<CR>`/`<BS>`/`<TAB>`
 - **wildfire.nvim** - Quick bracket content selection (custom version)
 - **nvim-surround** - Quick operations: surround selections with delimiters
@@ -124,20 +125,8 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - **neotest-go** - Go adapter
 - **neotest-vitest** - Vitest adapter
 
-### All-in-one Toolkit
-- **snacks.nvim** - All-in-one toolkit, including:
-  - Project picker
-  - Terminal integration
-  - Big file friendly mode
-  - Quick file rendering
-  - Indent visualization
-  - Scope detection
-  - Status bar enhancement (with folds, Git marks)
-  - Word highlight (with jump functionality)
-  - Scratch buffer
-  - Zen mode and window zoom
-  - Git browse and Lazygit integration
-- **fzf-lua** - Native fuzzy finder powered by system `fzf`, now used as the primary search layer for files, buffers, command history, live grep, and recent files
+### Search & File Management
+- **fzf-lua** - Native fuzzy finder powered by system `fzf`, used as the primary search layer for files, buffers, command history, live grep, and recent files
 - **neo-tree.nvim** - Current file explorer implementation, opened with `<leader>e`
 
 ### Formatting & Tools
@@ -337,10 +326,8 @@ f*unc_name(a, b, x)         dsf             a, b, x
 - `<leader>fT` - Project tags
 - `<leader>fR` - Resume the last fzf-lua picker
 
-#### Snacks-specific
-- `<leader>n` - Notification history
+#### Search & Files
 - `<leader>e` - File explorer
-- `<leader>fp` - Project list
 
 #### File Explorer Operations (Neo-tree)
 - `<CR>` / `l` - Open file or expand directory
@@ -352,19 +339,14 @@ f*unc_name(a, b, x)         dsf             a, b, x
 - `H` - Toggle hidden and gitignored files
 
 #### Other Features
-- `<leader>z` - Zoom mode
-- `<leader>Z` - Zen mode
-- `<leader>gg` - Lazygit
-- `<leader>gB` - Git browser
 - `<leader>F` - Format code
 - `<leader>bd` - Delete buffer
 - `<leader>cR` - Rename file
-- `<leader>un` - Close all notifications
-- `<c-/>` - Toggle terminal
-- `<leader>N` - Neovim news
-- `<leader>.` - Toggle scratch buffer
-- `<leader>S` - Select scratch buffer
-- `]]` / `[[` - Jump to next/previous word reference
+
+#### Word/Reference Highlighting
+- `]r` - Jump to next reference
+- `[r` - Jump to previous reference
+- `<leader>ch` - Toggle reference highlighting for the current buffer
 
 ### LSP Keymaps
 
@@ -390,19 +372,6 @@ f*unc_name(a, b, x)         dsf             a, b, x
 - `<leader>cl` - LSP information
 - `<leader>xL` - Location list
 - `<leader>xQ` - Quickfix list
-
-### Toggle Keymaps
-- `<leader>us` - Spell check
-- `<leader>uw` - Word wrap
-- `<leader>uL` - Relative line numbers
-- `<leader>ud` - Diagnostics
-- `<leader>ul` - Line numbers
-- `<leader>uc` - Conceal level
-- `<leader>uT` - Treesitter
-- `<leader>ub` - Dark background
-- `<leader>uh` - Inline hints
-- `<leader>ug` - Indent guides
-- `<leader>uD` - Dim mode
 
 ## ⚙️ Configuration Options
 
@@ -459,7 +428,7 @@ f*unc_name(a, b, x)         dsf             a, b, x
 
 ## 🎨 Features
 
-1. **All-in-one Toolkit**: Uses snacks.nvim for project picking, terminal, statuscolumn enhancements, word highlighting, scratch buffers, zen mode, and related workflows
+1. **Search Workflow**: Uses fzf-lua as the primary search interface together with neo-tree for file browsing
 2. **Modern LSP**: Complete language server support with auto-installation and UI enhancement
 3. **Code Formatting**: Auto-formatting for multiple languages (triggers on save)
 4. **Transparent Interface**: Window transparency effects automatically applied to color themes
@@ -476,15 +445,12 @@ f*unc_name(a, b, x)         dsf             a, b, x
 10. **Inline Diagnostics**: Show diagnostic information within code lines using ghost preset style with multiline support
 11. **Window Selector**: Quickly switch and manage windows (version 2.*)
 12. **Keybinding Hints**: Real-time display of available keybindings, use `<leader>?` for local mappings
-13. **In-terminal Image Display**: Support for displaying images directly in terminal (Ghostty backend)
-14. **Scratch Buffer**: Temporary note-taking and quick calculations
-15. **Enhanced File Explorer**: Uses neo-tree for file browsing, split/tab opening, preview, and hidden file toggling
-16. **Auto LSP Installation**: Mason automatically installs and configures multiple language servers
-17. **Cursor Position Memory**: Restores last cursor position when reopening files
-18. **Terminal Integration**: Smart terminal management with split and quick switching support
-19. **Treesitter Folding**: Intelligent code folding based on syntax tree
-20. **Zen Mode**: Distraction-free focused editing mode
-21. **GitHub Copilot**: AI code completion and suggestions (lazy-loaded)
+13. **Reference Highlighting**: Uses vim-illuminate to highlight other references of the current word and jump between them
+14. **Enhanced File Explorer**: Uses neo-tree for file browsing, split/tab opening, preview, and hidden file toggling
+15. **Auto LSP Installation**: Mason automatically installs and configures multiple language servers
+16. **Cursor Position Memory**: Restores last cursor position when reopening files
+17. **Treesitter Folding**: Intelligent code folding based on syntax tree
+18. **GitHub Copilot**: AI code completion and suggestions (lazy-loaded)
 
 ## 📁 Project Structure
 
@@ -500,7 +466,7 @@ f*unc_name(a, b, x)         dsf             a, b, x
 │   └── plugins/
 │       ├── cmp.lua       # Completion plugins
 │       ├── lsp.lua       # LSP plugins
-│       ├── snacks.lua    # Snacks toolkit
+│       ├── snacks.lua    # fzf-lua and neo-tree config
 │       ├── tools.lua     # Utility plugins
 │       └── ui.lua        # UI plugins
 └── README.md             # Chinese documentation
@@ -547,7 +513,7 @@ f*unc_name(a, b, x)         dsf             a, b, x
 - **`lua/plugins/ui.lua`** - UI-related plugins (theme, status bar, icons, Treesitter, rainbow brackets, etc.)
 - **`lua/plugins/cmp.lua`** - Completion system configuration (blink.cmp, Copilot, auto-pairs)
 - **`lua/plugins/lsp.lua`** - LSP and diagnostics configuration (lspconfig, Mason, Trouble, diagnostics display)
-- **`lua/plugins/snacks.lua`** - Snacks toolkit configuration (file explorer, picker, notifications, terminal, etc.)
+- **`lua/plugins/snacks.lua`** - fzf-lua and neo-tree configuration
 - **`lua/plugins/tools.lua`** - Formatting and other tools (conform, wildfire, PEP8 indent)
 
 ### Quick Modification Guide
@@ -557,7 +523,7 @@ f*unc_name(a, b, x)         dsf             a, b, x
 4. **Adjust Formatting**: Modify formatters_by_ft in `lua/plugins/tools.lua`
 5. **Disable Transparency**: Comment out `require("config.transparency")` loading in `init.lua`
 6. **Configure Copilot**: Adjust Copilot settings in `lua/plugins/cmp.lua`
-7. **Customize File Explorer**: Modify explorer configuration in `lua/plugins/snacks.lua`
+7. **Customize File Explorer**: Modify neo-tree configuration in `lua/plugins/snacks.lua`
 
 This configuration provides a complete, modern development environment with excellent performance and usability. All components have been carefully tuned to ensure compatibility and stability.
 

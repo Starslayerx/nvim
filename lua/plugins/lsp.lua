@@ -264,7 +264,7 @@ return {
         },
       })
 
-      vim.api.nvim_set_hl(0, "SagaClass", { link = "FrappePink" })
+      vim.api.nvim_set_hl(0, "SagaClass", { link = "FrappeLavender" })
 
       local saga_util = require("lspsaga.util")
       local get_max_content_length = saga_util.get_max_content_length

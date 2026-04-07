@@ -87,7 +87,6 @@ return {
         { "<leader>f", group = "Find", icon = { icon = "", color = "green" } },
         { "<leader>g", group = "Git", icon = { icon = "󰊢", color = "orange" } },
         { "<leader>t", group = "Test", icon = { icon = "󰙨", color = "purple" } },
-        { "<leader>u", group = "Toggle", icon = { icon = "", color = "cyan" } },
         { "<leader>x", group = "Diagnostics", icon = { icon = "", color = "yellow" } },
         {
           "<leader>db",

@@ -76,6 +76,65 @@ return {
     },
   },
 
+  -- Current word/reference highlighting
+  {
+    "RRethy/vim-illuminate",
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      local function set_illuminate_highlights()
+        vim.api.nvim_set_hl(0, "IlluminatedWordText", { bg = "#53586d" })
+        vim.api.nvim_set_hl(0, "IlluminatedWordRead", { bg = "#4f565f" })
+        vim.api.nvim_set_hl(0, "IlluminatedWordWrite", { bg = "#5c5150" })
+      end
+
+      set_illuminate_highlights()
+
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        group = vim.api.nvim_create_augroup("IlluminateHighlights", { clear = true }),
+        callback = set_illuminate_highlights,
+      })
+
+      require("illuminate").configure({
+        providers = { "lsp", "treesitter", "regex" },
+        delay = 120,
+        under_cursor = true,
+        min_count_to_highlight = 2,
+        large_file_cutoff = 5000,
+        disable_keymaps = true,
+        modes_denylist = { "i" },
+        filetypes_denylist = {
+          "alpha",
+          "checkhealth",
+          "dap-repl",
+          "dap-view",
+          "dap-view-term",
+          "fugitive",
+          "help",
+          "lazy",
+          "mason",
+          "neo-tree",
+          "noice",
+          "notify",
+          "qf",
+          "TelescopePrompt",
+          "trouble",
+        },
+      })
+
+      vim.keymap.set("n", "]r", function()
+        require("illuminate").goto_next_reference(false)
+      end, { silent = true, nowait = true, desc = "Next Reference" })
+
+      vim.keymap.set("n", "[r", function()
+        require("illuminate").goto_prev_reference(false)
+      end, { silent = true, nowait = true, desc = "Prev Reference" })
+
+      vim.keymap.set("n", "<leader>ch", function()
+        require("illuminate").toggle_buf()
+      end, { silent = true, desc = "Toggle References" })
+    end,
+  },
+
   -- Wildfire: 空格选择内容
   {
     "Starslayerx/wildfire.nvim",

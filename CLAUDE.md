@@ -22,8 +22,8 @@ This is a Neovim configuration built with **lazy.nvim** as the package manager. 
    - `ui.lua` - Theme, statusline, icons, treesitter, rainbow brackets
    - `cmp.lua` - Completion system (blink.cmp, Copilot, autopairs)
    - `lsp.lua` - LSP servers, Mason, diagnostics, Trouble, lspsaga, noice
-   - `snacks.lua` - Snacks.nvim toolkit + fzf-lua integration (explorer, terminal, fuzzy search)
-   - `tools.lua` - Gitsigns, neotest, formatters (conform.nvim), wildfire, PEP8 indent
+   - `snacks.lua` - fzf-lua and neo-tree configuration
+   - `tools.lua` - Gitsigns, vim-illuminate, neotest, formatters (conform.nvim), wildfire, PEP8 indent
    - `debug.lua` - nvim-dap debugging setup (Python debugpy)
 
 ### LSP Configuration Strategy
@@ -52,7 +52,7 @@ Uses **blink.cmp** (modern completion engine) with:
   - Uses both `kind_resolution` and `semantic_token_resolution` (400ms timeout)
   - `blocked_filetypes` cleared to support all languages including Python, TS, Vue
 - **nvim-autopairs**: Handles manual bracket input, <CR> formatting, bracket deletion
-  - Disabled in macros, replace mode, and snacks_picker_input
+  - Disabled in macros and replace mode
   - Special rule for Python f-strings (f' and f" auto-pairing)
 
 ### Formatting
@@ -212,18 +212,19 @@ When adding new plugins:
 - UI/visual plugins → `lua/plugins/ui.lua`
 - Completion/snippets → `lua/plugins/cmp.lua`
 - LSP/diagnostics → `lua/plugins/lsp.lua`
-- File operations/utilities → `lua/plugins/snacks.lua` or `lua/plugins/tools.lua`
+- Search/file navigation → `lua/plugins/snacks.lua`
+- File operations/utilities → `lua/plugins/tools.lua`
 - Debugging → `lua/plugins/debug.lua`
 
 ### Keybinding Strategy
 
 Core keybindings are in `lua/config/keymaps.lua`, but many plugins define their own in their config:
 - Gitsigns: `<leader>g*`
+- vim-illuminate: `]r` / `[r` (next/prev reference), `<leader>ch` (toggle current buffer highlighting)
 - Neotest: `<leader>t*`
 - Trouble: `<leader>x*` prefix (diagnostics)
 - fzf-lua: primary search mappings (`<leader><space>`, `<leader>bb`, `<leader>/`, `<leader>:`, `<leader>ff`, `<leader>fg`, `<leader>fb`, `<leader>fc`, `<leader>fr`, `<leader>fs`, `<leader>fS`, `<leader>ft`, `<leader>fT`, `<leader>fR`)
 - Neo-tree: `<leader>e` (filesystem reveal left toggle), `o` (open in new tab), `H` (toggle hidden/gitignored)
-- Snacks: `<leader>n` (notifications), `<leader>fp` (projects), `<leader>z` (zoom), `<leader>Z` (zen), `<leader>gg` (lazygit)
 - LSP/lspsaga: `gh` (hover), `gd` (definition), `gp` (peek), `gr` (references), `<leader>rn` (rename), `<leader>ca` (code action), `<leader>o` (outline)
 - DAP: `<leader>d*` prefix (all debug operations)
 - LSP is defined in plugin specs (see `keys = {}` tables)
@@ -253,25 +254,11 @@ vim.lsp.config.new_server = {
 
 Transparency is managed separately in `lua/config/transparency.lua` and applied via autocmd after ColorScheme load. To disable transparency, comment out the require in `init.lua`.
 
-## File Explorer And Snacks
-
-This config heavily uses **snacks.nvim** for:
-- Terminal management (`<C-/>` toggle)
-- Notification system (3s timeout, history accessible)
-- Dashboard (currently disabled)
-- Git integration (Lazygit wrapper at `<leader>gg`)
-- Image display (ghostty backend)
-- Indent guides and scope detection
-- Statuscolumn beautification (mark, sign on left; fold, git on right)
-- Word highlighting with jump navigation (`]]` / `[[`)
-- Zen mode and zoom
-- Scratch buffers
+## File Explorer And Search
 
 Use **fzf-lua** as the default picker layer for files, buffers, grep, command history, and recent files.
-Use Snacks for projects, notifications, and the rest of the toolkit.
 
-File explorer is **neo-tree**, not Snacks explorer:
-- Snacks explorer is disabled in `lua/plugins/snacks.lua`
+File explorer is **neo-tree**:
 - `<leader>e`: `:Neotree filesystem reveal left toggle`
 - `<CR>` / `l`: open in current window
 - `o`: open in a new tab
@@ -280,13 +267,6 @@ File explorer is **neo-tree**, not Snacks explorer:
 - Hidden files and gitignored files are filtered by default
 - `follow_current_file` is enabled so the tree can reveal the active buffer
 - `t` is intentionally unmapped inside neo-tree so tab navigation keeps working elsewhere
-
-### Special Snacks Features
-
-- **scroll disabled**: Smooth scrolling is disabled to avoid search display issues
-- **bigfile mode**: Enabled for large file performance
-- **quickfile**: Instant file rendering
-- **picker focus**: Explorer starts with list focused, not preview
 
 ## Debugging Tips
 
