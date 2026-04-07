@@ -38,8 +38,49 @@ return {
     "folke/which-key.nvim",
     event = "VimEnter",
     opts = {
-      delay = 150,
+      delay = 140,
+      preset = "modern",
+      show_help = false,
+      show_keys = false,
+      sort = { "manual", "local", "order", "group", "alphanum", "mod" },
+      icons = {
+        mappings = true,
+      },
     },
+    config = function(_, opts)
+      local wk = require("which-key")
+
+      local function outline_is_open()
+        local ok, outline = pcall(require, "lspsaga.symbol.outline")
+        return ok and outline.winid and vim.api.nvim_win_is_valid(outline.winid) or false
+      end
+
+      wk.setup(opts)
+      wk.add({
+        { "<leader>b", group = "Buffer", icon = { icon = "󰈚", color = "azure" } },
+        { "<leader>c", group = "Code", icon = { icon = "", color = "blue" } },
+        { "<leader>d", group = "Debug", icon = { icon = "", color = "red" } },
+        { "<leader>f", group = "Find", icon = { icon = "", color = "green" } },
+        { "<leader>g", group = "Git", icon = { icon = "󰊢", color = "orange" } },
+        { "<leader>t", group = "Test", icon = { icon = "󰙨", color = "purple" } },
+        { "<leader>u", group = "Toggle", icon = { icon = "", color = "cyan" } },
+        { "<leader>x", group = "Diagnostics", icon = { icon = "", color = "yellow" } },
+        {
+          "<leader>o",
+          mode = "n",
+          icon = function()
+            local enabled = outline_is_open()
+            return {
+              icon = enabled and " " or " ",
+              color = enabled and "green" or "yellow",
+            }
+          end,
+          desc = function()
+            return outline_is_open() and "Close Outline" or "Open Outline"
+          end,
+        },
+      })
+    end,
     keys = {
       {
         "<leader>?",

@@ -39,7 +39,7 @@ return {
             return
           end
           vim.schedule(gitsigns.next_hunk)
-        end, "Git: Next Hunk")
+        end, "Next Hunk")
 
         map("n", "<leader>gk", function()
           if vim.wo.diff then
@@ -47,31 +47,31 @@ return {
             return
           end
           vim.schedule(gitsigns.prev_hunk)
-        end, "Git: Prev Hunk")
+        end, "Prev Hunk")
 
-        map("n", "<leader>gs", gitsigns.stage_hunk, "Git: Stage Hunk")
-        map("n", "<leader>gr", gitsigns.reset_hunk, "Git: Reset Hunk")
+        map("n", "<leader>gs", gitsigns.stage_hunk, "Stage Hunk")
+        map("n", "<leader>gr", gitsigns.reset_hunk, "Reset Hunk")
         map("v", "<leader>gs", function()
           gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
-        end, "Git: Stage Hunk")
+        end, "Stage Hunk")
         map("v", "<leader>gr", function()
           gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
-        end, "Git: Reset Hunk")
-        map("n", "<leader>gS", gitsigns.stage_buffer, "Git: Stage Buffer")
-        map("n", "<leader>gR", gitsigns.reset_buffer, "Git: Reset Buffer")
-        map("n", "<leader>gp", gitsigns.preview_hunk, "Git: Preview Hunk")
-        map("n", "<leader>gi", gitsigns.preview_hunk_inline, "Git: Preview Hunk Inline")
+        end, "Reset Hunk")
+        map("n", "<leader>gS", gitsigns.stage_buffer, "Stage Buffer")
+        map("n", "<leader>gR", gitsigns.reset_buffer, "Reset Buffer")
+        map("n", "<leader>gp", gitsigns.preview_hunk, "Preview Hunk")
+        map("n", "<leader>gi", gitsigns.preview_hunk_inline, "Preview Hunk Inline")
         map("n", "<leader>gb", function()
           gitsigns.blame_line({ full = true })
-        end, "Git: Blame Line")
-        map("n", "<leader>gd", gitsigns.diffthis, "Git: Diff This")
+        end, "Blame Line")
+        map("n", "<leader>gd", gitsigns.diffthis, "Diff This")
         map("n", "<leader>gD", function()
           gitsigns.diffthis("~")
-        end, "Git: Diff This ~")
-        map("n", "<leader>gq", gitsigns.setqflist, "Git: Hunks To Quickfix")
-        map("n", "<leader>gl", gitsigns.toggle_current_line_blame, "Git: Toggle Line Blame")
-        map("n", "<leader>gw", gitsigns.toggle_word_diff, "Git: Toggle Word Diff")
-        map({ "o", "x" }, "ih", gitsigns.select_hunk, "Git: Select Hunk")
+        end, "Diff This ~")
+        map("n", "<leader>gq", gitsigns.setqflist, "Hunks To Quickfix")
+        map("n", "<leader>gl", gitsigns.toggle_current_line_blame, "Toggle Line Blame")
+        map("n", "<leader>gw", gitsigns.toggle_word_diff, "Toggle Word Diff")
+        map({ "o", "x" }, "ih", gitsigns.select_hunk, "Select Hunk")
       end,
     },
   },
@@ -132,63 +132,63 @@ return {
         function()
           require("neotest").run.run()
         end,
-        desc = "Test: Run Nearest",
+        desc = "Run Nearest",
       },
       {
         "<leader>tf",
         function()
           require("neotest").run.run(vim.fn.expand("%"))
         end,
-        desc = "Test: Run File",
+        desc = "Run File",
       },
       {
         "<leader>ta",
         function()
           require("neotest").run.run(vim.uv.cwd())
         end,
-        desc = "Test: Run Project",
+        desc = "Run Project",
       },
       {
         "<leader>td",
         function()
           require("neotest").run.run({ strategy = "dap" })
         end,
-        desc = "Test: Debug Nearest",
+        desc = "Debug Nearest",
       },
       {
         "<leader>ts",
         function()
           require("neotest").summary.toggle()
         end,
-        desc = "Test: Toggle Summary",
+        desc = "Toggle Summary",
       },
       {
         "<leader>to",
         function()
           require("neotest").output.open({ enter = true, auto_close = true })
         end,
-        desc = "Test: Show Output",
+        desc = "Show Output",
       },
       {
         "<leader>tO",
         function()
           require("neotest").output_panel.toggle()
         end,
-        desc = "Test: Toggle Output Panel",
+        desc = "Toggle Output Panel",
       },
       {
         "<leader>tw",
         function()
           require("neotest").watch.toggle(vim.fn.expand("%"))
         end,
-        desc = "Test: Watch File",
+        desc = "Watch File",
       },
       {
         "<leader>tS",
         function()
           require("neotest").run.stop()
         end,
-        desc = "Test: Stop",
+        desc = "Stop",
       },
     },
     config = function()
