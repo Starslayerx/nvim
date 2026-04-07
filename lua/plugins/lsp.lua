@@ -246,6 +246,9 @@ return {
         ui = {
           border = "rounded",
           winblend = 0, -- 不透明，避免透过窗口看到下面的代码造成混淆
+          kind = {
+            Class = { "󰌗 ", "Include" },
+          },
         },
         outline = {
           auto_preview = false, -- 切换 tab 时 outline 的自动预览偶发把浮窗高度算成 0
