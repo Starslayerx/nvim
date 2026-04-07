@@ -163,8 +163,8 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 ### Window Management
 
 #### Basic Window Operations
-- `<leader>t` - Open terminal (horizontal split)
-- `<leader>T` - Open terminal (vertical split)
+- `<leader>ot` - Open terminal (horizontal split)
+- `<leader>oT` - Open terminal (vertical split)
 - `<Esc>` - Exit to normal mode in terminal
 
 #### Window Switching (Native Vim Way)
@@ -194,32 +194,32 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - `<C-w>c` - Close current window
 
 ### Git Keymaps
-- `]c` - Next hunk
-- `[c` - Previous hunk
-- `<leader>hs` - Stage current hunk
-- `<leader>hr` - Reset current hunk
-- `<leader>hS` - Stage current buffer
-- `<leader>hR` - Reset current buffer
-- `<leader>hp` - Preview current hunk
-- `<leader>hi` - Preview current hunk inline
-- `<leader>hb` - Show line blame
-- `<leader>hd` - Diff against index
-- `<leader>hD` - Diff against `~`
-- `<leader>hq` - Send hunks to quickfix
-- `<leader>tb` - Toggle current line blame
-- `<leader>tw` - Toggle word diff
+- `<leader>gj` - Next hunk
+- `<leader>gk` - Previous hunk
+- `<leader>gs` - Stage current hunk
+- `<leader>gr` - Reset current hunk
+- `<leader>gS` - Stage current buffer
+- `<leader>gR` - Reset current buffer
+- `<leader>gp` - Preview current hunk
+- `<leader>gi` - Preview current hunk inline
+- `<leader>gb` - Show line blame
+- `<leader>gd` - Diff against index
+- `<leader>gD` - Diff against `~`
+- `<leader>gq` - Send hunks to quickfix
+- `<leader>gl` - Toggle current line blame
+- `<leader>gw` - Toggle word diff
 - `ih` - Hunk text object
 
 ### Test Keymaps
-- `<leader>rr` - Run nearest test
-- `<leader>rf` - Run current file
-- `<leader>ra` - Run current project
-- `<leader>rd` - Debug nearest test with DAP
-- `<leader>rs` - Toggle neotest summary
-- `<leader>ro` - Open latest test output
-- `<leader>rO` - Toggle output panel
-- `<leader>rw` - Watch current file
-- `<leader>rS` - Stop current test run
+- `<leader>tn` - Run nearest test
+- `<leader>tf` - Run current file
+- `<leader>ta` - Run current project
+- `<leader>td` - Debug nearest test with DAP
+- `<leader>ts` - Toggle neotest summary
+- `<leader>to` - Open latest test output
+- `<leader>tO` - Toggle output panel
+- `<leader>tw` - Watch current file
+- `<leader>tS` - Stop current test run
 
 ### Page Navigation
 normal mode:

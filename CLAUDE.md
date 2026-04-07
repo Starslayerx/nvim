@@ -116,16 +116,16 @@ Important options in `lua/config/options.lua`:
 ### Git And Test Workflow
 
 - **gitsigns.nvim**: Inline Git hunk workflow
-  - Navigation: `[c` / `]c`
-  - Hunk actions: `<leader>hs`, `<leader>hr`, `<leader>hp`, `<leader>hi`
-  - Buffer actions: `<leader>hS`, `<leader>hR`
-  - Review actions: `<leader>hb`, `<leader>hd`, `<leader>hD`, `<leader>hq`
-  - Toggles: `<leader>tb`, `<leader>tw`
+  - Navigation: `<leader>gj` / `<leader>gk`
+  - Hunk actions: `<leader>gs`, `<leader>gr`, `<leader>gp`, `<leader>gi`
+  - Buffer actions: `<leader>gS`, `<leader>gR`
+  - Review actions: `<leader>gb`, `<leader>gd`, `<leader>gD`, `<leader>gq`
+  - Toggles: `<leader>gl`, `<leader>gw`
 - **neotest**: Test runner with Python, Go, and Vitest adapters
-  - Run nearest/file/project: `<leader>rr`, `<leader>rf`, `<leader>ra`
-  - Debug nearest test through DAP: `<leader>rd`
-  - Test UI: `<leader>rs`, `<leader>ro`, `<leader>rO`
-  - Watch/stop: `<leader>rw`, `<leader>rS`
+  - Run nearest/file/project: `<leader>tn`, `<leader>tf`, `<leader>ta`
+  - Debug nearest test through DAP: `<leader>td`
+  - Test UI: `<leader>ts`, `<leader>to`, `<leader>tO`
+  - Watch/stop: `<leader>tw`, `<leader>tS`
 
 ## Development Commands
 
@@ -178,12 +178,12 @@ Format current buffer:
 ### Test Commands
 
 ```vim
-<leader>rr          " Run nearest test
-<leader>rf          " Run current file
-<leader>ra          " Run current project
-<leader>rd          " Debug nearest test
-<leader>rs          " Toggle neotest summary
-<leader>ro          " Open latest output
+<leader>tn          " Run nearest test
+<leader>tf          " Run current file
+<leader>ta          " Run current project
+<leader>td          " Debug nearest test
+<leader>ts          " Toggle neotest summary
+<leader>to          " Open latest output
 ```
 
 ### Copilot Activation
@@ -207,8 +207,8 @@ When adding new plugins:
 ### Keybinding Strategy
 
 Core keybindings are in `lua/config/keymaps.lua`, but many plugins define their own in their config:
-- Gitsigns: `[c`, `]c`, `<leader>h*`, `<leader>t*`
-- Neotest: `<leader>r*`
+- Gitsigns: `<leader>g*`
+- Neotest: `<leader>t*`
 - Trouble: `<leader>x*` prefix (diagnostics)
 - fzf-lua: primary search mappings (`<leader><space>`, `<leader>,`, `<leader>/`, `<leader>:`, `<leader>ff`, `<leader>fg`, `<leader>fb`, `<leader>fc`, `<leader>fr`, `<leader>fs`, `<leader>fS`, `<leader>ft`, `<leader>fT`, `<leader>fR`)
 - Neo-tree: `<leader>e` (filesystem reveal left toggle), `o` (open in new tab), `H` (toggle hidden/gitignored)

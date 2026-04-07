@@ -230,8 +230,8 @@ vim.lsp.config.pyright = {
 
 #### 基础窗口操作
 
-- `<leader>t` - 水平分割打开终端
-- `<leader>T` - 垂直分割打开终端
+- `<leader>ot` - 水平分割打开终端
+- `<leader>oT` - 垂直分割打开终端
 - `<Esc>` - 终端模式下退出到普通模式
 
 #### 窗口切换 (原生 Vim 方式)
@@ -265,33 +265,33 @@ vim.lsp.config.pyright = {
 
 ### Git 快捷键
 
-- `]c` - 跳到下一个 hunk
-- `[c` - 跳到上一个 hunk
-- `<leader>hs` - stage 当前 hunk
-- `<leader>hr` - reset 当前 hunk
-- `<leader>hS` - stage 当前 buffer
-- `<leader>hR` - reset 当前 buffer
-- `<leader>hp` - 浮窗预览当前 hunk
-- `<leader>hi` - 行内预览当前 hunk
-- `<leader>hb` - 查看当前行 blame
-- `<leader>hd` - 与 index 做 diff
-- `<leader>hD` - 与 `~` 做 diff
-- `<leader>hq` - 将 hunk 列到 quickfix
-- `<leader>tb` - 切换当前行 blame 显示
-- `<leader>tw` - 切换 word diff
+- `<leader>gj` - 跳到下一个 hunk
+- `<leader>gk` - 跳到上一个 hunk
+- `<leader>gs` - stage 当前 hunk
+- `<leader>gr` - reset 当前 hunk
+- `<leader>gS` - stage 当前 buffer
+- `<leader>gR` - reset 当前 buffer
+- `<leader>gp` - 浮窗预览当前 hunk
+- `<leader>gi` - 行内预览当前 hunk
+- `<leader>gb` - 查看当前行 blame
+- `<leader>gd` - 与 index 做 diff
+- `<leader>gD` - 与 `~` 做 diff
+- `<leader>gq` - 将 hunk 列到 quickfix
+- `<leader>gl` - 切换当前行 blame 显示
+- `<leader>gw` - 切换 word diff
 - `ih` - 文本对象选择 hunk
 
 ### 测试快捷键
 
-- `<leader>rr` - 运行离光标最近的测试
-- `<leader>rf` - 运行当前文件测试
-- `<leader>ra` - 运行当前项目测试
-- `<leader>rd` - 用 DAP 调试最近测试
-- `<leader>rs` - 切换 neotest summary
-- `<leader>ro` - 打开最近一次测试输出
-- `<leader>rO` - 切换 output panel
-- `<leader>rw` - watch 当前文件
-- `<leader>rS` - 停止当前测试运行
+- `<leader>tn` - 运行离光标最近的测试
+- `<leader>tf` - 运行当前文件测试
+- `<leader>ta` - 运行当前项目测试
+- `<leader>td` - 用 DAP 调试最近测试
+- `<leader>ts` - 切换 neotest summary
+- `<leader>to` - 打开最近一次测试输出
+- `<leader>tO` - 切换 output panel
+- `<leader>tw` - watch 当前文件
+- `<leader>tS` - 停止当前测试运行
 
 ### 翻页功能
 
