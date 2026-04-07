@@ -72,3 +72,10 @@ keymap("t", "<Esc>", "<C-\\><C-n>", { noremap = true })
 -- keymap("n", "<C-j>", "<C-w>j", { noremap = true })
 -- keymap("n", "<C-k>", "<C-w>k", { noremap = true })
 -- keymap("n", "<C-l>", "<C-w>l", { noremap = true })
+
+-- ===
+-- === Buffer management
+-- ===
+keymap("n", "<leader>bn", ":bnext<CR>", { noremap = true, silent = true, desc = "Next Buffer" })
+keymap("n", "<leader>bp", ":bprevious<CR>", { noremap = true, silent = true, desc = "Previous Buffer" })
+keymap("n", "<leader>bd", ":bdelete<CR>", { noremap = true, silent = true, desc = "Delete Buffer" })

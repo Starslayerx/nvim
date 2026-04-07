@@ -165,7 +165,6 @@ return {
     "folke/trouble.nvim",
     opts = {
       height = 10,
-      icons = true,
       auto_open = false,
       auto_close = true,
     },

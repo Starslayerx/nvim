@@ -130,7 +130,10 @@ return {
       end, { silent = true, nowait = true, desc = "Prev Reference" })
 
       vim.keymap.set("n", "<leader>ch", function()
+        local bufnr = vim.api.nvim_get_current_buf()
+        local paused = vim.b[bufnr].illuminate_paused == true
         require("illuminate").toggle_buf()
+        vim.b[bufnr].illuminate_paused = not paused
       end, { silent = true, desc = "Toggle References" })
     end,
   },

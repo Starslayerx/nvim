@@ -340,6 +340,8 @@ f*unc_name(a, b, x)         dsf             a, b, x
 
 #### Other Features
 - `<leader>F` - Format code
+- `<leader>bn` - Next buffer
+- `<leader>bp` - Previous buffer
 - `<leader>bd` - Delete buffer
 - `<leader>cR` - Rename file
 

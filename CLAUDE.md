@@ -219,6 +219,7 @@ When adding new plugins:
 ### Keybinding Strategy
 
 Core keybindings are in `lua/config/keymaps.lua`, but many plugins define their own in their config:
+- Buffer: `<leader>bb` (buffer list), `<leader>bn` / `<leader>bp` (next/prev), `<leader>bd` (delete)
 - Gitsigns: `<leader>g*`
 - vim-illuminate: `]r` / `[r` (next/prev reference), `<leader>ch` (toggle current buffer highlighting)
 - Neotest: `<leader>t*`

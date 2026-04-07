@@ -87,6 +87,10 @@ return {
         return config.config[key] or false
       end
 
+      local function illuminate_is_enabled()
+        return vim.b.illuminate_paused ~= true
+      end
+
       wk.setup(opts)
       wk.add({
         { "<leader>b", group = "Buffer", icon = { icon = "󰈚", color = "azure" } },
@@ -157,6 +161,20 @@ return {
           end,
           desc = function()
             return gitsigns_toggle_state("word_diff") and "Disable Word Diff" or "Enable Word Diff"
+          end,
+        },
+        {
+          "<leader>ch",
+          mode = "n",
+          icon = function()
+            local enabled = illuminate_is_enabled()
+            return {
+              icon = enabled and " " or " ",
+              color = enabled and "green" or "yellow",
+            }
+          end,
+          desc = function()
+            return illuminate_is_enabled() and "Disable References" or "Enable References"
           end,
         },
         {

@@ -428,6 +428,8 @@ f*unc_name(a, b, x)       dsf          a, b, x
 #### 其他功能
 
 - `<leader>F` - 格式化代码
+- `<leader>bn` - 下一个缓冲区
+- `<leader>bp` - 上一个缓冲区
 - `<leader>bd` - 删除缓冲区
 - `<leader>cR` - 重命名文件
 
