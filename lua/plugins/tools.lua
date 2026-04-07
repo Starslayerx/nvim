@@ -1,4 +1,81 @@
 return {
+  -- Git hunk workflow
+  {
+    "lewis6991/gitsigns.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    opts = {
+      signs = {
+        add = { text = "▎" },
+        change = { text = "▎" },
+        delete = { text = "" },
+        topdelete = { text = "" },
+        changedelete = { text = "▎" },
+        untracked = { text = "▎" },
+      },
+      signcolumn = true,
+      numhl = false,
+      linehl = false,
+      word_diff = false,
+      current_line_blame = false,
+      current_line_blame_opts = {
+        delay = 300,
+      },
+      preview_config = {
+        border = "rounded",
+      },
+      watch_gitdir = {
+        follow_files = true,
+      },
+      on_attach = function(bufnr)
+        local gitsigns = require("gitsigns")
+
+        local function map(mode, lhs, rhs, desc)
+          vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true, desc = desc })
+        end
+
+        map("n", "]c", function()
+          if vim.wo.diff then
+            vim.cmd.normal({ "]c", bang = true })
+            return
+          end
+          vim.schedule(gitsigns.next_hunk)
+        end, "Next Hunk")
+
+        map("n", "[c", function()
+          if vim.wo.diff then
+            vim.cmd.normal({ "[c", bang = true })
+            return
+          end
+          vim.schedule(gitsigns.prev_hunk)
+        end, "Prev Hunk")
+
+        map("n", "<leader>hs", gitsigns.stage_hunk, "Git: Stage Hunk")
+        map("n", "<leader>hr", gitsigns.reset_hunk, "Git: Reset Hunk")
+        map("v", "<leader>hs", function()
+          gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+        end, "Git: Stage Hunk")
+        map("v", "<leader>hr", function()
+          gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+        end, "Git: Reset Hunk")
+        map("n", "<leader>hS", gitsigns.stage_buffer, "Git: Stage Buffer")
+        map("n", "<leader>hR", gitsigns.reset_buffer, "Git: Reset Buffer")
+        map("n", "<leader>hp", gitsigns.preview_hunk, "Git: Preview Hunk")
+        map("n", "<leader>hi", gitsigns.preview_hunk_inline, "Git: Preview Hunk Inline")
+        map("n", "<leader>hb", function()
+          gitsigns.blame_line({ full = true })
+        end, "Git: Blame Line")
+        map("n", "<leader>hd", gitsigns.diffthis, "Git: Diff This")
+        map("n", "<leader>hD", function()
+          gitsigns.diffthis("~")
+        end, "Git: Diff This ~")
+        map("n", "<leader>hq", gitsigns.setqflist, "Git: Hunks To Quickfix")
+        map("n", "<leader>tb", gitsigns.toggle_current_line_blame, "Toggle Git Blame")
+        map("n", "<leader>tw", gitsigns.toggle_word_diff, "Toggle Word Diff")
+        map({ "o", "x" }, "ih", gitsigns.select_hunk, "Git: Select Hunk")
+      end,
+    },
+  },
+
   -- Wildfire: 空格选择内容
   {
     "Starslayerx/wildfire.nvim",
@@ -32,6 +109,158 @@ return {
     config = function()
       require("nvim-surround").setup({
         -- Configuration here, or leave empty to use defaults
+      })
+    end,
+  },
+
+  -- Test runner
+  {
+    "nvim-neotest/neotest",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-neotest/nvim-nio",
+      "antoinemadec/FixCursorHold.nvim",
+      "nvim-neotest/neotest-python",
+      "nvim-neotest/neotest-go",
+      "marilari88/neotest-vitest",
+      "mfussenegger/nvim-dap",
+    },
+    keys = {
+      {
+        "<leader>rr",
+        function()
+          require("neotest").run.run()
+        end,
+        desc = "Test: Run Nearest",
+      },
+      {
+        "<leader>rf",
+        function()
+          require("neotest").run.run(vim.fn.expand("%"))
+        end,
+        desc = "Test: Run File",
+      },
+      {
+        "<leader>ra",
+        function()
+          require("neotest").run.run(vim.uv.cwd())
+        end,
+        desc = "Test: Run Project",
+      },
+      {
+        "<leader>rd",
+        function()
+          require("neotest").run.run({ strategy = "dap" })
+        end,
+        desc = "Test: Debug Nearest",
+      },
+      {
+        "<leader>rs",
+        function()
+          require("neotest").summary.toggle()
+        end,
+        desc = "Test: Toggle Summary",
+      },
+      {
+        "<leader>ro",
+        function()
+          require("neotest").output.open({ enter = true, auto_close = true })
+        end,
+        desc = "Test: Show Output",
+      },
+      {
+        "<leader>rO",
+        function()
+          require("neotest").output_panel.toggle()
+        end,
+        desc = "Test: Toggle Output Panel",
+      },
+      {
+        "<leader>rw",
+        function()
+          require("neotest").watch.toggle(vim.fn.expand("%"))
+        end,
+        desc = "Test: Watch File",
+      },
+      {
+        "<leader>rS",
+        function()
+          require("neotest").run.stop()
+        end,
+        desc = "Test: Stop",
+      },
+    },
+    config = function()
+      require("neotest").setup({
+        adapters = {
+          require("neotest-python")({
+            dap = {
+              justMyCode = false,
+            },
+            runner = "pytest",
+          }),
+          require("neotest-go")({
+            experimental = {
+              test_table = true,
+            },
+          }),
+          require("neotest-vitest")({
+            filter_dir = function(name)
+              return name ~= "node_modules"
+            end,
+          }),
+        },
+        discovery = {
+          enabled = true,
+        },
+        diagnostic = {
+          enabled = true,
+        },
+        floating = {
+          border = "rounded",
+          max_height = 0.8,
+          max_width = 0.8,
+        },
+        output = {
+          enabled = true,
+          open_on_run = false,
+        },
+        output_panel = {
+          enabled = true,
+          open = "botright split | resize 12",
+        },
+        quickfix = {
+          enabled = false,
+        },
+        summary = {
+          animated = false,
+          mappings = {
+            attach = "a",
+            clear_marked = "M",
+            clear_target = "T",
+            debug = "d",
+            debug_marked = "D",
+            expand = { "<CR>", "<2-LeftMouse>" },
+            expand_all = "e",
+            jumpto = "i",
+            mark = "m",
+            next_failed = "J",
+            output = "o",
+            prev_failed = "K",
+            run = "r",
+            run_marked = "R",
+            short = "O",
+            stop = "u",
+            target = "t",
+            watch = "w",
+          },
+        },
+        status = {
+          enabled = true,
+          signs = true,
+          virtual_text = false,
+        },
       })
     end,
   },
@@ -98,7 +327,8 @@ return {
         },
         ruff = {
           append_args = {
-            "--ignore", "F401", -- unused import
+            "--ignore",
+            "F401", -- unused import
           },
         },
         shfmt = {
@@ -109,7 +339,7 @@ return {
         },
         sql_formatter = {
           command = "sql-formatter",
-          args = { "--language", "sql" },  -- 使用通用 SQL,最宽松的语法支持
+          args = { "--language", "sql" }, -- 使用通用 SQL,最宽松的语法支持
         },
       },
     },

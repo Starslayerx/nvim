@@ -23,7 +23,7 @@ This is a Neovim configuration built with **lazy.nvim** as the package manager. 
    - `cmp.lua` - Completion system (blink.cmp, Copilot, autopairs)
    - `lsp.lua` - LSP servers, Mason, diagnostics, Trouble, lspsaga, noice
    - `snacks.lua` - Snacks.nvim toolkit + fzf-lua integration (explorer, terminal, fuzzy search)
-   - `tools.lua` - Formatters (conform.nvim), wildfire, PEP8 indent
+   - `tools.lua` - Gitsigns, neotest, formatters (conform.nvim), wildfire, PEP8 indent
    - `debug.lua` - nvim-dap debugging setup (Python debugpy)
 
 ### LSP Configuration Strategy
@@ -36,7 +36,7 @@ vim.lsp.config(server, server_opts)
 vim.lsp.enable(server)
 ```
 
-Mason auto-installs LSP servers: clangd, pyright, gopls, eslint, lua_ls, rust_analyzer, marksman
+Mason auto-installs LSP servers: clangd, pyright, gopls, eslint, ts_ls, lua_ls, rust_analyzer, marksman, html, cssls, jsonls, yamlls, bashls, dockerls, taplo, emmet_language_server, jinja_lsp
 
 Special configurations:
 - **pyright**: Type checking disabled (`typeCheckingMode = "off"`), automatic venv discovery (searches up 3 levels for .venv/venv/env)
@@ -113,6 +113,20 @@ Important options in `lua/config/options.lua`:
 - **nvim-dap-python**: Uses Mason-installed debugpy at `~/.local/share/nvim/mason/packages/debugpy/venv/bin/python`
 - **mason-nvim-dap**: Auto-installs debugpy
 
+### Git And Test Workflow
+
+- **gitsigns.nvim**: Inline Git hunk workflow
+  - Navigation: `[c` / `]c`
+  - Hunk actions: `<leader>hs`, `<leader>hr`, `<leader>hp`, `<leader>hi`
+  - Buffer actions: `<leader>hS`, `<leader>hR`
+  - Review actions: `<leader>hb`, `<leader>hd`, `<leader>hD`, `<leader>hq`
+  - Toggles: `<leader>tb`, `<leader>tw`
+- **neotest**: Test runner with Python, Go, and Vitest adapters
+  - Run nearest/file/project: `<leader>rr`, `<leader>rf`, `<leader>ra`
+  - Debug nearest test through DAP: `<leader>rd`
+  - Test UI: `<leader>rs`, `<leader>ro`, `<leader>rO`
+  - Watch/stop: `<leader>rw`, `<leader>rS`
+
 ## Development Commands
 
 ### Testing Configuration Changes
@@ -161,6 +175,17 @@ Format current buffer:
 <leader>du          " Toggle debug UI
 ```
 
+### Test Commands
+
+```vim
+<leader>rr          " Run nearest test
+<leader>rf          " Run current file
+<leader>ra          " Run current project
+<leader>rd          " Debug nearest test
+<leader>rs          " Toggle neotest summary
+<leader>ro          " Open latest output
+```
+
 ### Copilot Activation
 
 Copilot is lazy-loaded and requires manual activation:
@@ -182,6 +207,8 @@ When adding new plugins:
 ### Keybinding Strategy
 
 Core keybindings are in `lua/config/keymaps.lua`, but many plugins define their own in their config:
+- Gitsigns: `[c`, `]c`, `<leader>h*`, `<leader>t*`
+- Neotest: `<leader>r*`
 - Trouble: `<leader>x*` prefix (diagnostics)
 - fzf-lua: primary search mappings (`<leader><space>`, `<leader>,`, `<leader>/`, `<leader>:`, `<leader>ff`, `<leader>fg`, `<leader>fb`, `<leader>fc`, `<leader>fr`, `<leader>fs`, `<leader>fS`, `<leader>ft`, `<leader>fT`, `<leader>fR`)
 - Neo-tree: `<leader>e` (filesystem reveal left toggle), `o` (open in new tab), `H` (toggle hidden/gitignored)

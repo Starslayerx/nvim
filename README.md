@@ -129,8 +129,10 @@ vim.lsp.config.pyright = {
 - **透明度**: 已启用
 - **补全引擎**: blink.cmp (现代补全系统，集成 GitHub Copilot)
 - **调试器**: nvim-dap (支持 Python debugpy，自动安装)
+- **测试运行**: neotest (支持 Python / Go / Vitest，并可接入 DAP)
+- **Git 工作流**: gitsigns.nvim (hunk 预览、stage/reset、blame、diff)
 - **工具集**: snacks.nvim + fzf-lua (一体化工具集合 + 原生 fzf 搜索)
-- **AI 辅助**: GitHub Copilot (代码补全和建议)
+- **AI 辅助**: GitHub Copilot (当前仅保留为可选补全源)
 
 ## 🔌 插件列表
 
@@ -153,7 +155,7 @@ vim.lsp.config.pyright = {
 - **nvim-autopairs** - 自动括号补全，与 blink.cmp 组合使用，处理手动输入括号、回车格式化等场景，禁用在宏和替换模式中运行
 - **nvim-lspconfig** - LSP 配置，使用新版 API (vim.lsp.config/enable)，支持 pyright (关闭类型检查) 和 lua_ls
 - **mason.nvim** - LSP 服务器管理，带有自定义图标
-- **mason-lspconfig.nvim** - 自动安装 LSP (clangd, pyright, gopls, eslint, lua_ls, rust_analyzer, marksman)
+- **mason-lspconfig.nvim** - 自动安装 LSP (clangd, pyright, gopls, eslint, ts_ls, lua_ls, rust_analyzer, marksman, html, cssls, jsonls, yamlls, bashls, dockerls, taplo, emmet_language_server, jinja_lsp)
 - **trouble.nvim** - 诊断界面，支持多种视图模式
 - **tiny-inline-diagnostic.nvim** - 行内诊断，使用 ghost 预设，支持多行显示
 - **lspsaga.nvim** - LSP UI 美化，圆角边框，禁用灯泡提示
@@ -176,25 +178,30 @@ vim.lsp.config.pyright = {
 - **nvim-dap-python** - Python 调试扩展，支持测试方法/类调试
 - **mason-nvim-dap.nvim** - Mason 集成，自动安装和配置调试适配器 (debugpy)
 
+### Git & 测试
+
+- **gitsigns.nvim** - 行内 Git hunk 标记，支持预览、stage/reset、blame、diff、quickfix
+- **neotest** - 统一测试运行器
+- **neotest-python** - Python / pytest 测试适配器
+- **neotest-go** - Go 测试适配器
+- **neotest-vitest** - Vitest 测试适配器
+
 ### 一体化工具集
 
 - **snacks.nvim** - 一体化工具集，包含:
-  - 文件浏览器 (替换 netrw，支持完整文件操作)
-  - 智能文件选择器 (类似 fzf/Telescope)
-  - 通知系统 (带历史记录，3秒超时)
-  - 终端集成 (Ghostty 后端图片显示)
+  - 项目选择器
+  - 内置终端
   - 大文件友好模式
-  - 欢迎界面 (dashboard)
-  - 图片显示支持
+  - 快速文件渲染
   - 缩进可视化
   - 作用域检测
   - 状态栏美化 (带折叠、Git 标记)
   - 单词高亮 (带跳转功能)
   - 草稿缓冲区
-  - 快速文件渲染
   - 禅模式和窗口缩放
   - Git 浏览和 Lazygit 集成
 - **fzf-lua** - 基于系统 `fzf` 的原生模糊搜索器，现作为主检索入口，负责文件/缓冲区/命令历史/实时 grep/最近文件
+- **neo-tree.nvim** - 当前文件树实现，`<leader>e` 打开，支持 reveal、split、tab 打开和隐藏文件切换
 
 ### 格式化 & 工具
 
@@ -255,6 +262,36 @@ vim.lsp.config.pyright = {
 - `<C-w>o` - 关闭其他所有窗口 (only)
 - `<C-w>q` - 退出当前窗口
 - `<C-w>c` - 关闭当前窗口
+
+### Git 快捷键
+
+- `]c` - 跳到下一个 hunk
+- `[c` - 跳到上一个 hunk
+- `<leader>hs` - stage 当前 hunk
+- `<leader>hr` - reset 当前 hunk
+- `<leader>hS` - stage 当前 buffer
+- `<leader>hR` - reset 当前 buffer
+- `<leader>hp` - 浮窗预览当前 hunk
+- `<leader>hi` - 行内预览当前 hunk
+- `<leader>hb` - 查看当前行 blame
+- `<leader>hd` - 与 index 做 diff
+- `<leader>hD` - 与 `~` 做 diff
+- `<leader>hq` - 将 hunk 列到 quickfix
+- `<leader>tb` - 切换当前行 blame 显示
+- `<leader>tw` - 切换 word diff
+- `ih` - 文本对象选择 hunk
+
+### 测试快捷键
+
+- `<leader>rr` - 运行离光标最近的测试
+- `<leader>rf` - 运行当前文件测试
+- `<leader>ra` - 运行当前项目测试
+- `<leader>rd` - 用 DAP 调试最近测试
+- `<leader>rs` - 切换 neotest summary
+- `<leader>ro` - 打开最近一次测试输出
+- `<leader>rO` - 切换 output panel
+- `<leader>rw` - watch 当前文件
+- `<leader>rS` - 停止当前测试运行
 
 ### 翻页功能
 
@@ -390,30 +427,15 @@ f*unc_name(a, b, x)       dsf          a, b, x
 - `<leader>e` - 文件浏览器
 - `<leader>fp` - 项目列表
 
-#### 文件浏览器操作 (在 explorer 中)
+#### 文件浏览器操作 (Neo-tree)
 
-- `<CR>` - 进入目录/打开文件
-- `<BS>` - 打开上级目录
-- `h` - 关闭目录
-- `l` - 打开文件
-- `t` - 新 tab 打开文件
-- `s` - 横向分屏打开
-- `v` - 纵向分屏打开
-- `a` - 添加文件/目录
-- `d` - 删除文件/目录
-- `r` - 重命名文件/目录
-- `c` - 复制文件/目录
-- `y` - 复制文件路径
-- `p` - 粘贴文件/目录
-- `u` - 更新文件树
-- `P` - 预览文件
-- `I` - 显示 .gitignore 的文件
-- `H` - 显示隐藏文件
-- `Z` - 收起所有子文件夹
-- `]g` / `[g` - 跳转到下一个/上一个 git 修改的文件
-- `]d` / `[d` - 跳转到下一个/上一个有诊断信息的文件
-- `]w` / `[w` - 跳转到下一个/上一个有警告的文件
-- `]e` / `[e` - 跳转到下一个/上一个有错误的文件
+- `<CR>` / `l` - 打开文件或展开目录
+- `h` - 收起目录
+- `o` - 在新标签页打开
+- `s` - 垂直分屏打开
+- `S` - 水平分屏打开
+- `P` - 浮窗预览
+- `H` - 切换显示隐藏文件和 gitignored 文件
 
 #### 其他功能
 
@@ -536,7 +558,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 
 ## 🎨 特色功能
 
-1. **一体化工具集**: 使用 snacks.nvim 整合了文件浏览器、选择器、通知系统、终端、调试工具、禅模式等
+1. **一体化工具集**: 使用 snacks.nvim 整合了项目选择、终端、状态栏增强、单词高亮、草稿缓冲区、禅模式等
 2. **现代化 LSP**: 完整的语言服务器支持，包含自动安装和 UI 美化
 3. **代码格式化**: 支持多种语言的自动格式化 (保存时触发)
 4. **透明界面**: 支持窗口透明效果，自动应用于颜色主题
@@ -555,7 +577,7 @@ f*unc_name(a, b, x)       dsf          a, b, x
 12. **快捷键提示**: 实时显示可用快捷键，使用 `<leader>?` 查看本地映射
 13. **终端内图片显示**: 支持在终端中直接显示图片 (Ghostty 后端)
 14. **草稿缓冲区**: 临时记事和快速计算功能
-15. **文件浏览器增强**: 完整的文件操作支持 (添加、删除、重命名、复制、移动等)
+15. **文件浏览器增强**: 使用 neo-tree 提供文件浏览、分屏/标签页打开、预览和隐藏文件切换
 16. **自动 LSP 安装**: Mason 自动安装和配置多种语言服务器
 17. **光标位置记忆**: 重新打开文件时恢复上次的光标位置
 18. **终端集成**: 智能终端管理，支持分割和快速切换

@@ -79,8 +79,10 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - **Leader Key**: Space (LocalLeader: `\`)
 - **Transparency**: Enabled
 - **Completion Engine**: blink.cmp (Modern completion system with GitHub Copilot integration)
+- **Test Runner**: neotest (Python / Go / Vitest, with DAP integration)
+- **Git Workflow**: gitsigns.nvim (hunk preview, stage/reset, blame, diff)
 - **Toolkit**: snacks.nvim + fzf-lua (All-in-one toolkit + native fzf search)
-- **AI Assistant**: GitHub Copilot (Code completion and suggestions)
+- **AI Assistant**: GitHub Copilot (currently kept as an optional completion source)
 
 ## 🔌 Plugins
 
@@ -101,7 +103,7 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - **nvim-autopairs** - Auto bracket completion, works in combination with blink.cmp to handle manual bracket input, enter formatting, and other scenarios, disabled in macros and replace mode
 - **nvim-lspconfig** - LSP configuration using new API (vim.lsp.config/enable), supporting pyright (type checking disabled) and lua_ls
 - **mason.nvim** - LSP server management with custom icons
-- **mason-lspconfig.nvim** - Auto-install LSP (clangd, pyright, gopls, eslint, lua_ls, rust_analyzer, marksman)
+- **mason-lspconfig.nvim** - Auto-install LSP (clangd, pyright, gopls, eslint, ts_ls, lua_ls, rust_analyzer, marksman, html, cssls, jsonls, yamlls, bashls, dockerls, taplo, emmet_language_server, jinja_lsp)
 - **trouble.nvim** - Diagnostic interface with multiple view modes
 - **tiny-inline-diagnostic.nvim** - Inline diagnostics with ghost preset and multiline support
 - **lspsaga.nvim** - LSP UI enhancement with rounded borders, lightbulb disabled
@@ -115,24 +117,28 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - **wildfire.nvim** - Quick bracket content selection (custom version)
 - **nvim-surround** - Quick operations: surround selections with delimiters
 
+### Git & Testing
+- **gitsigns.nvim** - Inline Git hunk signs with preview, stage/reset, blame, diff, and quickfix support
+- **neotest** - Unified test runner
+- **neotest-python** - Python / pytest adapter
+- **neotest-go** - Go adapter
+- **neotest-vitest** - Vitest adapter
+
 ### All-in-one Toolkit
 - **snacks.nvim** - All-in-one toolkit, including:
-  - File explorer (replaces netrw with full file operations)
-  - Smart file picker (like fzf/Telescope)
-  - Notification system (with history, 3s timeout)
-  - Terminal integration (Ghostty backend for images)
+  - Project picker
+  - Terminal integration
   - Big file friendly mode
-  - Welcome dashboard
-  - Image display support
+  - Quick file rendering
   - Indent visualization
   - Scope detection
   - Status bar enhancement (with folds, Git marks)
   - Word highlight (with jump functionality)
   - Scratch buffer
-  - Quick file rendering
   - Zen mode and window zoom
   - Git browse and Lazygit integration
 - **fzf-lua** - Native fuzzy finder powered by system `fzf`, now used as the primary search layer for files, buffers, command history, live grep, and recent files
+- **neo-tree.nvim** - Current file explorer implementation, opened with `<leader>e`
 
 ### Formatting & Tools
 - **conform.nvim** - Code formatter with auto-format on save
@@ -186,6 +192,34 @@ A modern and feature-rich Neovim configuration built with lazy.nvim package mana
 - `<C-w>o` - Close all other windows (only)
 - `<C-w>q` - Quit current window
 - `<C-w>c` - Close current window
+
+### Git Keymaps
+- `]c` - Next hunk
+- `[c` - Previous hunk
+- `<leader>hs` - Stage current hunk
+- `<leader>hr` - Reset current hunk
+- `<leader>hS` - Stage current buffer
+- `<leader>hR` - Reset current buffer
+- `<leader>hp` - Preview current hunk
+- `<leader>hi` - Preview current hunk inline
+- `<leader>hb` - Show line blame
+- `<leader>hd` - Diff against index
+- `<leader>hD` - Diff against `~`
+- `<leader>hq` - Send hunks to quickfix
+- `<leader>tb` - Toggle current line blame
+- `<leader>tw` - Toggle word diff
+- `ih` - Hunk text object
+
+### Test Keymaps
+- `<leader>rr` - Run nearest test
+- `<leader>rf` - Run current file
+- `<leader>ra` - Run current project
+- `<leader>rd` - Debug nearest test with DAP
+- `<leader>rs` - Toggle neotest summary
+- `<leader>ro` - Open latest test output
+- `<leader>rO` - Toggle output panel
+- `<leader>rw` - Watch current file
+- `<leader>rS` - Stop current test run
 
 ### Page Navigation
 normal mode:
@@ -306,29 +340,14 @@ f*unc_name(a, b, x)         dsf             a, b, x
 - `<leader>e` - File explorer
 - `<leader>fp` - Project list
 
-#### File Explorer Operations (in explorer)
-- `<CR>` - Enter directory/Open file
-- `<BS>` - Open parent directory
+#### File Explorer Operations (Neo-tree)
+- `<CR>` / `l` - Open file or expand directory
 - `h` - Close directory
-- `l` - Open file
-- `t` - Open file in new tab
-- `s` - Open in horizontal split
-- `v` - Open in vertical split
-- `a` - Add file/directory
-- `d` - Delete file/directory
-- `r` - Rename file/directory
-- `c` - Copy file/directory
-- `y` - Copy file path
-- `p` - Paste file/directory
-- `u` - Update file tree
-- `P` - Preview file
-- `I` - Show .gitignore files
-- `H` - Show hidden files
-- `Z` - Collapse all subdirectories
-- `]g` / `[g` - Jump to next/previous git modified file
-- `]d` / `[d` - Jump to next/previous file with diagnostics
-- `]w` / `[w` - Jump to next/previous file with warnings
-- `]e` / `[e` - Jump to next/previous file with errors
+- `o` - Open in new tab
+- `s` - Open in vertical split
+- `S` - Open in horizontal split
+- `P` - Toggle floating preview
+- `H` - Toggle hidden and gitignored files
 
 #### Other Features
 - `<leader>z` - Zen mode
@@ -438,7 +457,7 @@ f*unc_name(a, b, x)         dsf             a, b, x
 
 ## 🎨 Features
 
-1. **All-in-one Toolkit**: Uses snacks.nvim to integrate file explorer, picker, notification system, terminal, debugging tools, zen mode, etc.
+1. **All-in-one Toolkit**: Uses snacks.nvim for project picking, terminal, statuscolumn enhancements, word highlighting, scratch buffers, zen mode, and related workflows
 2. **Modern LSP**: Complete language server support with auto-installation and UI enhancement
 3. **Code Formatting**: Auto-formatting for multiple languages (triggers on save)
 4. **Transparent Interface**: Window transparency effects automatically applied to color themes
@@ -457,7 +476,7 @@ f*unc_name(a, b, x)         dsf             a, b, x
 12. **Keybinding Hints**: Real-time display of available keybindings, use `<leader>?` for local mappings
 13. **In-terminal Image Display**: Support for displaying images directly in terminal (Ghostty backend)
 14. **Scratch Buffer**: Temporary note-taking and quick calculations
-15. **Enhanced File Explorer**: Complete file operations support (add, delete, rename, copy, move, etc.)
+15. **Enhanced File Explorer**: Uses neo-tree for file browsing, split/tab opening, preview, and hidden file toggling
 16. **Auto LSP Installation**: Mason automatically installs and configures multiple language servers
 17. **Cursor Position Memory**: Restores last cursor position when reopening files
 18. **Terminal Integration**: Smart terminal management with split and quick switching support
