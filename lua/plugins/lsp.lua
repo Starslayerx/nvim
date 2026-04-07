@@ -264,6 +264,8 @@ return {
         },
       })
 
+      vim.api.nvim_set_hl(0, "SagaClass", { link = "FrappePink" })
+
       local saga_util = require("lspsaga.util")
       local get_max_content_length = saga_util.get_max_content_length
 
@@ -278,11 +280,43 @@ return {
 
       local outline = require("lspsaga.symbol.outline")
       local outline_mt = getmetatable(outline)
+      local outline_text_ns = vim.api.nvim_create_namespace("SagaOutlineText")
+      local saga_kinds = require("lspsaga.lspkind").kind
+
+      local function highlight_outline_names(self)
+        if not self.bufnr or not vim.api.nvim_buf_is_valid(self.bufnr) or not self.list then
+          return
+        end
+
+        vim.api.nvim_buf_clear_namespace(self.bufnr, outline_text_ns, 0, -1)
+
+        local node = self.list
+        while node do
+          local value = node.value
+          if value and value.winline and value.winline > 0 and value.kind and saga_kinds[value.kind] then
+            local hl = "Saga" .. saga_kinds[value.kind][1]
+            vim.api.nvim_buf_add_highlight(self.bufnr, outline_text_ns, hl, value.winline - 1, value.inlevel or 0, -1)
+          end
+          node = node.next
+        end
+      end
 
       if outline_mt and not outline_mt._tab_refresh_guard_patched then
         outline_mt._tab_refresh_guard_patched = true
+        local original_parse = outline_mt.parse
+        local original_toggle_or_jump = outline_mt.toggle_or_jump
 
         local outline_group = vim.api.nvim_create_augroup("outline", { clear = false })
+
+        outline_mt.parse = function(self, symbols, curline)
+          original_parse(self, symbols, curline)
+          highlight_outline_names(self)
+        end
+
+        outline_mt.toggle_or_jump = function(self)
+          original_toggle_or_jump(self)
+          highlight_outline_names(self)
+        end
 
         local function outline_tab_is_current(self)
           return self.winid
