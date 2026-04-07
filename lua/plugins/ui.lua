@@ -79,6 +79,14 @@ return {
         return ok and state.winnr and vim.api.nvim_win_is_valid(state.winnr) or false
       end
 
+      local function gitsigns_toggle_state(key)
+        local ok, config = pcall(require, "gitsigns.config")
+        if not ok then
+          return false
+        end
+        return config.config[key] or false
+      end
+
       wk.setup(opts)
       wk.add({
         { "<leader>b", group = "Buffer", icon = { icon = "󰈚", color = "azure" } },
@@ -121,6 +129,34 @@ return {
           end,
           desc = function()
             return dap_view_is_open() and "Close Debug View" or "Open Debug View"
+          end,
+        },
+        {
+          "<leader>gl",
+          mode = "n",
+          icon = function()
+            local enabled = gitsigns_toggle_state("current_line_blame")
+            return {
+              icon = enabled and " " or " ",
+              color = enabled and "green" or "yellow",
+            }
+          end,
+          desc = function()
+            return gitsigns_toggle_state("current_line_blame") and "Hide Line Blame" or "Show Line Blame"
+          end,
+        },
+        {
+          "<leader>gw",
+          mode = "n",
+          icon = function()
+            local enabled = gitsigns_toggle_state("word_diff")
+            return {
+              icon = enabled and " " or " ",
+              color = enabled and "green" or "yellow",
+            }
+          end,
+          desc = function()
+            return gitsigns_toggle_state("word_diff") and "Disable Word Diff" or "Enable Word Diff"
           end,
         },
         {
