@@ -1,9 +1,6 @@
 local opt = vim.opt
 local g = vim.g
 
--- 全局设置
-g.mapleader = " "
-
 -- 编码和系统
 opt.encoding = "utf-8"
 opt.fileencoding = "utf-8"

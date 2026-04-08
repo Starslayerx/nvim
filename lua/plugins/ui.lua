@@ -92,6 +92,17 @@ return {
       end
 
       wk.setup(opts)
+      -- Use an explicit leader trigger instead of relying only on which-key's
+      -- auto-generated state. This keeps <Space> from falling back to the
+      -- built-in right-move when the trigger state gets out of sync.
+      vim.keymap.set({ "n", "x" }, "<leader>", function()
+        require("which-key.state").start({ keys = "<leader>" })
+      end, {
+        desc = "which-key-trigger user leader",
+        nowait = true,
+        silent = true,
+      })
+
       wk.add({
         { "<leader>b", group = "Buffer", icon = { icon = "󰈚", color = "azure" } },
         { "<leader>c", group = "Code", icon = { icon = "", color = "blue" } },
