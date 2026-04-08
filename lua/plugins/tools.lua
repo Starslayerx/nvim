@@ -1,4 +1,10 @@
 return {
+  -- Sync direnv project environments into Neovim
+  {
+    "direnv/direnv.vim",
+    event = { "BufReadPre", "BufNewFile" },
+  },
+
   -- Git hunk workflow
   {
     "lewis6991/gitsigns.nvim",

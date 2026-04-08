@@ -104,6 +104,7 @@ return {
       })
 
       wk.add({
+        { "<leader>a", group = "Agenda", icon = { icon = "󰃭", color = "cyan" } },
         { "<leader>b", group = "Buffer", icon = { icon = "󰈚", color = "azure" } },
         { "<leader>c", group = "Code", icon = { icon = "", color = "blue" } },
         { "<leader>d", group = "Debug", icon = { icon = "", color = "red" } },
