@@ -72,6 +72,31 @@ return {
     end,
   },
 
+  -- Inline variable values while debugging
+  {
+    "theHamsta/nvim-dap-virtual-text",
+    dependencies = {
+      "mfussenegger/nvim-dap",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    config = function()
+      require("nvim-dap-virtual-text").setup({})
+    end,
+  },
+
+  -- Persist breakpoints across Neovim restarts
+  {
+    "Weissle/persistent-breakpoints.nvim",
+    dependencies = {
+      "mfussenegger/nvim-dap",
+    },
+    config = function()
+      require("persistent-breakpoints").setup({
+        load_breakpoints_event = { "BufReadPost" },
+      })
+    end,
+  },
+
   -- Mason DAP: 自动安装调试器
   {
     "jay-babu/mason-nvim-dap.nvim",
@@ -269,7 +294,7 @@ return {
       {
         "<leader>db",
         function()
-          require("dap").toggle_breakpoint()
+          require("persistent-breakpoints.api").toggle_breakpoint()
           vim.schedule(function()
             vim.cmd("redraw!")
           end)
@@ -279,14 +304,14 @@ return {
       {
         "<leader>dB",
         function()
-          require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
+          require("persistent-breakpoints.api").set_conditional_breakpoint()
         end,
         desc = "Set Conditional Breakpoint",
       },
       {
         "<leader>dl",
         function()
-          require("dap").set_breakpoint(nil, nil, vim.fn.input("Log point message: "))
+          require("persistent-breakpoints.api").set_log_point()
         end,
         desc = "Set Log Point",
       },
