@@ -88,9 +88,9 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     config = function()
       local function set_illuminate_highlights()
-        vim.api.nvim_set_hl(0, "IlluminatedWordText", { bg = "#53586d" })
-        vim.api.nvim_set_hl(0, "IlluminatedWordRead", { bg = "#4f565f" })
-        vim.api.nvim_set_hl(0, "IlluminatedWordWrite", { bg = "#5c5150" })
+        vim.api.nvim_set_hl(0, "IlluminatedWordText", { bg = "#5b6372" })
+        vim.api.nvim_set_hl(0, "IlluminatedWordRead", { bg = "#555d6b" })
+        vim.api.nvim_set_hl(0, "IlluminatedWordWrite", { bg = "#66707f" })
       end
 
       set_illuminate_highlights()
