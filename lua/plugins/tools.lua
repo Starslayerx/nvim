@@ -196,6 +196,15 @@ return {
     opts = {
       use_default_keymaps = false,
       max_join_length = 120,
+      langs = {
+        python = {
+          argument_list = {
+            split = {
+              last_separator = true,
+            },
+          },
+        },
+      },
     },
   },
 
