@@ -181,6 +181,24 @@ return {
     end,
   },
 
+  -- Treesitter-aware split/join for function args, lists, dicts, etc.
+  {
+    "Wansmer/treesj",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    keys = {
+      {
+        "<leader>j",
+        "<cmd>TSJToggle<CR>",
+        mode = "n",
+        desc = "Split/Join Node",
+      },
+    },
+    opts = {
+      use_default_keymaps = false,
+      max_join_length = 120,
+    },
+  },
+
   -- Test runner
   {
     "nvim-neotest/neotest",
@@ -336,7 +354,6 @@ return {
   -- Formatter 代码格式化
   {
     "stevearc/conform.nvim",
-    event = { "BufWritePre" },
     cmd = { "ConformInfo" },
     keys = {
       {
@@ -347,12 +364,29 @@ return {
         mode = "n",
         desc = "Format buffer",
       },
+      {
+        "<leader>F",
+        function()
+          local start_pos = vim.fn.getpos("'<")
+          local end_pos = vim.fn.getpos("'>")
+
+          require("conform").format({
+            async = true,
+            range = {
+              start = { start_pos[2], start_pos[3] - 1 },
+              ["end"] = { end_pos[2], end_pos[3] - 1 },
+            },
+          })
+        end,
+        mode = "x",
+        desc = "Format selection",
+      },
     },
     opts = {
       formatters_by_ft = {
         c = { "clang-format" },
         cpp = { "clang-format" },
-        python = { "ruff" },
+        python = { "ruff_fix", "ruff_format" },
         javascript = { "prettier", stop_after_first = true },
         typescript = { "prettier", stop_after_first = true },
         javascriptreact = { "prettier", stop_after_first = true },
@@ -374,13 +408,6 @@ return {
       default_format_opts = {
         lsp_format = "fallback",
       },
-      format_on_save = function(bufnr)
-        -- 对 SQL 文件禁用自动格式化,避免语法错误导致保存失败
-        if vim.bo[bufnr].filetype == "sql" then
-          return nil
-        end
-        return { timeout_ms = 2000 }
-      end,
       formatters = {
         ["clang-format"] = {
           prepend_args = {
@@ -393,7 +420,7 @@ return {
             "--indent=2",
           },
         },
-        ruff = {
+        ruff_fix = {
           append_args = {
             "--ignore",
             "F401", -- unused import
