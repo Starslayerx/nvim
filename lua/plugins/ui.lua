@@ -22,15 +22,76 @@ return {
 
         lualine_bold = true, -- When `true`, section headers in the lualine theme will be bold
       },
+      on_highlights = function(highlights, colors)
+        local float_bg = colors.polar_night.bright
+        local select_bg = colors.polar_night.light
+
+        highlights.Visual = { fg = colors.snow_storm.brightest, bg = select_bg, bold = true }
+        highlights.VisualNOS = { fg = colors.snow_storm.brightest, bg = select_bg, bold = true }
+
+        highlights.NormalFloat = { fg = colors.snow_storm.origin, bg = float_bg }
+        highlights.FloatBorder = { fg = colors.polar_night.light, bg = float_bg }
+        highlights.Pmenu = { fg = colors.snow_storm.origin, bg = float_bg }
+        highlights.PmenuSel = { fg = colors.snow_storm.brightest, bg = colors.polar_night.brighter, bold = true }
+      end,
     },
-    config = function()
-      require("nord").setup({})
+    config = function(_, opts)
+      require("nord").setup(opts)
       vim.cmd.colorscheme("nord")
     end,
   },
 
   -- icons 图标支持
-  { "nvim-mini/mini.nvim", version = "*" },
+  {
+    "nvim-mini/mini.nvim",
+    version = "*",
+    config = function()
+      local indentscope = require("mini.indentscope")
+      local function set_indentscope_highlight()
+        vim.api.nvim_set_hl(0, "MiniIndentscopeSymbol", {
+          fg = "#E5E9F0",
+          nocombine = true,
+        })
+      end
+
+      indentscope.setup({
+        symbol = "│",
+        draw = {
+          delay = 0,
+          animation = indentscope.gen_animation.none(),
+        },
+        options = {
+          try_as_border = true,
+        },
+      })
+      set_indentscope_highlight()
+
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        callback = set_indentscope_highlight,
+      })
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = {
+          "help",
+          "lazy",
+          "mason",
+          "neo-tree",
+          "NvimTree",
+          "noice",
+          "notify",
+          "snacks_dashboard",
+          "snacks_picker_input",
+          "snacks_picker_list",
+          "terminal",
+          "toggleterm",
+          "Trouble",
+        },
+        callback = function(args)
+          vim.b[args.buf].miniindentscope_disable = true
+        end,
+      })
+    end,
+  },
   { "nvim-tree/nvim-web-devicons", lazy = true },
 
   -- 展示 key mapping

@@ -170,6 +170,55 @@ return {
       local dap = require("dap")
       require("dap-view").setup(opts)
 
+      local function is_jump_target(win, dap_view_win)
+        if not win or win == 0 or not vim.api.nvim_win_is_valid(win) then
+          return false
+        end
+        if dap_view_win and win == dap_view_win then
+          return false
+        end
+        if vim.wo[win].winfixbuf then
+          return false
+        end
+
+        local buf = vim.api.nvim_win_get_buf(win)
+        if not vim.api.nvim_buf_is_valid(buf) then
+          return false
+        end
+
+        return vim.bo[buf].buftype == ""
+      end
+
+      local function focus_edit_window_for_dap_jump()
+        local cur_win = vim.api.nvim_get_current_win()
+        if not vim.api.nvim_win_is_valid(cur_win) then
+          return
+        end
+
+        local state = require("dap-view.state")
+        local dap_view_win = state.winnr
+        local cur_is_dap_view = dap_view_win and cur_win == dap_view_win
+
+        if not cur_is_dap_view and not vim.wo[cur_win].winfixbuf then
+          return
+        end
+
+        local alt_win = vim.fn.win_getid(vim.fn.winnr("#"))
+        if is_jump_target(alt_win, dap_view_win) then
+          vim.api.nvim_set_current_win(alt_win)
+          return
+        end
+
+        for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+          if is_jump_target(win, dap_view_win) then
+            vim.api.nvim_set_current_win(win)
+            return
+          end
+        end
+
+        vim.cmd("belowright split")
+      end
+
       -- Force redraw on DAP events to fix rendering issues
       local function force_redraw()
         vim.cmd("redraw!")
@@ -180,6 +229,11 @@ return {
           vim.cmd("redraw")
         end)
       end
+
+      -- nvim-dap jumps to the stopped frame in the current window. If the
+      -- current window is dap-view (or any other winfixbuf window), that jump
+      -- fails with E1513. Move focus back to a normal edit window first.
+      dap.listeners.before.event_stopped["avoid_winfixbuf_jump"] = focus_edit_window_for_dap_jump
 
       -- Redraw after stopped event (when execution pauses at breakpoint)
       dap.listeners.after.event_stopped["force_redraw"] = schedule_redraw
@@ -328,12 +382,6 @@ return {
           end
 
           vim.cmd("DapViewOpen")
-          vim.schedule(function()
-            local new_state = require("dap-view.state")
-            if new_state.winnr and vim.api.nvim_win_is_valid(new_state.winnr) then
-              vim.api.nvim_set_current_win(new_state.winnr)
-            end
-          end)
         end,
         desc = "Toggle View",
       },
