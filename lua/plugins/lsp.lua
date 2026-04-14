@@ -284,6 +284,7 @@ return {
       local outline_mt = getmetatable(outline)
       local outline_text_ns = vim.api.nvim_create_namespace("SagaOutlineText")
       local saga_kinds = require("lspsaga.lspkind").kind
+      local saga_slist = require("lspsaga.slist")
 
       local function highlight_outline_names(self)
         if not self.bufnr or not vim.api.nvim_buf_is_valid(self.bufnr) or not self.list then
@@ -310,9 +311,41 @@ return {
 
         local outline_group = vim.api.nvim_create_augroup("outline", { clear = false })
 
+        local function outline_window_is_valid(self)
+          return self.winid
+            and vim.api.nvim_win_is_valid(self.winid)
+            and self.bufnr
+            and vim.api.nvim_buf_is_valid(self.bufnr)
+        end
+
+        local function save_outline_view(self)
+          if not outline_window_is_valid(self) then
+            return nil
+          end
+
+          local ok, view = pcall(vim.api.nvim_win_call, self.winid, vim.fn.winsaveview)
+          return ok and view or nil
+        end
+
+        local function restore_outline_view(self, view)
+          if not view or not outline_window_is_valid(self) then
+            return
+          end
+
+          local line_count = vim.api.nvim_buf_line_count(self.bufnr)
+          view.lnum = math.min(math.max(view.lnum or 1, 1), line_count)
+          view.topline = math.min(math.max(view.topline or 1, 1), line_count)
+          pcall(vim.api.nvim_win_call, self.winid, function()
+            vim.fn.winrestview(view)
+          end)
+        end
+
         outline_mt.parse = function(self, symbols, curline)
+          local view = curline and nil or save_outline_view(self)
+          self.list = saga_slist.new()
           original_parse(self, symbols, curline)
           highlight_outline_names(self)
+          restore_outline_view(self, view)
         end
 
         outline_mt.toggle_or_jump = function(self)
