@@ -340,12 +340,53 @@ return {
           end)
         end
 
+        local function node_contains_line(value, line)
+          local range = value.range or value.selectionRange or value.targetRange
+          if value.location then
+            range = value.location.range
+          end
+
+          return range and line >= range.start.line and line <= range["end"].line
+        end
+
+        local function focus_outline_at_line(self, curline)
+          if not curline or not outline_window_is_valid(self) or not self.list then
+            return
+          end
+
+          local line = curline - 1
+          local target
+          local node = self.list
+          while node do
+            local value = node.value
+            if value and value.winline and value.winline > 0 and node_contains_line(value, line) then
+              target = value
+            end
+            node = node.next
+          end
+
+          if not target then
+            return
+          end
+
+          local row = math.min(target.winline, vim.api.nvim_buf_line_count(self.bufnr))
+          local col = math.max((target.inlevel or 1) - 1, 0)
+          pcall(vim.api.nvim_win_set_cursor, self.winid, { row, col })
+          pcall(vim.api.nvim_win_call, self.winid, function()
+            vim.cmd("normal! zz")
+          end)
+        end
+
         outline_mt.parse = function(self, symbols, curline)
           local view = curline and nil or save_outline_view(self)
           self.list = saga_slist.new()
           original_parse(self, symbols, curline)
           highlight_outline_names(self)
+          focus_outline_at_line(self, curline)
           restore_outline_view(self, view)
+          vim.schedule(function()
+            focus_outline_at_line(self, curline)
+          end)
         end
 
         outline_mt.toggle_or_jump = function(self)
