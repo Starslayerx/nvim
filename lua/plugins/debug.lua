@@ -75,6 +75,7 @@ return {
   -- Inline variable values while debugging
   {
     "theHamsta/nvim-dap-virtual-text",
+    enabled = false,
     dependencies = {
       "mfussenegger/nvim-dap",
       "nvim-treesitter/nvim-treesitter",
