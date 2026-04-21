@@ -1,3 +1,84 @@
+local function document_symbol_client(bufnr)
+  for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+    if client.initialized ~= false and client:supports_method("textDocument/documentSymbol") then
+      return client
+    end
+  end
+end
+
+local function lspsaga_symbol_backend()
+  if vim.version().minor >= 10 and vim.fn.exists("##LspNotify") ~= 0 then
+    return require("lspsaga.symbol.head")
+  end
+
+  return require("lspsaga.symbol")
+end
+
+local function bootstrap_lspsaga_symbols(bufnr)
+  local client = document_symbol_client(bufnr)
+  if not client then
+    return nil, nil
+  end
+
+  vim.api.nvim_exec_autocmds("LspAttach", {
+    group = "LspsagaSymbols",
+    buffer = bufnr,
+    modeline = false,
+    data = { client_id = client.id },
+  })
+
+  return client, lspsaga_symbol_backend()
+end
+
+local function toggle_lspsaga_outline()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local outline = require("lspsaga.symbol.outline")
+
+  if outline.winid and vim.api.nvim_win_is_valid(outline.winid) then
+    outline:outline(bufnr)
+    return
+  end
+
+  local client, symbols = bootstrap_lspsaga_symbols(bufnr)
+  if not client then
+    vim.notify("Current buffer has no LSP client with documentSymbol support.", vim.log.levels.WARN)
+    return
+  end
+
+  local cached = symbols:get_buf_symbols(bufnr)
+  if cached and cached.symbols and #cached.symbols > 0 then
+    outline:outline(bufnr)
+    return
+  end
+
+  local group = vim.api.nvim_create_augroup("LspsagaOutlineBootstrap", { clear = false })
+  local autocmd_id
+  autocmd_id = vim.api.nvim_create_autocmd("User", {
+    group = group,
+    pattern = "SagaSymbolUpdate",
+    callback = function(args)
+      if not args.data or args.data.bufnr ~= bufnr then
+        return
+      end
+
+      pcall(vim.api.nvim_del_autocmd, autocmd_id)
+      vim.schedule(function()
+        local updated = symbols:get_buf_symbols(bufnr)
+        if updated and updated.symbols and #updated.symbols > 0 then
+          outline:outline(bufnr)
+          return
+        end
+
+        vim.notify("[lspsaga] No document symbols returned for current buffer.", vim.log.levels.WARN)
+      end)
+    end,
+  })
+
+  if not cached or not cached.pending_request then
+    symbols:do_request(bufnr, client.id)
+  end
+end
+
 return {
   -- neovim LSP client
   {
@@ -448,6 +529,12 @@ return {
           })
         end
       end
+
+      for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_loaded(bufnr) then
+          bootstrap_lspsaga_symbols(bufnr)
+        end
+      end
     end,
     keys = {
       -- 查看文档（替代原来的 K）- 自动聚焦到浮动窗口
@@ -502,7 +589,7 @@ return {
       { "]d", "<cmd>Lspsaga diagnostic_jump_next<cr>", desc = "Next Diagnostic" },
 
       -- 大纲（文件结构）
-      { "<leader>o", "<cmd>Lspsaga outline<cr>", desc = "Toggle Outline" },
+      { "<leader>o", toggle_lspsaga_outline, desc = "Toggle Outline" },
     },
   },
 
