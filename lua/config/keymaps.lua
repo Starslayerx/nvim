@@ -56,6 +56,21 @@ keymap("n", "tml", ":+tabmove<CR>", { noremap = true, silent = true, desc = "Mov
 -- ===
 -- === Window management
 -- ===
+keymap("n", "<leader>z", function()
+  if vim.t.zoomed_window then
+    vim.cmd("tabclose")
+    return
+  end
+
+  if vim.fn.winnr("$") == 1 then
+    vim.notify("Current window is already full screen", vim.log.levels.INFO)
+    return
+  end
+
+  vim.cmd("tab split")
+  vim.t.zoomed_window = true
+end, { noremap = true, silent = true, desc = "Toggle window full screen" })
+
 -- 快速打开终端快捷键
 vim.keymap.set("n", "<C-w>t", ":split | terminal<CR>", { silent = true, desc = "Open terminal" })
 vim.keymap.set("n", "<C-w>T", ":vsplit | terminal<CR>", { silent = true, desc = "Open terminal" })
