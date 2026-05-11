@@ -87,6 +87,12 @@ return {
     "RRethy/vim-illuminate",
     event = { "BufReadPost", "BufNewFile" },
     config = function()
+      if vim.str_byteindx == nil and vim.str_byteindex ~= nil then
+        vim.str_byteindx = function(str, encoding, index, strict_indexing)
+          return vim.str_byteindex(str, encoding, index, strict_indexing)
+        end
+      end
+
       local function set_illuminate_highlights()
         vim.api.nvim_set_hl(0, "IlluminatedWordText", { bg = "#5b6372" })
         vim.api.nvim_set_hl(0, "IlluminatedWordRead", { bg = "#555d6b" })

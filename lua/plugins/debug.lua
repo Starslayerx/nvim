@@ -131,7 +131,97 @@ return {
     config = function()
       -- 使用 Mason 安装的 debugpy
       local mason_path = vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
-      require("dap-python").setup(mason_path)
+      local dap_python = require("dap-python")
+      dap_python.setup(mason_path)
+      local dap = require("dap")
+      local python_path = dap_python.resolve_python
+
+      local function current_python_module_name()
+        local file = vim.api.nvim_buf_get_name(0)
+        if file == "" then
+          return ""
+        end
+
+        local relative = vim.fn.fnamemodify(file, ":.")
+        if relative == file then
+          return ""
+        end
+
+        if not relative:match("%.py$") then
+          return ""
+        end
+
+        local module = relative:gsub("%.py$", ""):gsub("/", ".")
+        module = module:gsub("%.__init__$", "")
+        return module
+      end
+
+      dap.configurations.python = {
+        {
+          type = "python",
+          request = "launch",
+          name = "file",
+          program = "${file}",
+          console = "integratedTerminal",
+          pythonPath = python_path,
+          justMyCode = true,
+        },
+        {
+          type = "python",
+          request = "launch",
+          name = "file:args",
+          program = "${file}",
+          args = function()
+            local args_string = vim.fn.input("Arguments: ")
+            local utils = require("dap.utils")
+            if utils.splitstr and vim.fn.has("nvim-0.10") == 1 then
+              return utils.splitstr(args_string)
+            end
+            return vim.split(args_string, " +")
+          end,
+          console = "integratedTerminal",
+          pythonPath = python_path,
+          justMyCode = true,
+        },
+        {
+          type = "python",
+          request = "launch",
+          name = "module",
+          module = function()
+            local default = current_python_module_name()
+            return vim.fn.input("Module name: ", default)
+          end,
+          cwd = function()
+            return vim.fn.getcwd()
+          end,
+          console = "integratedTerminal",
+          pythonPath = python_path,
+          justMyCode = true,
+        },
+        {
+          type = "python",
+          request = "attach",
+          name = "attach",
+          connect = function()
+            local host = vim.fn.input("Host [127.0.0.1]: ")
+            host = host ~= "" and host or "127.0.0.1"
+            local port = tonumber(vim.fn.input("Port [5678]: ")) or 5678
+            return { host = host, port = port }
+          end,
+          justMyCode = true,
+        },
+        {
+          type = "python",
+          request = "launch",
+          name = "file:doctest",
+          module = "doctest",
+          args = { "${file}" },
+          noDebug = true,
+          console = "integratedTerminal",
+          pythonPath = python_path,
+          justMyCode = true,
+        },
+      }
 
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "python",

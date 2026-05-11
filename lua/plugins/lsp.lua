@@ -616,7 +616,7 @@ return {
       },
       lsp = {
         progress = {
-          enabled = true, -- 启用 LSP 进度通知
+          enabled = false, -- 关闭右上角 LSP 进度提示，避免 pyright 持续占用空间
           view = "notify",
         },
         override = {
