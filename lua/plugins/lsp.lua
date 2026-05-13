@@ -539,7 +539,7 @@ return {
     keys = {
       -- 查看文档（替代原来的 K）- 自动聚焦到浮动窗口
       {
-        "gh",
+        "<leader>lh",
         function()
           vim.cmd("Lspsaga hover_doc ++keep")
           -- 延迟后查找并聚焦到 hover 窗口
@@ -562,21 +562,38 @@ return {
         desc = "Hover Documentation",
       },
 
-      -- 跳转到定义（垂直分屏打开）
+      -- 跳转到定义（当前窗口）
       {
-        "gd",
+        "<leader>ld",
+        "<cmd>Lspsaga goto_definition<cr>",
+        desc = "Goto Definition",
+      },
+
+      -- 跳转到定义（垂直分屏）
+      {
+        "<leader>lv",
         function()
           vim.cmd("vsplit")
           vim.cmd("Lspsaga goto_definition")
         end,
-        desc = "Goto Definition (vsplit)",
+        desc = "Goto Definition (Vertical Split)",
+      },
+
+      -- 跳转到定义（水平分屏）
+      {
+        "<leader>ls",
+        function()
+          vim.cmd("split")
+          vim.cmd("Lspsaga goto_definition")
+        end,
+        desc = "Goto Definition (Horizontal Split)",
       },
 
       -- 预览定义（不跳转，浮动窗口显示）
-      { "gp", "<cmd>Lspsaga peek_definition<cr>", desc = "Peek Definition" },
+      { "<leader>lf", "<cmd>Lspsaga peek_definition<cr>", desc = "Peek Definition" },
 
       -- 查找引用和实现
-      { "gr", "<cmd>Lspsaga finder<cr>", desc = "LSP Finder (References/Implementation)" },
+      { "<leader>lr", "<cmd>Lspsaga finder<cr>", desc = "LSP Finder (References/Implementation)" },
 
       -- 重命名变量
       { "<leader>rn", "<cmd>Lspsaga rename<cr>", desc = "LSP Rename" },
