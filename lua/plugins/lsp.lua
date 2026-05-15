@@ -734,6 +734,14 @@ return {
           },
           opts = { skip = true },
         },
+        {
+          filter = {
+            event = "msg_show",
+            kind = "",
+            find = '^".*"%s+%d+L,',
+          },
+          opts = { skip = true },
+        },
       },
       views = {
         notify = {

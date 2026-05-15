@@ -4,6 +4,9 @@ vim.g.loaded_perl_provider = 0
 -- 禁用 Ruby 提供商
 vim.g.loaded_ruby_provider = 0
 
+-- Suppress file read/write messages before plugins start rendering UI.
+vim.opt.shortmess = "filnxxtToOF"
+
 -- lazy.nvim
 require("config.lazy")
 
