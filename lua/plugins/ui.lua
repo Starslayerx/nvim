@@ -104,6 +104,12 @@ return {
       show_help = false,
       show_keys = false,
       sort = { "manual", "local", "order", "group", "alphanum", "mod" },
+      win = {
+        -- Keep the popup height stable near the bottom of the screen.
+        -- With no_overlap=true, which-key shrinks the window when the cursor is
+        -- a few lines above the bottom, hiding some mappings.
+        no_overlap = false,
+      },
       icons = {
         mappings = true,
       },
