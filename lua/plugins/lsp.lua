@@ -79,6 +79,116 @@ local function toggle_lspsaga_outline()
   end
 end
 
+local function debug_current_buffer_diagnostics()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local clients = vim.lsp.get_clients({ bufnr = bufnr })
+  local diagnostics = vim.diagnostic.get(bufnr)
+  local lines = {
+    ("buf=%d file=%s"):format(bufnr, vim.api.nvim_buf_get_name(bufnr)),
+    ("diag_count=%d"):format(#diagnostics),
+  }
+
+  if #clients == 0 then
+    lines[#lines + 1] = "clients=(none)"
+  else
+    for _, client in ipairs(clients) do
+      lines[#lines + 1] = ("client=%s root=%s"):format(client.name, client.config.root_dir or "nil")
+
+      local debug_state = vim.b[bufnr].pyright_diag_debug
+      if client.name == "pyright" and debug_state then
+        lines[#lines + 1] = ("diagnostic_mode=%s"):format(debug_state.diagnostic_mode or "nil")
+        lines[#lines + 1] = ("last_publish_count=%s"):format(debug_state.last_count or "nil")
+        lines[#lines + 1] = ("last_publish_at=%s"):format(debug_state.last_at or "nil")
+        lines[#lines + 1] = ("last_changed_count=%s"):format(debug_state.last_changed_count or "nil")
+        lines[#lines + 1] = ("last_notify=%s %s"):format(
+          debug_state.last_notify_method or "nil",
+          debug_state.last_notify_at or "nil"
+        )
+      end
+    end
+  end
+
+  local ns_counts = {}
+  for _, diag in ipairs(vim.diagnostic.get(bufnr, { enabled = true })) do
+    local ns = diag.namespace or -1
+    ns_counts[ns] = (ns_counts[ns] or 0) + 1
+  end
+  for ns, count in pairs(ns_counts) do
+    lines[#lines + 1] = ("namespace[%s]=%d"):format(ns, count)
+  end
+
+  if #diagnostics > 0 then
+    for _, diag in ipairs(diagnostics) do
+      lines[#lines + 1] = ("%d:%d %s %s"):format(
+        diag.lnum + 1,
+        diag.col + 1,
+        diag.source or "unknown",
+        diag.code or diag.message
+      )
+    end
+  end
+
+  vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO, { title = "LSP Diagnostics Debug" })
+end
+
+local function attach_pyright_diagnostic_debug(args)
+  local client = vim.lsp.get_client_by_id(args.data and args.data.client_id or -1)
+  if not client or client.name ~= "pyright" then
+    return
+  end
+
+  local bufnr = args.buf
+  local group = vim.api.nvim_create_augroup(("PyrightDiagnosticDebug.%d"):format(bufnr), { clear = true })
+  local state = vim.b[bufnr].pyright_diag_debug or {}
+  state.diagnostic_mode = vim.tbl_get(client.config.settings, "python", "analysis", "diagnosticMode")
+  vim.b[bufnr].pyright_diag_debug = state
+
+  vim.api.nvim_create_autocmd("DiagnosticChanged", {
+    group = group,
+    buffer = bufnr,
+    callback = function(event)
+      local current = vim.b[event.buf].pyright_diag_debug or {}
+      current.diagnostic_mode = current.diagnostic_mode
+        or vim.tbl_get(client.config.settings, "python", "analysis", "diagnosticMode")
+      current.last_count = #vim.diagnostic.get(event.buf)
+      current.last_at = os.date("%H:%M:%S")
+      current.last_changed_count = #(event.data and event.data.diagnostics or {})
+      vim.b[event.buf].pyright_diag_debug = current
+    end,
+    desc = "Track latest pyright diagnostics for debugging",
+  })
+
+  if vim.fn.exists("##LspNotify") ~= 0 then
+    vim.api.nvim_create_autocmd("LspNotify", {
+      group = group,
+      callback = function(event)
+        local data = event.data or {}
+        if data.client_id ~= client.id then
+          return
+        end
+
+        local method = data.method
+        if method ~= "textDocument/didOpen" and method ~= "textDocument/didChange" and method ~= "textDocument/didClose" then
+          return
+        end
+
+        local uri = vim.tbl_get(data.params, "textDocument", "uri")
+        if uri ~= vim.uri_from_bufnr(bufnr) then
+          return
+        end
+
+        local current = vim.b[bufnr].pyright_diag_debug or {}
+        current.diagnostic_mode = current.diagnostic_mode
+          or vim.tbl_get(client.config.settings, "python", "analysis", "diagnosticMode")
+        current.last_notify_method = method
+        current.last_notify_at = os.date("%H:%M:%S")
+        vim.b[bufnr].pyright_diag_debug = current
+      end,
+      desc = "Track pyright textDocument notifications for debugging",
+    })
+  end
+end
+
 return {
   -- neovim LSP client
   {
@@ -135,6 +245,13 @@ return {
       -- Pyright 特殊配置
       vim.lsp.config.pyright = {
         capabilities = capabilities,
+        settings = {
+          python = {
+            analysis = {
+              diagnosticMode = "workspace",
+            },
+          },
+        },
         before_init = function(_, config)
           -- 向上查找虚拟环境（最多 3 层）
           local function find_venv(start_path)
@@ -158,28 +275,14 @@ return {
           if config.root_dir then
             local venv = find_venv(config.root_dir)
             if venv then
-              config.settings.python.pythonPath = venv .. "/bin/python"
+              config.settings = vim.tbl_deep_extend("force", config.settings or {}, {
+                python = {
+                  pythonPath = venv .. "/bin/python",
+                },
+              })
             end
           end
         end,
-        settings = {
-          python = {
-            analysis = {
-              typeCheckingMode = "off",
-              diagnosticMode = "openFilesOnly",
-              useLibraryCodeForTypes = false,
-              autoSearchPaths = true,
-              diagnosticSeverityOverrides = {
-                reportGeneralTypeIssues = "none",
-                reportOptionalMemberAccess = "none",
-                reportOptionalSubscript = "none",
-                reportOptionalCall = "none",
-                reportUnboundVariable = "none",
-                reportAttributeAccessIssue = "none",
-              },
-            },
-          },
-        },
       }
 
       -- Lua_ls 特殊配置
@@ -238,6 +341,12 @@ return {
       for _, server in ipairs(opts.ensure_installed) do
         vim.lsp.enable(server)
       end
+
+      vim.api.nvim_create_autocmd("LspAttach", {
+        group = vim.api.nvim_create_augroup("PyrightDiagnosticDebug", { clear = true }),
+        callback = attach_pyright_diagnostic_debug,
+        desc = "Track pyright diagnostic updates",
+      })
     end,
   },
 
@@ -251,8 +360,33 @@ return {
     },
     cmd = "Trouble",
     keys = {
-      { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics (Trouble)" },
-      { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer Diagnostics" },
+      {
+        "<leader>xl",
+        function()
+          vim.diagnostic.open_float(nil, {
+            scope = "line",
+            focusable = true,
+            border = "rounded",
+            source = "always",
+          })
+        end,
+        desc = "Line Diagnostics",
+      },
+      {
+        "<leader>xd",
+        debug_current_buffer_diagnostics,
+        desc = "Diagnostics Debug",
+      },
+      {
+        "<leader>xx",
+        "<cmd>Trouble diagnostics toggle<cr>",
+        desc = "Workspace Diagnostics",
+      },
+      {
+        "<leader>xX",
+        "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+        desc = "Buffer Diagnostics",
+      },
       { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<cr>", desc = "Symbols (Trouble)" },
       { "<leader>cl", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", desc = "LSP Info (Trouble)" },
       { "<leader>xL", "<cmd>Trouble loclist toggle<cr>", desc = "Location List" },
@@ -263,7 +397,7 @@ return {
   -- Inline diagnostics
   {
     "rachartier/tiny-inline-diagnostic.nvim",
-    event = "VeryLazy",
+    event = { "BufReadPre", "BufNewFile" },
     priority = 1000,
     config = function()
       -- 禁用 vim 默认的 virtual text 诊断（由 tiny-inline-diagnostic 接管）
@@ -279,7 +413,7 @@ return {
         preset = "ghost",
         options = {
           show_source = { enabled = true, if_many = true },
-          throttle = 150, -- 增加延迟到 150ms，减少闪现频率
+          throttle = 80,
           softwrap = 30,
           multilines = { enabled = true, always_show = true },
           show_all_diags_on_cursorline = false,
@@ -287,31 +421,6 @@ return {
           overflow = { mode = "wrap" },
           virt_texts = { priority = 2048 },
         },
-      })
-
-      -- 添加智能延迟：在输入时延迟显示诊断，减少闪现
-      local last_insert_time = 0
-      local insert_timeout = vim.fn.timer_start
-
-      vim.api.nvim_create_autocmd("InsertEnter", {
-        callback = function()
-          last_insert_time = vim.loop.hrtime()
-        end,
-      })
-
-      vim.api.nvim_create_autocmd("InsertLeave", {
-        callback = function()
-          local current_time = vim.loop.hrtime()
-          local elapsed = (current_time - last_insert_time) / 1000000 -- 转换为毫秒
-
-          -- 如果插入时间很短（快速输入），延迟更长时间才显示诊断
-          if elapsed < 200 then
-            vim.defer_fn(function()
-              -- 触发诊断刷新
-              vim.diagnostic.show()
-            end, 300)
-          end
-        end,
       })
     end,
   },
