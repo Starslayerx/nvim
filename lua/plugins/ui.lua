@@ -376,7 +376,7 @@ return {
     config = function()
       require("rainbow-delimiters.setup").setup({
         strategy = {
-          [""] = "config.rainbow_delimiters_safe_global",
+          [""] = "rainbow-delimiters.strategy.global",
           vim = "rainbow-delimiters.strategy.local",
         },
         query = {
