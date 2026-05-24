@@ -206,6 +206,21 @@ local function attach_pyright_diagnostic_debug(args)
   end
 end
 
+local htmx_custom_data_path = vim.fn.stdpath("config") .. "/data/htmx.html-data.json"
+
+local function html_custom_data_content(_, uri)
+  local requested_path = htmx_custom_data_path
+  if type(uri) == "string" then
+    requested_path = vim.uri_to_fname(uri)
+  end
+  if requested_path ~= htmx_custom_data_path then
+    return nil
+  end
+
+  local lines = vim.fn.readfile(requested_path)
+  return table.concat(lines, "\n")
+end
+
 return {
   -- neovim LSP client
   {
@@ -332,12 +347,23 @@ return {
       vim.lsp.config.html = {
         capabilities = capabilities,
         filetypes = { "html", "htmldjango" },
+        init_options = {
+          provideFormatter = true,
+          embeddedLanguages = { css = true, javascript = true },
+          configurationSection = { "html", "css", "javascript" },
+          dataPaths = {
+            vim.uri_from_fname(htmx_custom_data_path),
+          },
+        },
         settings = {
           html = {
             customData = {
-              vim.fn.stdpath("config") .. "/data/htmx.html-data.json",
+              htmx_custom_data_path,
             },
           },
+        },
+        handlers = {
+          ["html/customDataContent"] = html_custom_data_content,
         },
       }
 
