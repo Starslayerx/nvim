@@ -138,6 +138,11 @@ local function attach_pyright_diagnostic_debug(args)
   end
 
   local bufnr = args.buf
+  if not vim.api.nvim_buf_is_valid(bufnr) then
+    return
+  end
+
+  local buffer_uri = vim.uri_from_bufnr(bufnr)
   local group = vim.api.nvim_create_augroup(("PyrightDiagnosticDebug.%d"):format(bufnr), { clear = true })
   local state = vim.b[bufnr].pyright_diag_debug or {}
   state.diagnostic_mode = vim.tbl_get(client.config.settings, "python", "analysis", "diagnosticMode")
@@ -147,6 +152,10 @@ local function attach_pyright_diagnostic_debug(args)
     group = group,
     buffer = bufnr,
     callback = function(event)
+      if not vim.api.nvim_buf_is_valid(event.buf) then
+        return
+      end
+
       local current = vim.b[event.buf].pyright_diag_debug or {}
       current.diagnostic_mode = current.diagnostic_mode
         or vim.tbl_get(client.config.settings, "python", "analysis", "diagnosticMode")
@@ -162,6 +171,10 @@ local function attach_pyright_diagnostic_debug(args)
     vim.api.nvim_create_autocmd("LspNotify", {
       group = group,
       callback = function(event)
+        if not vim.api.nvim_buf_is_valid(bufnr) then
+          return
+        end
+
         local data = event.data or {}
         if data.client_id ~= client.id then
           return
@@ -173,7 +186,7 @@ local function attach_pyright_diagnostic_debug(args)
         end
 
         local uri = vim.tbl_get(data.params, "textDocument", "uri")
-        if uri ~= vim.uri_from_bufnr(bufnr) then
+        if uri ~= buffer_uri then
           return
         end
 
