@@ -1,5 +1,9 @@
 -- Jinja2/Flask 模板文件类型配置
 
+-- htmldjango parser 在混合 HTML/Jinja2 时高亮不稳定；提前注册，确保
+-- FileType autocmd 启动 treesitter 前就使用 html parser。
+vim.treesitter.language.register("html", "htmldjango")
+
 -- 纯 Jinja2 文件（.jinja, .jinja2, .j2）使用 htmldjango 文件类型
 vim.filetype.add({
   extension = {
@@ -49,9 +53,6 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function(args)
     -- 设置注释格式（用于 gcc 等注释命令）
     vim.bo.commentstring = "{# %s #}"
-    -- 使用 html treesitter parser（比 htmldjango parser 更稳定）
-    -- htmldjango parser 的高亮质量不稳定，彩虹括号也会失效
-    vim.treesitter.language.register("html", "htmldjango")
     -- 禁用彩虹括号（html parser 在遇到 Jinja2 语法时会打断，导致括号匹配混乱）
     vim.b[args.buf].rainbow_delimiters = { enabled = false }
   end,

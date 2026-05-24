@@ -437,6 +437,49 @@ return {
     opts = {},
   },
 
+  -- Context-aware commentstring for embedded languages/templates.
+  {
+    "JoosepAlviste/nvim-ts-context-commentstring",
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      local function htmldjango_commentstring()
+        if vim.bo.filetype ~= "htmldjango" then
+          return nil
+        end
+
+        local line = vim.api.nvim_get_current_line()
+        if line:find("{{", 1, true) or line:find("{%", 1, true) or line:find("{#", 1, true) then
+          return "{# %s #}"
+        end
+
+        return "<!-- %s -->"
+      end
+
+      require("ts_context_commentstring").setup({
+        enable_autocmd = false,
+        custom_calculation = function()
+          return htmldjango_commentstring()
+        end,
+      })
+
+      if vim.g.ts_context_commentstring_get_option_patched then
+        return
+      end
+
+      local get_option = vim.filetype.get_option
+      vim.filetype.get_option = function(filetype, option)
+        if option ~= "commentstring" then
+          return get_option(filetype, option)
+        end
+
+        return htmldjango_commentstring()
+          or require("ts_context_commentstring").calculate_commentstring()
+          or get_option(filetype, option)
+      end
+      vim.g.ts_context_commentstring_get_option_patched = true
+    end,
+  },
+
   -- 展示色块
   {
     "Starslayerx/nvim-colorizer.lua",

@@ -1,0 +1,169 @@
+{
+  "version": 1.1,
+  "globalAttributes": [
+    {
+      "name": "hx-boost",
+      "description": "Boost normal links and forms to use AJAX requests."
+    },
+    {
+      "name": "hx-confirm",
+      "description": "Show a confirmation dialog before issuing the request."
+    },
+    {
+      "name": "hx-delete",
+      "description": "Issue a DELETE request to the given URL."
+    },
+    {
+      "name": "hx-disable",
+      "description": "Disable htmx processing for this element and its children."
+    },
+    {
+      "name": "hx-disabled-elt",
+      "description": "Disable selected elements while a request is in flight."
+    },
+    {
+      "name": "hx-disinherit",
+      "description": "Control which inherited htmx attributes should not be inherited."
+    },
+    {
+      "name": "hx-encoding",
+      "description": "Set the request encoding type, such as multipart/form-data."
+    },
+    {
+      "name": "hx-ext",
+      "description": "Enable one or more htmx extensions for this element."
+    },
+    {
+      "name": "hx-get",
+      "description": "Issue a GET request to the given URL."
+    },
+    {
+      "name": "hx-headers",
+      "description": "Add request headers using a JSON object."
+    },
+    {
+      "name": "hx-history",
+      "description": "Control whether the page is saved in the history cache.",
+      "values": [
+        { "name": "true" },
+        { "name": "false" }
+      ]
+    },
+    {
+      "name": "hx-history-elt",
+      "description": "Mark the element whose content should be saved in the history cache."
+    },
+    {
+      "name": "hx-include",
+      "description": "Include additional elements in request parameter collection."
+    },
+    {
+      "name": "hx-indicator",
+      "description": "Select the element that receives the htmx-request class while loading."
+    },
+    {
+      "name": "hx-on",
+      "description": "Attach inline event handlers for htmx or DOM events."
+    },
+    {
+      "name": "hx-params",
+      "description": "Filter submitted request parameters."
+    },
+    {
+      "name": "hx-patch",
+      "description": "Issue a PATCH request to the given URL."
+    },
+    {
+      "name": "hx-post",
+      "description": "Issue a POST request to the given URL."
+    },
+    {
+      "name": "hx-preserve",
+      "description": "Preserve this element by id between content swaps."
+    },
+    {
+      "name": "hx-prompt",
+      "description": "Show a prompt before issuing the request and submit the result."
+    },
+    {
+      "name": "hx-push-url",
+      "description": "Push a URL into browser history after a successful request.",
+      "values": [
+        { "name": "true" },
+        { "name": "false" }
+      ]
+    },
+    {
+      "name": "hx-put",
+      "description": "Issue a PUT request to the given URL."
+    },
+    {
+      "name": "hx-replace-url",
+      "description": "Replace the current browser history URL after a successful request.",
+      "values": [
+        { "name": "true" },
+        { "name": "false" }
+      ]
+    },
+    {
+      "name": "hx-request",
+      "description": "Configure request behavior using a JSON object."
+    },
+    {
+      "name": "hx-select",
+      "description": "Select the fragment to swap from the server response."
+    },
+    {
+      "name": "hx-select-oob",
+      "description": "Select content to swap out of band from the server response."
+    },
+    {
+      "name": "hx-swap",
+      "description": "Control how the response is swapped into the target element.",
+      "values": [
+        { "name": "innerHTML" },
+        { "name": "outerHTML" },
+        { "name": "textContent" },
+        { "name": "beforebegin" },
+        { "name": "afterbegin" },
+        { "name": "beforeend" },
+        { "name": "afterend" },
+        { "name": "delete" },
+        { "name": "none" }
+      ]
+    },
+    {
+      "name": "hx-swap-oob",
+      "description": "Swap this element out of band into another part of the document."
+    },
+    {
+      "name": "hx-sync",
+      "description": "Synchronize requests between elements."
+    },
+    {
+      "name": "hx-target",
+      "description": "Select the element that receives the swapped response."
+    },
+    {
+      "name": "hx-trigger",
+      "description": "Specify the event or events that trigger the request."
+    },
+    {
+      "name": "hx-vals",
+      "description": "Add request values using a JSON object."
+    },
+    {
+      "name": "hx-validate",
+      "description": "Force validation before issuing the request.",
+      "values": [
+        { "name": "true" },
+        { "name": "false" }
+      ]
+    },
+    {
+      "name": "hx-vars",
+      "description": "Add dynamically computed request values."
+    }
+  ],
+  "valueSets": []
+}

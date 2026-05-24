@@ -8,5 +8,7 @@
 !init.lua
 !lua/
 !lua/**
+!data/
+!data/**
 !stylua.toml
 !CLAUDE.md

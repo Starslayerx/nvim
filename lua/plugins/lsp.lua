@@ -181,7 +181,11 @@ local function attach_pyright_diagnostic_debug(args)
         end
 
         local method = data.method
-        if method ~= "textDocument/didOpen" and method ~= "textDocument/didChange" and method ~= "textDocument/didClose" then
+        if
+          method ~= "textDocument/didOpen"
+          and method ~= "textDocument/didChange"
+          and method ~= "textDocument/didClose"
+        then
           return
         end
 
@@ -328,6 +332,13 @@ return {
       vim.lsp.config.html = {
         capabilities = capabilities,
         filetypes = { "html", "htmldjango" },
+        settings = {
+          html = {
+            customData = {
+              vim.fn.stdpath("config") .. "/data/htmx.html-data.json",
+            },
+          },
+        },
       }
 
       -- CSS LSP 特殊配置：不服务于 htmldjango（避免在 HTML 模板中出现 CSS 属性补全）
