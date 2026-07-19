@@ -1,740 +1,460 @@
-# Fix tips
+# Neovim 配置
 
-当你的 neovim 出现报错的解决方案：
+[English documentation](README-en.md)
 
-1. 首先法确定报错原因
-2. 根据错误信息定义到具体插件，可以通过暂时禁用插件的方式来实现
-3. 确定错误插件后，看看最近是否有更新，再去 github 上面的 issues 里面看看，以此确定是自己的配置问题，还是更新引入的 bug
-4. 如果是新 commit 的 bug，fork 代码仓库，使用自己仓库尝试修复然后测试，最后提交 pr
-5. 如果配置问题，应该详细阅读文档
+一套以 `lazy.nvim` 为包管理器的模块化 Neovim 配置，重点覆盖 LSP、补全、调试、测试、Git、模板开发和快速检索。
+
+> 当前配置在 Neovim `0.12.4` 上使用，并依赖新版 `vim.lsp.config()` / `vim.lsp.enable()` API。建议使用 Neovim `0.11+`。
+
+## 配置概览
+
+| 功能         | 实现                                                |
+| ------------ | --------------------------------------------------- |
+| 包管理       | lazy.nvim，自动检查插件更新，禁用插件 Git submodule |
+| 主题与状态栏 | nord.nvim、lualine.nvim、透明背景                   |
+| 补全         | blink.cmp、friendly-snippets、nvim-autopairs        |
+| LSP          | Neovim 新版 LSP API、Mason、mason-lspconfig         |
+| 诊断界面     | tiny-inline-diagnostic、Trouble、lspsaga            |
+| 语法解析     | nvim-treesitter `main` 分支、rainbow-delimiters     |
+| 搜索与文件   | fzf-lua、neo-tree                                   |
+| Git          | gitsigns.nvim                                       |
+| 格式化       | conform.nvim                                        |
+| 调试         | nvim-dap、nvim-dap-view、nvim-dap-python            |
+| 测试         | neotest、pytest、Go、Vitest 适配器                  |
+| 任务管理     | 内置 Taskwarrior 面板与命令                         |
+| 项目环境     | direnv.vim，打开或新建 buffer 时同步 `.envrc`       |
+
+Leader 是空格，LocalLeader 是 `\`。
+
+## 环境要求
+
+必需或强烈建议安装：
+
+- Neovim `0.11+`，当前测试版本为 `0.12.4`
+- Git
+- Nerd Font
+- `fzf` 和 `ripgrep`
+- 支持系统剪贴板的环境
+
+可选工具：
+
+- `ctags`：LSP/Tree-sitter 无法提供符号时作为 fzf-lua 回退
+- `task`：启用 Taskwarrior 集成
+- `direnv`：自动把项目 `.envrc` 环境同步进 Neovim
+- GitHub Copilot 账号：使用可选 Copilot 命令和状态显示
+- 各语言运行时，例如 Python、Node.js、Go、Rust、Java
+
+Mason 会自动安装配置中的 LSP 服务器。Conform 使用的格式化器不会由本配置统一自动安装，需要通过 Mason、系统包管理器或语言包管理器确保它们位于 `PATH`。
+
+## 安装
+
+将仓库放到 Neovim 配置目录：
+
+```bash
+git clone <repository-url> ~/.config/nvim
+nvim
+```
+
+首次启动时 lazy.nvim 会安装插件，Mason 和 Tree-sitter 会安装已配置的服务器与 parser。
+
+常用维护命令：
+
+```vim
+:Lazy
+:Lazy sync
+:Lazy clean
+:Mason
+:LspInfo
+:ConformInfo
+:checkhealth lazy
+:checkhealth lsp
+:checkhealth fzf_lua
+```
+
+## 目录结构
+
+```text
+~/.config/nvim/
+├── init.lua
+├── data/
+│   └── htmx.html-data.json
+├── lua/
+│   ├── config/
+│   │   ├── lazy.lua
+│   │   ├── options.lua
+│   │   ├── keymaps.lua
+│   │   ├── filetype.lua
+│   │   ├── transparency.lua
+│   │   └── taskwarrior.lua
+│   └── plugins/
+│       ├── ui.lua
+│       ├── cmp.lua
+│       ├── lsp.lua
+│       ├── snacks.lua
+│       ├── tools.lua
+│       └── debug.lua
+├── README.md
+└── README-en.md
+```
+
+插件按职责拆分：UI、补全、LSP、搜索/文件、工具和调试分别维护，文件类型行为集中在 `lua/config/filetype.lua`。
+
+## 核心选项
+
+- 行号与相对行号、光标行、固定 sign column
+- 全局软换行，`scrolloff=8`，100 列参考线
+- 4 空格缩进，启用 `expandtab` 和 `autoindent`
+- 禁用 `smartindent`、`cindent`；Python 保留 PEP8 插件的 `indentexpr`
+- 默认 `foldmethod=indent`、`foldlevel=99`、不启用折叠
+- 非 Markdown/Text 缓冲区由 Tree-sitter 接管折叠表达式
+- 搜索区分大小写，启用搜索高亮和 `inccommand=split`
+- 垂直分屏向右，水平分屏向下
+- 禁用 backup、writebackup 和 swapfile
+- 持久撤销保存在 `~/.config/nvim/tmp/undo/`
+- 自动恢复上次打开文件时的光标位置
+- 禁用自动续写注释
+- `timeoutlen=500`、`ttimeoutlen=50`、`updatetime=300`
+- `lazyredraw=false`，避免 Noice 等 UI 插件出现重绘问题
+- Perl、Ruby provider 在启动时禁用
+
+## 自定义快捷键
+
+### 基础编辑
+
+| 按键           | 功能                                             |
+| -------------- | ------------------------------------------------ |
+| `S`            | 保存当前文件                                     |
+| `Q`            | 退出当前窗口                                     |
+| `Y`            | 全选并复制到系统剪贴板                           |
+| `<leader><CR>` | 清除搜索高亮                                     |
+| `J` / `K`      | 向下/向上移动 5 行                               |
+| `<` / `>`      | 普通模式缩进；可视模式缩进后保持选择             |
+| `<leader>z`    | 将当前分屏放入独立 tab，切换全屏显示             |
+| `G`            | 仅 Markdown：跳到目标行/文件末尾并执行 `zz` 居中 |
+
+Markdown 的 `G` 是 buffer-local 映射。其他文件仍保留原生 `G` 行为；带计数的命令如 `20G` 也会跳转后居中。
+
+### 插入模式与终端
+
+| 按键              | 功能                                                 |
+| ----------------- | ---------------------------------------------------- |
+| `<C-a>`           | 跳到行首并保持插入模式                               |
+| `<C-e>`           | 跳到行尾并保持插入模式；blink.cmp 的同名默认键已禁用 |
+| `<C-h>` / `<C-l>` | 左移/右移一个字符                                    |
+| `<C-j>` / `<C-k>` | 向下/向上翻一整屏                                    |
+| `<C-w>t`          | 水平分屏打开终端                                     |
+| `<C-w>T`          | 垂直分屏打开终端                                     |
+| `<Esc>`           | 终端模式返回普通模式                                 |
+
+### Tab、窗口与 Buffer
+
+| 按键                        | 功能                         |
+| --------------------------- | ---------------------------- |
+| `tn`                        | 新建 tab                     |
+| `tN`                        | 将当前 buffer 放入新 tab     |
+| `th` / `tl`                 | 上一个/下一个 tab            |
+| `tmh` / `tml`               | 向左/向右移动 tab            |
+| `<leader>bn` / `<leader>bp` | 下一个/上一个 buffer         |
+| `<leader>bd`                | 删除当前 buffer              |
+| `<C-w>h/j/k/l`              | 使用 Neovim 原生方式切换窗口 |
+
+### fzf-lua 与 Neo-tree
+
+| 按键                        | 功能                                    |
+| --------------------------- | --------------------------------------- |
+| `<leader><space>`           | fzf-lua 全局检索                        |
+| `<leader>bb` / `<leader>fb` | Buffer 列表                             |
+| `<leader>/`                 | Live grep                               |
+| `<leader>:`                 | 命令历史                                |
+| `<leader>ff`                | 查找文件                                |
+| `<leader>fg`                | 查找 Git 文件                           |
+| `<leader>fc`                | 查找 Neovim 配置文件                    |
+| `<leader>fr`                | 最近文件                                |
+| `<leader>fs`                | 当前文档符号：LSP → Tree-sitter → ctags |
+| `<leader>fS`                | 工作区符号：LSP → ctags                 |
+| `<leader>ft`                | Tree-sitter 符号                        |
+| `<leader>fT`                | 项目 tags                               |
+| `<leader>fR`                | 恢复上一次 fzf-lua picker               |
+| `<leader>e`                 | 在左侧切换 Neo-tree，并 reveal 当前文件 |
+
+Neo-tree 内部：
+
+| 按键         | 功能                           |
+| ------------ | ------------------------------ |
+| `<CR>` / `l` | 打开文件或展开目录             |
+| `h`          | 收起目录                       |
+| `o`          | 在新 tab 打开                  |
+| `s` / `S`    | 垂直/水平分屏打开              |
+| `P`          | 切换浮动预览                   |
+| `H`          | 切换隐藏文件和 gitignored 文件 |
+
+`t` 在 Neo-tree 中明确取消映射，避免影响其他 tab 导航习惯。
+
+### LSP 与诊断
+
+| 按键                        | 功能                                |
+| --------------------------- | ----------------------------------- |
+| `<leader>lh`                | Lspsaga hover，并自动聚焦浮窗       |
+| `<leader>ld`                | 在当前窗口跳转到定义                |
+| `<leader>lv`                | 垂直分屏后跳转到定义                |
+| `<leader>ls`                | 水平分屏后跳转到定义                |
+| `<leader>lf`                | 浮窗预览定义                        |
+| `<leader>lr`                | 查找引用和实现                      |
+| `<leader>rn`                | 重命名                              |
+| `<leader>ca`                | Code Action，支持普通/可视模式      |
+| `[d` / `]d`                 | 上一个/下一个诊断                   |
+| `<leader>o`                 | 切换 Lspsaga Outline                |
+| `<leader>xl`                | 显示当前行诊断浮窗                  |
+| `<leader>xd`                | 显示当前 buffer 的 LSP 诊断调试信息 |
+| `<leader>xx`                | Trouble 工作区诊断                  |
+| `<leader>xX`                | Trouble 当前 buffer 诊断            |
+| `<leader>cs`                | Trouble 符号列表                    |
+| `<leader>cl`                | Trouble LSP 信息                    |
+| `<leader>xL` / `<leader>xQ` | Location list / Quickfix list       |
+
+`K` 被用于向上移动 5 行，因此 hover 使用 `<leader>lh`。
+
+### Git
+
+| 按键                        | 功能                                |
+| --------------------------- | ----------------------------------- |
+| `<leader>gj` / `<leader>gk` | 下一个/上一个 hunk                  |
+| `<leader>gs` / `<leader>gr` | Stage/Reset 当前 hunk，支持可视范围 |
+| `<leader>gS` / `<leader>gR` | Stage/Reset 当前 buffer             |
+| `<leader>gp` / `<leader>gi` | 浮窗/行内预览 hunk                  |
+| `<leader>gb`                | 完整 blame 当前行                   |
+| `<leader>gd` / `<leader>gD` | 与 index / `~` 比较                 |
+| `<leader>gq`                | 将 hunks 写入 quickfix              |
+| `<leader>gl`                | 切换当前行 blame                    |
+| `<leader>gw`                | 切换 word diff                      |
+| `ih`                        | Hunk 文本对象                       |
+
+### 测试
+
+| 按键                        | 功能                    |
+| --------------------------- | ----------------------- |
+| `<leader>tn`                | 运行最近测试            |
+| `<leader>tf`                | 运行当前文件            |
+| `<leader>ta`                | 运行当前项目            |
+| `<leader>td`                | 使用 DAP 调试最近测试   |
+| `<leader>tm` / `<leader>tc` | 调试 Python 测试方法/类 |
+| `<leader>ts`                | 切换测试摘要            |
+| `<leader>to`                | 打开最近输出            |
+| `<leader>tO`                | 切换输出面板            |
+| `<leader>tw`                | Watch 当前文件          |
+| `<leader>tS`                | 停止测试                |
+
+### 调试
+
+| 按键                                       | 功能                                 |
+| ------------------------------------------ | ------------------------------------ |
+| `<leader>ds`                               | 启动调试                             |
+| `<leader>dc`                               | 继续；会话正在运行时显示会话操作菜单 |
+| `<leader>dn` / `<leader>di` / `<leader>do` | Step over / into / out               |
+| `<leader>db`                               | 切换持久断点                         |
+| `<leader>dB`                               | 条件断点                             |
+| `<leader>dl`                               | Log point                            |
+| `<leader>du`                               | 切换 DAP View                        |
+| `<leader>de`                               | 求值光标处或可视选择表达式           |
+| `<leader>dp`                               | 打开 REPL                            |
+| `<leader>dR`                               | 重跑上一次配置                       |
+| `<leader>dq`                               | 终止调试                             |
+
+断点会跨 Neovim 重启保存。DAP View 位于右侧，占窗口宽度的 50%，并在调试生命周期中自动切换。行内调试变量插件当前明确禁用。
+
+### Taskwarrior
+
+| 按键/命令                      | 功能           |
+| ------------------------------ | -------------- |
+| `<leader>an` / `:TaskNext`     | 显示 next 任务 |
+| `<leader>aa` / `:TaskAll`      | 显示全部任务   |
+| `<leader>ap` / `:TaskProjects` | 显示项目       |
+| `<leader>aA` / `:TaskAdd`      | 输入并添加任务 |
+
+Taskwarrior 面板中：`r` 刷新、`<CR>` 查看详情、`x` 完成任务、`q` 关闭。
+
+### 其他编辑工具
+
+| 按键            | 功能                                          |
+| --------------- | --------------------------------------------- |
+| `<leader>F`     | 普通模式格式化 buffer；可视模式格式化选择范围 |
+| `<leader>j`     | TreeSJ 拆分/合并当前语法节点                  |
+| `<CR>` / `<BS>` | Wildfire 扩展/缩小括号或 Tree-sitter 节点选择 |
+| `]r` / `[r`     | 下一个/上一个引用高亮位置                     |
+| `<leader>ch`    | 切换当前 buffer 的引用高亮                    |
+| `<leader>?`     | 显示当前 buffer 的本地快捷键                  |
+
+nvim-surround 使用默认映射，例如 `ysiw"`、`ds"`、`cs"'`、可视模式 `S{char}`。
+
+其他已启用集成：direnv.vim 自动同步项目环境，nvim-colorizer 显示颜色值色块，nvim-window-picker 提供窗口选择能力但没有单独配置全局快捷键。
+
+## LSP 与模板支持
+
+Mason 自动安装并启用：
+
+- `clangd`
+- `pyright`
+- `gopls`
+- `eslint`
+- `ts_ls`
+- `lua_ls`
+- `rust_analyzer`
+- `marksman`
+- `html`
+- `cssls`
+- `jsonls`
+- `yamlls`
+- `bashls`
+- `dockerls`
+- `taplo`
+- `emmet_language_server`
+- `jinja_lsp`
+
+特殊配置：
+
+- Pyright 使用 `diagnosticMode=workspace`，关闭类型检查，但保留缺失 import/module source 警告。
+- Pyright 会从项目根目录向上最多查找 3 层的 `.venv`、`venv` 或 `env`，并使用其中的 `bin/python`。
+- Clangd 在项目没有真实编译数据库/flags 时使用 `-std=c23` fallback。
+- Lua LS 识别 Neovim runtime 与 `vim` 全局。
+- HTML、Jinja 与 Emmet 支持 `htmldjango`；HTML LSP 加载本地 HTMX custom data。
+- CSS LS 只服务 CSS/SCSS/Less，避免在 Jinja 模板里提供错误的 CSS 属性补全。
+- `.jinja`、`.jinja2`、`.j2` 自动识别为 `htmldjango`；包含 Jinja 标记或位于 `templates/` 下的 HTML 也会自动切换。
+- Jinja 行中输入 `%` 或 `#` 可将已有的 `{}` 扩展为 `{%  %}` / `{#  #}`。
+- nvim-ts-context-commentstring 在 HTML 与 Jinja 区域之间动态选择正确注释格式。
+
+## 补全与自动配对
+
+blink.cmp 默认源：
+
+- LSP
+- 路径
+- friendly-snippets
+- 当前 buffer
+
+主要按键：
+
+- `<C-y>` 接受补全
+- `<C-Space>` 打开菜单或切换文档
+- `<C-n>` / `<C-p>` 选择下一项/上一项
+- `<C-e>` 已从 blink.cmp 中取消，保留给自定义行尾跳转
+
+blink.cmp 的 `auto_brackets` 会为函数/方法补全添加 `()`；nvim-autopairs 负责手动括号、回车和退格行为。Markdown 中的括号和引号只会在已识别的代码块语言内自动配对。
+
+Copilot provider、`:Copilot` 命令和 lualine 状态组件仍然保留，但 Copilot 不在 blink.cmp 的默认 source 列表中，suggestion 与 panel 也处于关闭状态。
+
+## 格式化
+
+格式化通过 `<leader>F` 手动触发；当前配置没有启用保存时自动格式化。外部 formatter 不可用时允许回退到 LSP formatting。
+
+| 文件类型                            | Formatter                                 |
+| ----------------------------------- | ----------------------------------------- |
+| C / C++                             | clang-format，4 空格，不使用 Tab          |
+| Python                              | ruff_fix → ruff_format，fix 阶段忽略 F401 |
+| JavaScript / TypeScript / JSX / TSX | prettier                                  |
+| HTML / Jinja / htmldjango           | djlint，Jinja profile，2 空格             |
+| CSS / SCSS                          | prettier                                  |
+| JSON / Markdown                     | prettier                                  |
+| YAML                                | yamlfmt                                   |
+| Lua                                 | stylua，2 空格                            |
+| Shell                               | shfmt，2 空格                             |
+| Dockerfile                          | dprint                                    |
+| SQL                                 | sql-formatter                             |
+| TOML                                | taplo                                     |
+
+## Tree-sitter 与界面
+
+自动安装 parser：Lua、Vim、Vimdoc、Python、JavaScript、TypeScript、HTML、htmldjango、CSS、JSON、Markdown、Bash、C、C++、Rust、Go、Java。
+
+Tree-sitter 在所有可识别文件类型启动；Markdown、Text 明确排除 Tree-sitter folding。Python 会额外恢复 Vim syntax，供 PEP8 indent 的 `synID()` 使用。
+
+界面组件：
+
+- Nord 主题，斜体注释、加粗 lualine section
+- 透明 Normal、SignColumn、NormalNC、MsgArea
+- mini.indentscope 静态缩进范围线
+- rainbow-delimiters 的 Nord/Catppuccin Frappé 配色
+- tiny-inline-diagnostic ghost preset，80ms throttle，支持多行和软换行
+- Noice 美化命令行和消息，隐藏常见文件写入消息
+- Which-key 使用 modern preset、140ms 延迟，并显示动态开关状态图标
+- Lspsaga hover 偏向光标下方；Outline 禁用自动 preview，并包含多 tab/空内容稳定性补丁
+- nvim-colorizer 为颜色文本显示实时色块；nvim-window-picker 作为窗口选择组件初始化
+
+## Python 调试
+
+Mason DAP 自动准备 debugpy，nvim-dap-python 使用：
+
+```text
+~/.local/share/nvim/mason/packages/debugpy/venv/bin/python
+```
+
+Python 配置包括：
+
+- 当前文件
+- 当前文件并输入参数
+- 运行 Python module
+- Attach 到 host/port，默认 `127.0.0.1:5678`
+- 使用 `doctest` 检查当前文件
+
+执行程序使用 integrated terminal。DAP 在跳转到停止位置前会避开 `winfixbuf` 窗口，并在关键调试事件后主动重绘。
 
 ## 常见问题
 
-### Pyright 类型检查错误
+### Markdown 中按 `G` 后光标贴底
 
-**问题**: 在 Python 文件中看到类似 `Cannot access attribute "aclose"` 的类型错误，但代码实际运行正常。
+Markdown buffer 已把 `G` 映射为 `Gzz`。它会先执行原生跳转，再将目标行居中。使用下面命令确认映射来源：
 
-**原因**: Pyright 的静态类型分析无法推断动态属性（如 Redis 的 `aclose()` 方法）。
-
-**解决方案**: 本配置已经通过以下方式禁用 Pyright 的类型检查：
-
-```lua
--- lua/plugins/lsp.lua 中的配置
-vim.lsp.config.pyright = {
-  settings = {
-    python = {
-      analysis = {
-        typeCheckingMode = "off",
-        diagnosticSeverityOverrides = {
-          reportAttributeAccessIssue = "none",  -- 关键配置
-          reportGeneralTypeIssues = "none",
-          -- ... 其他禁用规则
-        },
-      },
-    },
-  },
-}
+```vim
+:verbose nmap G
 ```
 
-**重要**: 本配置使用 **新版 LSP API** (`vim.lsp.config` + `vim.lsp.enable`)，而不是旧版的 `lspconfig.*.setup()` 方式。如果遇到配置不生效的问题：
+### LSP 没有启动
 
-1. 确认使用的是 `vim.lsp.config.*` 而不是 `require("lspconfig").*.setup()`
-2. 清理 Mason 的符号链接残留：
-   ```bash
-   rm -f ~/.local/share/nvim/mason/bin/pyright*
-   rm -f ~/.local/share/nvim/mason/share/mason-schemas/lsp/pyright.json
-   ```
-3. 重新安装：`:MasonInstall pyright`
-
-### blink.cmp 与 nvim-autopairs 集成
-
-**问题**: 使用 blink.cmp 补全引擎后，Python 代码补全时不自动添加括号。
-
-**原因**: blink.cmp 是较新的补全引擎，不像 nvim-cmp 那样有官方的 nvim-autopairs 集成支持。blink.cmp 没有 `event:on('confirm_done')` 事件系统，而 `nvim-autopairs.completion.cmp` 模块依赖 nvim-cmp 插件。
-
-**解决方案**: 本配置采用 **组合方案**，让两个插件分工合作。使用完整的 `auto_brackets` 配置确保在所有文件类型中都能正常工作：
-
-```lua
--- lua/plugins/cmp.lua 中的配置
-{
-  "saghen/blink.cmp",
-  opts = {
-    completion = {
-      accept = {
-        auto_brackets = {
-          enabled = true,
-          default_brackets = { "(", ")" },
-          override_brackets_for_filetypes = {},
-          -- 使用 kind 字段判断是否添加括号
-          kind_resolution = {
-            enabled = true,
-            blocked_filetypes = {}, -- 清空阻止列表，确保所有语言都能使用
-          },
-          -- 使用语义 token 异步判断（更准确）
-          semantic_token_resolution = {
-            enabled = true,
-            blocked_filetypes = {}, -- 清空阻止列表
-            timeout_ms = 400,
-          },
-        },
-      },
-    },
-    -- ... 其他配置
-  },
-}
+```vim
+:LspInfo
+:Mason
+:checkhealth lsp
 ```
 
-**工作方式**:
+本配置使用新版 API，不要改回 `require("lspconfig").SERVER.setup()`。
 
-- **blink.cmp 内置 auto_brackets**: 当你从补全菜单选择函数或方法时，自动添加 `()`
-  - `kind_resolution`: 根据补全项的 `kind` 字段立即判断
-  - `semantic_token_resolution`: 异步使用 LSP 语义 token 进行更准确判断（400ms 超时）
-  - 清空 `blocked_filetypes` 确保在所有语言（包括 Python、TS、Vue 等）中都能工作
-- **nvim-autopairs**: 处理其他所有括号配对场景
-  - 手动输入 `(` 时自动补全 `)`
-  - 在 `{|}` 位置按 `<CR>` 时格式化成多行
-  - 删除左括号时自动删除右括号
+### Pyright 找不到虚拟环境
 
-**测试场景**:
+确认项目根目录或向上 3 层内存在 `.venv/bin/python`、`venv/bin/python` 或 `env/bin/python`。可用 `<leader>xd` 查看当前 Pyright root 和诊断状态。
 
-```python
-# 1. 补全函数后添加括号
-# 输入 pri，选择 print 补全 → print(|)
+### 格式化无反应
 
-# 2. 手动输入括号配对
-# 输入 ( → (|)
-
-# 3. 括号间回车格式化
-# 在 {|} 中按 <CR> →
-# {
-#     |
-# }
+```vim
+:ConformInfo
+:lua vim.print(require("conform").list_formatters())
 ```
 
-**注意**:
+确认对应 formatter 已安装并位于 `PATH`。SQL 只会在手动执行 `<leader>F` 时格式化。
 
-- 目前 nvim-autopairs 还没有添加对 blink.cmp 的原生支持（[GitHub Issue #477](https://github.com/windwp/nvim-autopairs/issues/477) 仍开放中）
-- 本配置使用的组合方案是目前最稳定的解决办法
-- 如果插件更新后括号补全失效，检查是否需要清空 `blocked_filetypes` 列表（默认阻止 `typescriptreact`、`javascriptreact`、`vue` 等）
+### 补全后没有括号
 
-# Neovim 配置
+确认 blink.cmp 的 `auto_brackets` 仍启用，并且 `kind_resolution.blocked_filetypes` 与 `semantic_token_resolution.blocked_filetypes` 都为空表。手动输入括号由 nvim-autopairs 处理。
 
-一个基于 lazy.nvim 包管理器构建的现代化、功能丰富的 Neovim 配置。
+### DAP 无法启动 Python
 
-## 🎯 配置概览
-
-- **包管理器**: lazy.nvim (自动检查更新)
-- **主题**: nord.nvim (Nord 主题)
-- **Leader 键**: 空格键 (LocalLeader: `\`)
-- **透明度**: 已启用
-- **补全引擎**: blink.cmp (现代补全系统，集成 GitHub Copilot)
-- **调试器**: nvim-dap (支持 Python debugpy，自动安装)
-- **测试运行**: neotest (支持 Python / Go / Vitest，并可接入 DAP)
-- **Git 工作流**: gitsigns.nvim (hunk 预览、stage/reset、blame、diff)
-- **搜索与文件**: fzf-lua + neo-tree (原生 fzf 搜索 + 文件树)
-- **AI 辅助**: GitHub Copilot (当前仅保留为可选补全源)
-
-## 🔌 插件列表
-
-### UI & 外观
-
-- **nord.nvim** - Nord 主题，支持斜体注释和粗体 lualine
-- **lualine.nvim** - 状态栏，使用 nord 主题，集成 Copilot 状态显示
-- **nvim-colorizer.lua** - 颜色高亮，使用自定义版本 (Starslayerx/nvim-colorizer.lua)
-- **nvim-web-devicons** - 文件图标
-- **mini.nvim** - 图标支持
-- **window-picker.nvim** - 窗口选择器 (版本 2.\*)
-- **which-key.nvim** - 快捷键提示，使用 `<leader>?` 查看本地映射
-
-### 代码补全 & LSP
-
-- **blink.cmp** - 现代代码补全引擎 (版本 1.\*)，使用 default 预设快捷键，集成 Copilot，内置 auto_brackets 功能处理函数/方法补全后的括号
-- **blink-copilot** - Blink.cmp 的 Copilot 集成
-- **copilot.lua** - GitHub Copilot 支持 (懒加载，使用 `:Copilot` 命令启动)
-- **copilot-lualine** - Lualine 中的 Copilot 状态显示
-- **nvim-autopairs** - 自动括号补全，与 blink.cmp 组合使用，处理手动输入括号、回车格式化等场景，禁用在宏和替换模式中运行
-- **nvim-lspconfig** - LSP 配置，使用新版 API (vim.lsp.config/enable)，支持 pyright (关闭类型检查) 和 lua_ls
-- **mason.nvim** - LSP 服务器管理，带有自定义图标
-- **mason-lspconfig.nvim** - 自动安装 LSP (clangd, pyright, gopls, eslint, ts_ls, lua_ls, rust_analyzer, marksman, html, cssls, jsonls, yamlls, bashls, dockerls, taplo, emmet_language_server, jinja_lsp)
-- **trouble.nvim** - 诊断界面，支持多种视图模式
-- **tiny-inline-diagnostic.nvim** - 行内诊断，使用 ghost 预设，支持多行显示
-- **lspsaga.nvim** - LSP UI 美化，圆角边框，禁用灯泡提示
-- **noice.nvim** - 消息和命令行美化，多种预设启用
-- **friendly-snippets** - 代码片段支持
-
-### 语法高亮 & 编辑
-
-- **nvim-treesitter** - 高级语法高亮 (main 分支)，内置渐进式代码选择，支持折叠
-- **rainbow-delimiters.nvim** - 彩虹括号，使用 nord 和 Catppuccin Frappé 配色
-- **vim-illuminate** - 当前词/引用高亮，支持 LSP、Treesitter、regex provider，并可在引用间跳转
-- **内置 treesitter 选择** - 使用 `<CR>`/`<BS>`/`<TAB>` 进行渐进式代码选择
-- **wildfire.nvim** - 快速选择括号内容 (自定义版本)
-- **nvim-surround** - 快速操作：选择后用符号包围内容
-
-### 调试器
-
-- **nvim-dap** - Debug Adapter Protocol 客户端，核心调试功能
-- **nvim-dap-view** - 单窗口调试视图，使用顶部标签切换 scopes、breakpoints、threads、watches、REPL、console
-- **nvim-dap-python** - Python 调试扩展，支持测试方法/类调试
-- **mason-nvim-dap.nvim** - Mason 集成，自动安装和配置调试适配器 (debugpy)
-
-### Git & 测试
-
-- **gitsigns.nvim** - 行内 Git hunk 标记，支持预览、stage/reset、blame、diff、quickfix
-- **neotest** - 统一测试运行器
-- **neotest-python** - Python / pytest 测试适配器
-- **neotest-go** - Go 测试适配器
-- **neotest-vitest** - Vitest 测试适配器
-
-### 搜索与文件管理
-
-- **fzf-lua** - 基于系统 `fzf` 的原生模糊搜索器，负责文件/缓冲区/命令历史/实时 grep/最近文件
-- **neo-tree.nvim** - 当前文件树实现，`<leader>e` 打开，支持 reveal、split、tab 打开和隐藏文件切换
-
-### 格式化 & 工具
-
-- **conform.nvim** - 代码格式化，支持保存时自动格式化
-- **vim-python-pep8-indent** - Python PEP8 缩进
-
-## ⌨️ 快捷键映射
-
-### 基础操作
-
-- `S` - 保存文件
-- `Q` - 退出
-- `Y` - 全选并复制到系统剪贴板
-- `<leader><CR>` - 清除搜索高亮
-- `K/J` - 快速上下移动 5 行
-- `</>/` - 缩进/取消缩进
-
-### 标签页管理
-
-- `tn` - 新建标签页
-- `tN` - 在当前标签页中分割
-- `th/tl` - 前后切换标签页
-- `tmh/tml` - 左右移动标签页
-
-### 窗口管理
-
-#### 基础窗口操作
-
-- `<C-w>t` - 水平分割打开终端
-- `<C-w>T` - 垂直分割打开终端
-- `<Esc>` - 终端模式下退出到普通模式
-
-#### 窗口切换 (原生 Vim 方式)
-
-- `<C-w>h` - 切换到左侧窗口
-- `<C-w>j` - 切换到下方窗口
-- `<C-w>k` - 切换到上方窗口
-- `<C-w>l` - 切换到右侧窗口
-- `<C-w>w` - 循环切换到下一个窗口
-- `<C-w>p` - 切换到上一个访问的窗口
-
-#### 窗口布局调整
-
-- `<C-w>=` - 平均分配所有窗口大小
-- `<C-w>_` - 最大化当前窗口高度
-- `<C-w>|` - 最大化当前窗口宽度
-- `<C-w>+` - 增加当前窗口高度
-- `<C-w>-` - 减少当前窗口高度
-- `<C-w>>` - 增加当前窗口宽度
-- `<C-w><` - 减少当前窗口宽度
-
-#### 窗口移动和关闭
-
-- `<C-w>H/J/K/L` - 将当前窗口移动到最左/下/上/右
-- `<C-w>r` - 顺时针旋转窗口
-- `<C-w>R` - 逆时针旋转窗口
-- `<C-w>x` - 与下一个窗口交换位置
-- `<C-w>o` - 关闭其他所有窗口 (only)
-- `<C-w>q` - 退出当前窗口
-- `<C-w>c` - 关闭当前窗口
-
-### Git 快捷键
-
-- `<leader>gj` - 跳到下一个 hunk
-- `<leader>gk` - 跳到上一个 hunk
-- `<leader>gs` - stage 当前 hunk
-- `<leader>gr` - reset 当前 hunk
-- `<leader>gS` - stage 当前 buffer
-- `<leader>gR` - reset 当前 buffer
-- `<leader>gp` - 浮窗预览当前 hunk
-- `<leader>gi` - 行内预览当前 hunk
-- `<leader>gb` - 查看当前行 blame
-- `<leader>gd` - 与 index 做 diff
-- `<leader>gD` - 与 `~` 做 diff
-- `<leader>gq` - 将 hunk 列到 quickfix
-- `<leader>gl` - 切换当前行 blame 显示
-- `<leader>gw` - 切换 word diff
-- `ih` - 文本对象选择 hunk
-
-### 测试快捷键
-
-- `<leader>tn` - 运行离光标最近的测试
-- `<leader>tf` - 运行当前文件测试
-- `<leader>ta` - 运行当前项目测试
-- `<leader>td` - 用 DAP 调试最近测试
-- `<leader>tm` - 调试当前测试方法（仅 Python）
-- `<leader>tc` - 调试当前测试类（仅 Python）
-- `<leader>ts` - 切换 neotest summary
-- `<leader>to` - 打开最近一次测试输出
-- `<leader>tO` - 切换 output panel
-- `<leader>tw` - watch 当前文件
-- `<leader>tS` - 停止当前测试运行
-
-### 翻页功能
-
-normal 模式:
-
-- `<C-f>` - forward 向下翻一整屏
-- `<C-b>` - backward 向上翻一整屏
-- `<C-d>` - down half 向下翻半屏
-- `<C-u>` - up half 向上翻半屏
-
-insert 模式:
-
-- `<C-j>` - forward 向下翻一整屏
-- `<C-k>` - backward 向上翻一整屏
-
-### 光标移动 (Insert 模式)
-
-- `<C-f>` - 移动到行尾
-- `<C-l>` - 向右移动一个字符
-- `<C-b>` - 移动到行首
-
-### Treesitter 代码选择 & 编辑
-
-- `<CR>` - 初始化选择/扩展选择 (普通模式和可视模式)
-- `<BS>` - 缩小选择 (可视模式)
-- `<TAB>` - 作用域增量选择 (可视模式)
-
-### nvim-surround 快捷键
-
-#### 添加包围符号
-
-- `ys{motion}{char}` - 在指定范围添加包围符号
-  - `ysiw"` - 给当前单词加双引号
-  - `ysa")` - 给引号内容加圆括号 (around quotes with parentheses)
-  - `yst;}` - 给当前位置到分号的内容加花括号
-- `yss{char}` - 给整行添加包围符号 (忽略首尾空格)
-- `yS{motion}{char}` - 添加包围符号，分隔到新行
-- `ySS{char}` - 给整行添加包围符号，分隔到新行
-- `<C-g>s{char}` - 插入模式：在光标位置添加包围符号
-- `<C-g>S{char}` - 插入模式：在光标位置添加包围符号，分隔到新行
-- `S{char}` - 可视模式：给选中内容添加包围符号
-- `gS{char}` - 可视模式：给选中内容添加包围符号，分隔到新行
-
-#### 删除包围符号
-
-- `ds{char}` - 删除指定的包围符号
-  - `ds"` - 删除双引号
-  - `ds)` - 删除圆括号
-  - `dst` - 删除 HTML 标签
-
-#### 修改包围符号
-
-- `cs{old}{new}` - 修改包围符号
-  - `cs"'` - 将双引号改为单引号
-  - `cs)}` - 将圆括号改为花括号
-  - `cst<div>` - 将 HTML 标签改为 div 标签
-- `cS{old}{new}` - 修改包围符号，分隔到新行
-
-#### 特殊符号说明
-
-- **括号/方括号/花括号/尖括号**：
-  - 使用闭合符号 (`)`, `]`, `}`, `>`) - 紧贴内容：`{text}`
-  - 使用开启符号 (`(`, `[`, `{`, `<`) - 添加空格：`{ text }`
-- **HTML 标签** (`t`/`T`)：
-  - `ysiwt` - 添加标签 (会提示输入标签名和属性)
-  - `dst` - 删除标签
-  - `cst` - 只修改标签类型 (保留属性)
-  - `csT` - 修改整个标签 (包括属性)
-- **函数调用** (`f`)：
-  - `ysiwf` - 添加函数调用 (会提示输入函数名)
-  - `dsf` - 删除函数调用，保留参数
-  - `csf` - 修改函数名
-- **自定义包围** (`i`)：
-  - `yssi` - 自定义左右包围内容 (会分别提示输入左右内容)
-
-#### 别名快捷键
-
-- `b` → `)` (圆括号)
-- `B` → `}` (花括号)
-- `r` → `]` (方括号)
-- `a` → `>` (尖括号)
-- `q` → `"`, `'`, `` ` `` (任意引号)
-- `s` → `}`, `]`, `)`, `>`, `"`, `'`, `` ` `` (任意包围符号)
-
-#### 使用示例
-
-```
-旧文本                    命令         新文本
--------                   ----         ------
-local str = H*ello        ysiw"        local str = "Hello"
-require"nvim-surroun*d"   ysa")        require("nvim-surround")
-*sample_text              ysiw}        {sample_text}
-*sample_text              ysiw{        { sample_text }
-local x = ({ *32 })       ds)          local x = { 32 }
-'*some string'            cs'"         "some string"
-"Nested '*quotes'"        dsq          "Nested quotes"
-div cont*ents             ysstdiv      <div>div contents</div>
-<div>d*iv contents</div>  dst          div contents
-arg*s                     ysiwffunc    func(args)
-f*unc_name(a, b, x)       dsf          a, b, x
+```vim
+:DapInstall
 ```
 
-### Blink.cmp 补全快捷键 (Default 预设)
-
-- `<C-y>` - 确认选择
-- `<C-Space>` - 打开菜单或切换文档
-- `<C-n>/<C-p>` 或 `Up/Down` - 选择下一个/上一个项目
-- `<C-e>` - 隐藏菜单
-- `<C-k>` - 切换签名帮助
-
-### 搜索与浏览快捷键
-
-#### fzf-lua 主检索
-
-- `<leader><space>` - 全局检索（文件 / buffer / LSP symbols）
-- `<leader>bb` - 缓冲区列表
-- `<leader>/` - 实时全文搜索
-- `<leader>:` - 命令历史
-- `<leader>ff` - 查找文件
-- `<leader>fg` - 查找 git 文件
-- `<leader>fb` - 查找缓冲区
-- `<leader>fc` - 查找配置文件
-- `<leader>fr` - 最近文件
-- `<leader>fs` - 当前文件符号，优先 LSP document symbols，回退到 Treesitter/ctags
-- `<leader>fS` - 项目符号，优先 LSP workspace symbols，回退到 ctags
-- `<leader>ft` - 当前文件 Treesitter 符号
-- `<leader>fT` - 项目 tags
-- `<leader>fR` - 恢复上一次 fzf-lua 搜索
-
-#### 搜索与文件
-
-- `<leader>e` - 文件浏览器
-
-#### 文件浏览器操作 (Neo-tree)
-
-- `<CR>` / `l` - 打开文件或展开目录
-- `h` - 收起目录
-- `o` - 在新标签页打开
-- `s` - 垂直分屏打开
-- `S` - 水平分屏打开
-- `P` - 浮窗预览
-- `H` - 切换显示隐藏文件和 gitignored 文件
-
-#### 其他功能
-
-- `<leader>F` - 格式化代码
-- `<leader>bn` - 下一个缓冲区
-- `<leader>bp` - 上一个缓冲区
-- `<leader>bd` - 删除缓冲区
-- `<leader>cR` - 重命名文件
-
-#### 单词/引用高亮
-
-- `]r` - 跳到下一个引用
-- `[r` - 跳到上一个引用
-- `<leader>ch` - 切换当前 buffer 的引用高亮
-
-### LSP 快捷键
-
-#### 查看源码和文档 (lspsaga)
-
-- `gh` - 查看文档（自动聚焦到浮动窗口，可翻页查看）
-- `gd` - 跳转到定义（垂直分屏打开）
-- `gp` - 预览定义（浮动窗口，不跳转，可按 `t`/`s`/`v` 在新 tab/分屏中打开）
-- `gr` - 查找所有引用和实现（浮动窗口列表）
-
-#### 代码操作 (lspsaga)
-
-- `<leader>rn` - 重命名变量/函数
-- `<leader>ca` - 代码操作（Code Action）
-- `<leader>o` - 切换文件大纲（显示所有符号）
-
-#### 诊断导航 (lspsaga)
-
-- `[d` - 跳转到上一个错误/警告
-- `]d` - 跳转到下一个错误/警告
-
-#### 诊断面板 (Trouble)
-
-- `<leader>xx` - 切换诊断面板
-- `<leader>xX` - 缓冲区诊断
-- `<leader>cs` - 符号列表
-- `<leader>cl` - LSP 信息
-- `<leader>xL` - 位置列表
-- `<leader>xQ` - 快速修复列表
-
-## ⚙️ 配置选项
-
-### 显示设置
-
-- 行号 + 相对行号
-- 光标行高亮
-- 100 列标记线
-- 自动换行
-- 符号列始终显示
-- 滚动偏移量: 8 行
-
-### 编辑设置
-
-- Tab 宽度: 4 空格
-- 智能缩进: 禁用 (nosmartindent)
-- C 语言缩进: 禁用 (nocindent)
-- 折叠方法: treesitter expr (级别 99，默认不折叠)
-- 自动缩进: 启用
-- 显示不可见字符: 启用 (Tab 显示为两个空格，尾随空格显示为 ▫)
-- 自动注释: 禁用
-- 撤销文件: 启用 (持久化)
-- 光标位置记忆: 启用
-
-### 搜索设置
-
-- 区分大小写 (ignorecase = false)
-- 智能大小写: 禁用 (smartcase = false)
-- 实时搜索预览 (inccommand = "split")
-- 搜索高亮: 启用
-
-### 分割窗口
-
-- 垂直分割: 向右打开
-- 水平分割: 向下打开
-
-### 性能优化
-
-- 禁用备份文件和交换文件
-- 启用隐藏缓冲区
-- 更新时间: 300ms
-- 超时时间: 50ms
-- 正则表达式引擎: 现代引擎 (re=0)
-- 备份目录: ~/.config/nvim/tmp/backup
-- 撤销目录: ~/.config/nvim/tmp/undo
-- 禁用 lazyredraw 避免 UI 插件异常
-
-### 补全设置
-
-- 补全选项: longest, noinsert, menuone, noselect, preview
-- 虚拟编辑: block 模式启用
-- GitHub Copilot: 集成到 blink.cmp，支持智能补全
-
-### 透明度效果
-
-- 主窗口背景透明 (Normal, NormalFloat)
-- 符号列透明 (SignColumn)
-- 非当前窗口透明 (NormalNC)
-- 消息区域透明 (MsgArea)
-- Telescope 界面透明 (TelescopeNormal, TelescopeBorder, TelescopePromptBorder)
-
-## 🎨 特色功能
-
-1. **搜索工作流**: 使用 fzf-lua 作为统一搜索入口，结合 neo-tree 提供文件树浏览
-2. **现代化 LSP**: 完整的语言服务器支持，包含自动安装和 UI 美化
-3. **代码格式化**: 支持多种语言的自动格式化 (保存时触发)
-4. **透明界面**: 支持窗口透明效果，自动应用于颜色主题
-5. **智能补全**: 基于 blink.cmp 的现代补全系统，支持 LSP、路径、片段、缓冲区和 GitHub Copilot
-6. **自动括号补全**: blink.cmp 内置 auto_brackets 处理函数/方法补全后的括号，nvim-autopairs 处理手动输入的括号配对、回车格式化等，禁用在特定文件类型、宏和替换模式中
-7. **彩虹括号**: 彩色括号高亮，使用 Nord 和 Catppuccin Frappé 配色方案
-8. **快速内容选择**: 使用 `<CR>`/`<BS>`/`<TAB>` 进行渐进式代码选择，支持作用域检测
-9. **符号包围编辑**: 使用 nvim-surround 快速操作包围符号
-   - 支持添加、删除、修改各种括号、引号、HTML 标签
-   - 智能空格处理 (开启/闭合符号行为不同)
-   - 内置别名快捷键 (如 `b`→`)`，`q`→任意引号)
-   - 支持函数调用和自定义包围符号
-   - 可视模式、插入模式、普通模式全面支持
-10. **行内诊断**: 在代码行内显示诊断信息，使用 ghost 预设样式，支持多行显示
-11. **窗口选择器**: 快速切换和管理窗口 (版本 2.\*)
-12. **快捷键提示**: 实时显示可用快捷键，使用 `<leader>?` 查看本地映射
-13. **引用高亮**: 使用 vim-illuminate 高亮当前词的其他引用，并支持前后跳转
-14. **文件浏览器增强**: 使用 neo-tree 提供文件浏览、分屏/标签页打开、预览和隐藏文件切换
-15. **自动 LSP 安装**: Mason 自动安装和配置多种语言服务器
-16. **光标位置记忆**: 重新打开文件时恢复上次的光标位置
-17. **Treesitter 折叠**: 基于语法树的智能代码折叠
-18. **GitHub Copilot**: AI 代码补全和建议 (懒加载)
-
-## 📁 项目结构
-
-```
-~/.config/nvim/
-├── init.lua              # 主配置文件
-├── lua/
-│   ├── config/
-│   │   ├── lazy.lua      # 包管理器设置
-│   │   ├── keymaps.lua   # 快捷键映射
-│   │   ├── options.lua   # 通用设置
-│   │   └── transparency.lua # 透明度设置
-│   └── plugins/
-│       ├── cmp.lua       # 补全插件
-│       ├── lsp.lua       # LSP 插件
-│       ├── debug.lua     # 调试器插件
-│       ├── snacks.lua    # fzf-lua 与 neo-tree 配置
-│       ├── tools.lua     # 工具插件
-│       └── ui.lua        # UI 插件
-└── README.md          # 本文档
-└── README-en.md       # 英文文档
-```
-
-## 🚀 开始使用
-
-1. **环境准备**:
-   - 确保已安装 Neovim 0.10+
-   - 确保已禁用 Perl 和 Ruby 提供商 (配置中已自动设置)
-
-2. **安装配置**:
-   - 将此配置克隆到 `~/.config/nvim/`
-   - 首次打开 Neovim，lazy.nvim 会自动安装所有插件
-
-3. **初始化**:
-   - Mason 将自动安装配置的 LSP 服务器
-   - Treesitter 将自动安装语法解析器
-   - 透明度效果将在颜色主题加载后自动应用
-
-4. **使用指南**:
-   - 使用 `<leader>?` 查看可用快捷键
-   - 使用 `<leader>e` 打开文件浏览器
-   - 使用 `<leader><space>` 智能查找文件
-
-### 自动功能
-
-- **自动完成**: 代码补全会自动触发，包含 LSP、片段、路径、缓冲区补全。Copilot 需要使用 `:Copilot` 命令手动启动
-- **自动格式化**: 保存文件时自动格式化代码 (支持 Python, JS/TS, Lua, Shell)
-- **自动诊断**: LSP 诊断信息实时显示，支持行内多行显示
-- **文件类型检测**: 自动启用对应的语法高亮和 LSP
-- **自动折叠**: 基于 Treesitter 的智能代码折叠
-- **自动启动终端**: TermOpen 时自动进入插入模式
-
-## 🔧 自定义配置
-
-### 核心配置文件
-
-- **`lua/config/options.lua`** - 通用设置 (显示、编辑、搜索等)
-- **`lua/config/keymaps.lua`** - 快捷键映射
-- **`lua/config/transparency.lua`** - 透明度效果设置
-- **`lua/config/lazy.lua`** - 包管理器初始化 (Leader 键设置)
-
-### 插件配置文件
-
-- **`lua/plugins/ui.lua`** - UI 相关插件 (主题、状态栏、图标、Treesitter、彩虹括号等)
-- **`lua/plugins/cmp.lua`** - 补全系统配置 (blink.cmp、Copilot、自动括号)
-- **`lua/plugins/lsp.lua`** - LSP 和诊断配置 (lspconfig、Mason、Trouble、诊断显示)
-- **`lua/plugins/debug.lua`** - 调试器配置 (nvim-dap、nvim-dap-view、nvim-dap-python)
-- **`lua/plugins/snacks.lua`** - fzf-lua 与 neo-tree 配置
-- **`lua/plugins/tools.lua`** - 格式化和其他工具 (conform、wildfire、PEP8 缩进)
-
-### 快速修改指南
-
-1. **修改主题**: 编辑 `lua/plugins/ui.lua` 中的 nord.nvim 配置
-2. **添加 LSP**: 在 `lua/plugins/lsp.lua` 的 ensure_installed 中添加服务器
-3. **修改快捷键**: 编辑 `lua/config/keymaps.lua` 添加自定义映射
-4. **调整格式化**: 修改 `lua/plugins/tools.lua` 中的 formatters_by_ft
-5. **禁用透明度**: 注释掉 `init.lua` 中的 `require("config.transparency")` 加载
-6. **配置 Copilot**: 在 `lua/plugins/cmp.lua` 中调整 Copilot 设置
-7. **自定义文件浏览器**: 在 `lua/plugins/snacks.lua` 中修改 neo-tree 配置
-
-此配置提供了一个完整、现代化的开发环境，具有出色的性能和可用性。所有组件都经过精心调试，确保兼容性和稳定性。
-
-## 📝 语言支持
-
-### LSP 服务器自动安装
-
-配置自动安装以下 LSP 服务器：
-
-- **clangd** - C/C++ 语言服务器
-- **pyright** - Python 语言服务器 (已关闭类型检查，仅提供基础 LSP 功能)
-- **gopls** - Go 语言服务器
-- **eslint** - JavaScript/TypeScript 代码检查
-- **lua_ls** - Lua 语言服务器 (特别配置支持 Neovim API)
-- **rust_analyzer** - Rust 语言服务器
-- **marksman** - Markdown 语言服务器
-
-### Treesitter 语法高亮
-
-自动安装以下语言解析器：
-
-- Lua, Vim, Vimdoc (Neovim 核心)
-- Python, JavaScript, TypeScript
-- HTML, CSS, JSON, Markdown
-- Bash, C, C++, Rust, Go, Java
-
-### 代码格式化支持
-
-- **Python**: ruff (忽略 F401 未使用导入警告)
-- **JavaScript/TypeScript**: prettier
-- **JavaScript React (JSX)**: prettier
-- **TypeScript React (TSX)**: prettier
-- **HTML**: prettier
-- **CSS/SCSS**: prettier
-- **JSON**: prettier
-- **Markdown**: prettier
-- **YAML**: prettier
-- **Lua**: stylua (2 空格缩进)
-- **Shell**: shfmt (2 空格缩进)
-
-所有格式化工具支持保存时自动格式化，超时时间 500ms，LSP 作为后备格式化选项。
-
-### 调试器支持
-
-- **Python**: debugpy (通过 Mason 自动安装)
-  - 支持断点调试
-  - 支持条件断点和日志点
-  - 支持测试方法/类调试
-  - 自动打开/关闭调试视图
-  - 单面板布局：右侧显示，console 合并进主调试窗口
-  - 使用 Nord 主题配色的断点标记
-
-#### 调试快捷键
-
-| 快捷键        | 功能                  |
-| ------------- | --------------------- |
-| `<leader>ds`  | 启动调试              |
-| `<leader>dc`  | 继续调试              |
-| `<leader>dn`  | 单步跳过 (Step Over)  |
-| `<leader>di`  | 单步进入 (Step Into)  |
-| `<leader>do`  | 单步跳出 (Step Out)   |
-| `<leader>db`  | 切换断点              |
-| `<leader>dB`  | 设置条件断点          |
-| `<leader>dl`  | 设置日志点            |
-| `<leader>du`  | 切换调试视图          |
-| `<leader>de`  | 计算表达式            |
-| `<leader>dp`  | 打开 REPL             |
-| `<leader>dq`  | 终止调试会话          |
-
-#### 断点标记说明
-
-- **●** 红色圆点 - 普通断点
-- **◆** 橙色菱形 - 条件断点
-- **○** 灰色空心圆 - 被拒绝的断点
-- **➜** 绿色箭头 - 当前执行位置
-- **◉** 黄色圆点 - 日志点
-
-所有标记使用 Nord 主题配色，不会高亮行号，避免干扰相对行号的显示。
-
-### 批量格式化项目文件
-
-```bash
-# 使用 prettier 格式化所有支持的文件
-npx prettier --write .
-
-# 格式化特定类型的文件
-npx prettier --write "**/*.{js,jsx,ts,tsx,html,css,scss,json,md}"
-
-# 检查哪些文件需要格式化（不修改文件）
-npx prettier --check .
-```
-
-#### ESLint 代码检查
-
-```bash
-# 检查所有文件
-npx eslint .
-
-# 自动修复可修复的问题
-npx eslint . --fix
-
-# 只显示错误，不显示警告
-npx eslint . --quiet
-```
-
-**提示**: 建议在项目根目录创建 `.eslintignore` 和 `.prettierignore` 文件来排除不需要检查的目录（如 `node_modules/`, `.next/`, `dist/`, `build/` 等）。
+并确认 Mason 的 debugpy Python 路径存在。调试面板可用 `<leader>du` 手动切换。
+
+### Noice 命令行异常
+
+Noice 位于 `lua/plugins/lsp.lua`。临时禁用其 plugin spec 可用于确认是否为消息 UI 冲突；保持 `lazyredraw=false`。
+
+## 自定义入口
+
+- 通用选项：`lua/config/options.lua`
+- 全局按键：`lua/config/keymaps.lua`
+- 文件类型行为：`lua/config/filetype.lua`
+- Taskwarrior：`lua/config/taskwarrior.lua`
+- UI：`lua/plugins/ui.lua`
+- 补全：`lua/plugins/cmp.lua`
+- LSP 与诊断：`lua/plugins/lsp.lua`
+- 搜索与文件树：`lua/plugins/snacks.lua`
+- Git、测试、格式化和编辑工具：`lua/plugins/tools.lua`
+- 调试：`lua/plugins/debug.lua`

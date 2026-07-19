@@ -1,590 +1,460 @@
 # Neovim Configuration
 
-A modern and feature-rich Neovim configuration built with lazy.nvim package manager.
+[中文文档](README.md)
 
-## 💡 FAQ
+A modular Neovim configuration powered by `lazy.nvim`, focused on LSP, completion, debugging, testing, Git, template development, and fast navigation.
 
-### blink.cmp and nvim-autopairs Integration
+> The current configuration is used with Neovim `0.12.4` and relies on the newer `vim.lsp.config()` / `vim.lsp.enable()` API. Neovim `0.11+` is recommended.
 
-**Issue**: After using blink.cmp completion engine, auto-brackets are not added when completing Python code.
+## Overview
 
-**Cause**: blink.cmp is a newer completion engine that doesn't have official nvim-autopairs integration support like nvim-cmp. blink.cmp lacks the `event:on('confirm_done')` event system, and the `nvim-autopairs.completion.cmp` module depends on the nvim-cmp plugin.
+| Area                 | Implementation                                                     |
+| -------------------- | ------------------------------------------------------------------ |
+| Plugin manager       | lazy.nvim, automatic update checks, plugin Git submodules disabled |
+| Theme and statusline | nord.nvim, lualine.nvim, transparent backgrounds                   |
+| Completion           | blink.cmp, friendly-snippets, nvim-autopairs                       |
+| LSP                  | New Neovim LSP API, Mason, mason-lspconfig                         |
+| Diagnostics UI       | tiny-inline-diagnostic, Trouble, lspsaga                           |
+| Syntax parsing       | nvim-treesitter `main`, rainbow-delimiters                         |
+| Search and files     | fzf-lua, neo-tree                                                  |
+| Git                  | gitsigns.nvim                                                      |
+| Formatting           | conform.nvim                                                       |
+| Debugging            | nvim-dap, nvim-dap-view, nvim-dap-python                           |
+| Testing              | neotest with pytest, Go, and Vitest adapters                       |
+| Task management      | Built-in Taskwarrior panel and commands                            |
+| Project environment  | direnv.vim, syncing `.envrc` when buffers are opened or created    |
 
-**Solution**: This configuration uses a **combination approach** where the two plugins work together. Use the complete `auto_brackets` configuration to ensure it works across all file types:
+The Leader key is Space and LocalLeader is `\`.
 
-```lua
--- Configuration in lua/plugins/cmp.lua
-{
-  "saghen/blink.cmp",
-  opts = {
-    completion = {
-      accept = {
-        auto_brackets = {
-          enabled = true,
-          default_brackets = { "(", ")" },
-          override_brackets_for_filetypes = {},
-          -- Use kind field to determine bracket insertion
-          kind_resolution = {
-            enabled = true,
-            blocked_filetypes = {}, -- Clear blocklist to support all languages
-          },
-          -- Use semantic tokens for async resolution (more accurate)
-          semantic_token_resolution = {
-            enabled = true,
-            blocked_filetypes = {}, -- Clear blocklist
-            timeout_ms = 400,
-          },
-        },
-      },
-    },
-    -- ... other options
-  },
-}
+## Requirements
+
+Required or strongly recommended:
+
+- Neovim `0.11+`; the current tested version is `0.12.4`
+- Git
+- A Nerd Font
+- `fzf` and `ripgrep`
+- An environment with working system clipboard support
+
+Optional tools:
+
+- `ctags`: fallback symbol source when LSP and Tree-sitter cannot provide symbols
+- `task`: enables the Taskwarrior integration
+- `direnv`: synchronizes project `.envrc` environments into Neovim
+- A GitHub Copilot account: for the optional Copilot command and status display
+- Language runtimes such as Python, Node.js, Go, Rust, and Java
+
+Mason automatically installs the configured LSP servers. Formatters used by Conform are not installed by one shared installer in this configuration; install them through Mason, a system package manager, or the relevant language package manager and make sure they are available in `PATH`.
+
+## Installation
+
+Place the repository in the Neovim configuration directory:
+
+```bash
+git clone <repository-url> ~/.config/nvim
+nvim
 ```
 
-**How it works**:
-- **blink.cmp built-in auto_brackets**: Automatically adds `()` when selecting functions or methods from completion menu
-  - `kind_resolution`: Immediately determines based on completion item's `kind` field
-  - `semantic_token_resolution`: Asynchronously uses LSP semantic tokens for more accurate determination (400ms timeout)
-  - Clear `blocked_filetypes` to ensure it works in all languages (including Python, TS, Vue, etc.)
-- **nvim-autopairs**: Handles all other bracket pairing scenarios
-  - Auto-completes `)` when manually typing `(`
-  - Formats to multiline when pressing `<CR>` at `{|}` position
-  - Auto-deletes closing bracket when deleting opening bracket
+On the first launch, lazy.nvim installs plugins while Mason and Tree-sitter install the configured servers and parsers.
 
-**Test scenarios**:
-```python
-# 1. Auto-brackets after completion
-# Type pri, select print → print(|)
+Useful maintenance commands:
 
-# 2. Manual bracket pairing
-# Type ( → (|)
-
-# 3. Format on enter between brackets
-# Press <CR> at {|} →
-# {
-#     |
-# }
+```vim
+:Lazy
+:Lazy sync
+:Lazy clean
+:Mason
+:LspInfo
+:ConformInfo
+:checkhealth lazy
+:checkhealth lsp
+:checkhealth fzf_lua
 ```
 
-**Note**:
-- Currently nvim-autopairs hasn't added native support for blink.cmp ([GitHub Issue #477](https://github.com/windwp/nvim-autopairs/issues/477) still open)
-- The combination approach used in this configuration is the most stable solution available
-- If bracket completion stops working after plugin updates, check if you need to clear the `blocked_filetypes` list (by default blocks `typescriptreact`, `javascriptreact`, `vue`, etc.)
+## Project Structure
 
-## 🎯 Overview
-
-- **Package Manager**: lazy.nvim (Auto-check for updates)
-- **Theme**: nord.nvim (Nord theme)
-- **Leader Key**: Space (LocalLeader: `\`)
-- **Transparency**: Enabled
-- **Completion Engine**: blink.cmp (Modern completion system with GitHub Copilot integration)
-- **Test Runner**: neotest (Python / Go / Vitest, with DAP integration)
-- **Git Workflow**: gitsigns.nvim (hunk preview, stage/reset, blame, diff)
-- **Search & Files**: fzf-lua + neo-tree (native fzf search + file tree)
-- **AI Assistant**: GitHub Copilot (currently kept as an optional completion source)
-
-## 🔌 Plugins
-
-### UI & Appearance
-- **nord.nvim** - Nord theme with italic comments and bold lualine support
-- **lualine.nvim** - Status line using nord theme with Copilot status integration
-- **nvim-colorizer.lua** - Color highlighter, custom version (Starslayerx/nvim-colorizer.lua)
-- **nvim-web-devicons** - File icons
-- **mini.nvim** - Icon support
-- **window-picker.nvim** - Window selector (version 2.*)
-- **which-key.nvim** - Keybinding hints, use `<leader>?` for local mappings
-
-### Code Completion & LSP
-- **blink.cmp** - Modern completion engine (version 1.*) with default preset keybindings and Copilot integration, built-in auto_brackets feature for function/method completion
-- **blink-copilot** - Copilot integration for Blink.cmp
-- **copilot.lua** - GitHub Copilot support (lazy-loaded, use `:Copilot` command to start)
-- **copilot-lualine** - Copilot status display in Lualine
-- **nvim-autopairs** - Auto bracket completion, works in combination with blink.cmp to handle manual bracket input, enter formatting, and other scenarios, disabled in macros and replace mode
-- **nvim-lspconfig** - LSP configuration using new API (vim.lsp.config/enable), supporting pyright (type checking disabled) and lua_ls
-- **mason.nvim** - LSP server management with custom icons
-- **mason-lspconfig.nvim** - Auto-install LSP (clangd, pyright, gopls, eslint, ts_ls, lua_ls, rust_analyzer, marksman, html, cssls, jsonls, yamlls, bashls, dockerls, taplo, emmet_language_server, jinja_lsp)
-- **trouble.nvim** - Diagnostic interface with multiple view modes
-- **tiny-inline-diagnostic.nvim** - Inline diagnostics with ghost preset and multiline support
-- **lspsaga.nvim** - LSP UI enhancement with rounded borders, lightbulb disabled
-- **noice.nvim** - Enhanced messages and cmdline with multiple presets
-- **friendly-snippets** - Code snippets support
-
-### Syntax Highlighting & Editing
-- **nvim-treesitter** - Advanced syntax highlighting (main branch) with built-in progressive selection and folding support
-- **rainbow-delimiters.nvim** - Rainbow parentheses using Nord and Catppuccin Frappé colors
-- **vim-illuminate** - Current word/reference highlighting with LSP, Treesitter, and regex providers plus reference navigation
-- **Built-in treesitter selection** - Progressive code selection using `<CR>`/`<BS>`/`<TAB>`
-- **wildfire.nvim** - Quick bracket content selection (custom version)
-- **nvim-surround** - Quick operations: surround selections with delimiters
-
-### Git & Testing
-- **gitsigns.nvim** - Inline Git hunk signs with preview, stage/reset, blame, diff, and quickfix support
-- **neotest** - Unified test runner
-- **neotest-python** - Python / pytest adapter
-- **neotest-go** - Go adapter
-- **neotest-vitest** - Vitest adapter
-
-### Search & File Management
-- **fzf-lua** - Native fuzzy finder powered by system `fzf`, used as the primary search layer for files, buffers, command history, live grep, and recent files
-- **neo-tree.nvim** - Current file explorer implementation, opened with `<leader>e`
-
-### Formatting & Tools
-- **conform.nvim** - Code formatter with auto-format on save
-- **vim-python-pep8-indent** - Python PEP8 indentation
-
-## ⌨️ Key Mappings
-
-### Basic Operations
-- `S` - Save file
-- `Q` - Quit
-- `Y` - Select all and copy to system clipboard
-- `<leader><CR>` - Clear search highlight
-- `K/J` - Move 5 lines up/down quickly
-- `</>/` - Indent/Unindent
-
-### Tab Management
-- `tn` - New tab
-- `tN` - Split current buffer in new tab
-- `th/tl` - Previous/Next tab
-- `tmh/tml` - Move tab left/right
-
-### Window Management
-
-#### Basic Window Operations
-- `<C-w>t` - Open terminal (horizontal split)
-- `<C-w>T` - Open terminal (vertical split)
-- `<Esc>` - Exit to normal mode in terminal
-
-#### Window Switching (Native Vim Way)
-- `<C-w>h` - Switch to left window
-- `<C-w>j` - Switch to bottom window
-- `<C-w>k` - Switch to top window
-- `<C-w>l` - Switch to right window
-- `<C-w>w` - Cycle to next window
-- `<C-w>p` - Switch to previous window
-
-#### Window Layout Adjustment
-- `<C-w>=` - Equalize all window sizes
-- `<C-w>_` - Maximize current window height
-- `<C-w>|` - Maximize current window width
-- `<C-w>+` - Increase current window height
-- `<C-w>-` - Decrease current window height
-- `<C-w>>` - Increase current window width
-- `<C-w><` - Decrease current window width
-
-#### Window Movement and Closing
-- `<C-w>H/J/K/L` - Move current window to far left/bottom/top/right
-- `<C-w>r` - Rotate windows clockwise
-- `<C-w>R` - Rotate windows counter-clockwise
-- `<C-w>x` - Exchange window with next one
-- `<C-w>o` - Close all other windows (only)
-- `<C-w>q` - Quit current window
-- `<C-w>c` - Close current window
-
-### Git Keymaps
-- `<leader>gj` - Next hunk
-- `<leader>gk` - Previous hunk
-- `<leader>gs` - Stage current hunk
-- `<leader>gr` - Reset current hunk
-- `<leader>gS` - Stage current buffer
-- `<leader>gR` - Reset current buffer
-- `<leader>gp` - Preview current hunk
-- `<leader>gi` - Preview current hunk inline
-- `<leader>gb` - Show line blame
-- `<leader>gd` - Diff against index
-- `<leader>gD` - Diff against `~`
-- `<leader>gq` - Send hunks to quickfix
-- `<leader>gl` - Toggle current line blame
-- `<leader>gw` - Toggle word diff
-- `ih` - Hunk text object
-
-### Test Keymaps
-- `<leader>tn` - Run nearest test
-- `<leader>tf` - Run current file
-- `<leader>ta` - Run current project
-- `<leader>td` - Debug nearest test with DAP
-- `<leader>tm` - Debug current test method (Python only)
-- `<leader>tc` - Debug current test class (Python only)
-- `<leader>ts` - Toggle neotest summary
-- `<leader>to` - Open latest test output
-- `<leader>tO` - Toggle output panel
-- `<leader>tw` - Watch current file
-- `<leader>tS` - Stop current test run
-
-### Page Navigation
-normal mode:
-- `<C-f>` - forward   Page down one full screen
-- `<C-b>` - backward  Page up one full screen
-- `<C-d>` - down half Page down half screen
-- `<C-u>` - up half   Page up half screen
-
-insert mode:
-- `<C-j>` - forward   Page down one full screen
-- `<C-k>` - backward  Page up one full screen
-
-### Cursor Movement (Insert Mode)
-- `<C-f>` - Move to end of line
-- `<C-l>` - Move one character to the right
-- `<C-b>` - Move to beginning of line
-
-### Treesitter Code Selection & Editing
-- `<CR>` - Initialize/Expand selection (normal and visual modes)
-- `<BS>` - Shrink selection (visual mode)
-- `<TAB>` - Scope incremental selection (visual mode)
-
-### nvim-surround Keymaps
-
-#### Add Surroundings
-- `ys{motion}{char}` - Add surrounding to specified range
-  - `ysiw"` - Add double quotes around current word
-  - `ysa")` - Add parentheses around quotes content
-  - `yst;}` - Add braces from cursor to semicolon
-- `yss{char}` - Add surrounding to entire line (ignoring leading/trailing whitespace)
-- `yS{motion}{char}` - Add surrounding on new lines
-- `ySS{char}` - Add surrounding to entire line on new lines
-- `<C-g>s{char}` - Insert mode: add surrounding at cursor
-- `<C-g>S{char}` - Insert mode: add surrounding at cursor on new lines
-- `S{char}` - Visual mode: add surrounding to selection
-- `gS{char}` - Visual mode: add surrounding to selection on new lines
-
-#### Delete Surroundings
-- `ds{char}` - Delete specified surrounding
-  - `ds"` - Delete double quotes
-  - `ds)` - Delete parentheses
-  - `dst` - Delete HTML tag
-
-#### Change Surroundings
-- `cs{old}{new}` - Change surrounding
-  - `cs"'` - Change double quotes to single quotes
-  - `cs)}` - Change parentheses to braces
-  - `cst<div>` - Change HTML tag to div tag
-- `cS{old}{new}` - Change surrounding on new lines
-
-#### Special Characters
-- **Parentheses/Brackets/Braces/Angle brackets**:
-  - Use closing char (`)`, `]`, `}`, `>`) - tight: `{text}`
-  - Use opening char (`(`, `[`, `{`, `<`) - add space: `{ text }`
-- **HTML tags** (`t`/`T`):
-  - `ysiwt` - Add tag (prompts for tag name and attributes)
-  - `dst` - Delete tag
-  - `cst` - Change only tag type (preserves attributes)
-  - `csT` - Change entire tag (including attributes)
-- **Function calls** (`f`):
-  - `ysiwf` - Add function call (prompts for function name)
-  - `dsf` - Delete function call, keep arguments
-  - `csf` - Change function name
-- **Custom surroundings** (`i`):
-  - `yssi` - Custom left/right surroundings (prompts for each side)
-
-#### Alias Shortcuts
-- `b` → `)` (parentheses)
-- `B` → `}` (braces)
-- `r` → `]` (brackets)
-- `a` → `>` (angle brackets)
-- `q` → `"`, `'`, `` ` `` (any quote)
-- `s` → `}`, `]`, `)`, `>`, `"`, `'`, `` ` `` (any surrounding)
-
-#### Usage Examples
-```
-Old text                    Command         New text
---------                    -------         --------
-local str = H*ello          ysiw"           local str = "Hello"
-require"nvim-surroun*d"     ysa")           require("nvim-surround")
-*sample_text                ysiw}           {sample_text}
-*sample_text                ysiw{           { sample_text }
-local x = ({ *32 })         ds)             local x = { 32 }
-'*some string'              cs'"            "some string"
-"Nested '*quotes'"          dsq             "Nested quotes"
-div cont*ents               ysstdiv         <div>div contents</div>
-<div>d*iv contents</div>    dst             div contents
-arg*s                       ysiwffunc       func(args)
-f*unc_name(a, b, x)         dsf             a, b, x
-```
-
-### Blink.cmp Completion Keys (Default preset)
-- `<C-y>` - Accept completion
-- `<C-Space>` - Open menu or toggle documentation
-- `<C-n>/<C-p>` or `Up/Down` - Select next/previous item
-- `<C-e>` - Hide menu
-- `<C-k>` - Toggle signature help
-
-### Search and Navigation Keymaps
-#### fzf-lua Primary Search
-- `<leader><space>` - Global picker (files / buffers / LSP symbols)
-- `<leader>bb` - Buffer list
-- `<leader>/` - Live grep
-- `<leader>:` - Command history
-- `<leader>ff` - Find files
-- `<leader>fg` - Find git files
-- `<leader>fb` - Find buffers
-- `<leader>fc` - Find configuration files
-- `<leader>fr` - Recent files
-- `<leader>fs` - Current file symbols, preferring LSP document symbols with Treesitter/ctags fallback
-- `<leader>fS` - Project symbols, preferring LSP workspace symbols with ctags fallback
-- `<leader>ft` - Current file Treesitter symbols
-- `<leader>fT` - Project tags
-- `<leader>fR` - Resume the last fzf-lua picker
-
-#### Search & Files
-- `<leader>e` - File explorer
-
-#### File Explorer Operations (Neo-tree)
-- `<CR>` / `l` - Open file or expand directory
-- `h` - Close directory
-- `o` - Open in new tab
-- `s` - Open in vertical split
-- `S` - Open in horizontal split
-- `P` - Toggle floating preview
-- `H` - Toggle hidden and gitignored files
-
-#### Other Features
-- `<leader>F` - Format code
-- `<leader>bn` - Next buffer
-- `<leader>bp` - Previous buffer
-- `<leader>bd` - Delete buffer
-- `<leader>cR` - Rename file
-
-#### Word/Reference Highlighting
-- `]r` - Jump to next reference
-- `[r` - Jump to previous reference
-- `<leader>ch` - Toggle reference highlighting for the current buffer
-
-### LSP Keymaps
-
-#### View Source Code and Documentation (lspsaga)
-- `gh` - View documentation (auto-focus to floating window, scrollable)
-- `gd` - Go to definition (open in vertical split)
-- `gp` - Peek definition (floating window, no jump, press `t`/`s`/`v` to open in new tab/split)
-- `gr` - Find all references and implementations (floating window list)
-
-#### Code Actions (lspsaga)
-- `<leader>rn` - Rename variable/function
-- `<leader>ca` - Code actions
-- `<leader>o` - Toggle file outline (show all symbols)
-
-#### Diagnostic Navigation (lspsaga)
-- `[d` - Jump to previous diagnostic
-- `]d` - Jump to next diagnostic
-
-#### Diagnostic Panels (Trouble)
-- `<leader>xx` - Toggle diagnostics panel
-- `<leader>xX` - Buffer diagnostics
-- `<leader>cs` - Symbols list
-- `<leader>cl` - LSP information
-- `<leader>xL` - Location list
-- `<leader>xQ` - Quickfix list
-
-## ⚙️ Configuration Options
-
-### Display Settings
-- Line numbers + relative numbers
-- Cursor line highlight
-- 100-column marker
-- Auto wrap
-- Sign column always visible
-- Scroll offset: 8 lines
-
-### Editing Settings
-- Tab width: 4 spaces
-- Smart indent: Disabled (nosmartindent)
-- C indent: Disabled (nocindent)
-- Fold method: Treesitter expr (level 99, not folded by default)
-- Auto indent: Enabled
-- Show invisible characters: Enabled (tabs as two spaces, trailing spaces as ▫)
-- Auto comments: Disabled
-- Undo files: Enabled (persistent)
-- Cursor position memory: Enabled
-
-### Search Settings
-- Case sensitive (ignorecase = false)
-- Smart case: Disabled (smartcase = false)
-- Live search preview (inccommand = "split")
-- Search highlight: Enabled
-
-### Window Splits
-- Vertical split: Opens to the right
-- Horizontal split: Opens below
-
-### Performance Optimization
-- Backup and swap files disabled
-- Hidden buffers enabled
-- Update time: 300ms
-- Timeout: 50ms
-- Regex engine: Modern engine (re=0)
-- Backup directory: ~/.config/nvim/tmp/backup
-- Undo directory: ~/.config/nvim/tmp/undo
-- Disable lazyredraw to prevent UI plugin issues
-
-### Completion Settings
-- Complete options: longest, noinsert, menuone, noselect, preview
-- Virtual edit: Block mode enabled
-- GitHub Copilot: Integrated into blink.cmp for smart completion
-
-### Transparency Effects
-- Main window background transparent (Normal, NormalFloat)
-- Sign column transparent (SignColumn)
-- Non-current windows transparent (NormalNC)
-- Message area transparent (MsgArea)
-- Telescope interface transparent (TelescopeNormal, TelescopeBorder, TelescopePromptBorder)
-
-## 🎨 Features
-
-1. **Search Workflow**: Uses fzf-lua as the primary search interface together with neo-tree for file browsing
-2. **Modern LSP**: Complete language server support with auto-installation and UI enhancement
-3. **Code Formatting**: Auto-formatting for multiple languages (triggers on save)
-4. **Transparent Interface**: Window transparency effects automatically applied to color themes
-5. **Smart Completion**: Modern completion system based on blink.cmp with LSP, path, snippets, buffer, and GitHub Copilot support
-6. **Auto Bracket Completion**: blink.cmp built-in auto_brackets handles function/method completion brackets, nvim-autopairs handles manual bracket pairing, enter formatting, etc., disabled in specific filetypes, macros, and replace mode
-7. **Rainbow Parentheses**: Colorful parentheses highlighting using Nord and Catppuccin Frappé color schemes
-8. **Quick Content Selection**: Use `<CR>`/`<BS>`/`<TAB>` for progressive code selection with scope detection
-9. **Surrounding Operations**: Use nvim-surround for quick surrounding operations
-   - Support for adding, deleting, changing brackets, quotes, HTML tags
-   - Smart space handling (different behavior for opening/closing characters)
-   - Built-in alias shortcuts (e.g., `b`→`)`, `q`→any quote)
-   - Support for function calls and custom surroundings
-   - Full support across visual, insert, and normal modes
-10. **Inline Diagnostics**: Show diagnostic information within code lines using ghost preset style with multiline support
-11. **Window Selector**: Quickly switch and manage windows (version 2.*)
-12. **Keybinding Hints**: Real-time display of available keybindings, use `<leader>?` for local mappings
-13. **Reference Highlighting**: Uses vim-illuminate to highlight other references of the current word and jump between them
-14. **Enhanced File Explorer**: Uses neo-tree for file browsing, split/tab opening, preview, and hidden file toggling
-15. **Auto LSP Installation**: Mason automatically installs and configures multiple language servers
-16. **Cursor Position Memory**: Restores last cursor position when reopening files
-17. **Treesitter Folding**: Intelligent code folding based on syntax tree
-18. **GitHub Copilot**: AI code completion and suggestions (lazy-loaded)
-
-## 📁 Project Structure
-
-```
+```text
 ~/.config/nvim/
-├── init.lua              # Main configuration file
+├── init.lua
+├── data/
+│   └── htmx.html-data.json
 ├── lua/
 │   ├── config/
-│   │   ├── lazy.lua      # Package manager setup
-│   │   ├── keymaps.lua   # Key mappings
-│   │   ├── options.lua   # General settings
-│   │   └── transparency.lua # Transparency settings
+│   │   ├── lazy.lua
+│   │   ├── options.lua
+│   │   ├── keymaps.lua
+│   │   ├── filetype.lua
+│   │   ├── transparency.lua
+│   │   └── taskwarrior.lua
 │   └── plugins/
-│       ├── cmp.lua       # Completion plugins
-│       ├── lsp.lua       # LSP plugins
-│       ├── snacks.lua    # fzf-lua and neo-tree config
-│       ├── tools.lua     # Utility plugins
-│       └── ui.lua        # UI plugins
-└── README.md             # Chinese documentation
-└── README-en.md          # This file
+│       ├── ui.lua
+│       ├── cmp.lua
+│       ├── lsp.lua
+│       ├── snacks.lua
+│       ├── tools.lua
+│       └── debug.lua
+├── README.md
+└── README-en.md
 ```
 
-## 🚀 Getting Started
+Plugins are grouped by responsibility: UI, completion, LSP, search/files, tools, and debugging. Filetype-specific behavior lives in `lua/config/filetype.lua`.
 
-1. **Environment Setup**:
-   - Ensure you have Neovim 0.10+ installed
-   - Perl and Ruby providers are automatically disabled (configured in init.lua)
+## Core Options
 
-2. **Installation**:
-   - Clone this configuration to `~/.config/nvim/`
-   - On first launch, lazy.nvim will automatically install all plugins
+- Absolute and relative line numbers, cursor line, and a persistent sign column
+- Global soft wrapping, `scrolloff=8`, and a 100-column guide
+- Four-space indentation with `expandtab` and `autoindent`
+- `smartindent` and `cindent` disabled; Python keeps the PEP8 plugin's `indentexpr`
+- Default `foldmethod=indent`, `foldlevel=99`, and folding disabled
+- Tree-sitter fold expressions for buffers other than Markdown and Text
+- Case-sensitive search, search highlighting, and `inccommand=split`
+- Vertical splits open right and horizontal splits open below
+- Backup, write-backup, and swap files disabled
+- Persistent undo stored in `~/.config/nvim/tmp/undo/`
+- Cursor position restored when reopening files
+- Automatic comment continuation disabled
+- `timeoutlen=500`, `ttimeoutlen=50`, and `updatetime=300`
+- `lazyredraw=false` to avoid redraw issues with UI plugins such as Noice
+- Perl and Ruby providers disabled at startup
 
-3. **Initialization**:
-   - Mason will automatically install configured LSP servers
-   - Treesitter will automatically install syntax parsers
-   - Transparency effects will be automatically applied after color theme loading
+## Custom Keymaps
 
-4. **Usage Guide**:
-   - Use `<leader>?` to see available keybindings
-   - Use `<leader>e` to open file explorer
-   - Use `<leader><space>` for smart file finding
+### Basic Editing
 
-### Automatic Features
-- **Auto Completion**: Code completion triggers automatically, including LSP, snippets, path, and buffer completion. Copilot requires manual start using `:Copilot` command
-- **Auto Formatting**: Code auto-formats on file save (supports Python, JS/TS, Lua, Shell)
-- **Auto Diagnostics**: LSP diagnostics display in real-time with multiline inline support
-- **File Type Detection**: Automatically enables corresponding syntax highlighting and LSP
-- **Auto Folding**: Intelligent code folding based on Treesitter
-- **Auto Terminal Start**: Automatically enters insert mode on TermOpen
+| Key            | Action                                                                  |
+| -------------- | ----------------------------------------------------------------------- |
+| `S`            | Save the current file                                                   |
+| `Q`            | Quit the current window                                                 |
+| `Y`            | Select the whole buffer and copy it to the system clipboard             |
+| `<leader><CR>` | Clear search highlighting                                               |
+| `J` / `K`      | Move down/up five lines                                                 |
+| `<` / `>`      | Indent in Normal mode; retain selection in Visual mode                  |
+| `<leader>z`    | Move the current split into its own tab and toggle a full-window view   |
+| `G`            | Markdown only: jump to the target/end of file and run `zz` to center it |
 
-## 🔧 Customization
+The Markdown `G` mapping is buffer-local. Other filetypes retain native `G`; counted commands such as `20G` also center after jumping.
 
-### Core Configuration Files
-- **`lua/config/options.lua`** - General settings (display, editing, search, etc.)
-- **`lua/config/keymaps.lua`** - Key mappings
-- **`lua/config/transparency.lua`** - Transparency effects settings
-- **`lua/config/lazy.lua`** - Package manager initialization (Leader key setup)
+### Insert Mode and Terminal
 
-### Plugin Configuration Files
-- **`lua/plugins/ui.lua`** - UI-related plugins (theme, status bar, icons, Treesitter, rainbow brackets, etc.)
-- **`lua/plugins/cmp.lua`** - Completion system configuration (blink.cmp, Copilot, auto-pairs)
-- **`lua/plugins/lsp.lua`** - LSP and diagnostics configuration (lspconfig, Mason, Trouble, diagnostics display)
-- **`lua/plugins/snacks.lua`** - fzf-lua and neo-tree configuration
-- **`lua/plugins/tools.lua`** - Formatting and other tools (conform, wildfire, PEP8 indent)
+| Key               | Action                                                                                   |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| `<C-a>`           | Move to the beginning of the line and remain in Insert mode                              |
+| `<C-e>`           | Move to the end of the line and remain in Insert mode; the blink.cmp binding is disabled |
+| `<C-h>` / `<C-l>` | Move one character left/right                                                            |
+| `<C-j>` / `<C-k>` | Scroll one full page down/up                                                             |
+| `<C-w>t`          | Open a terminal in a horizontal split                                                    |
+| `<C-w>T`          | Open a terminal in a vertical split                                                      |
+| `<Esc>`           | Leave Terminal mode for Normal mode                                                      |
 
-### Quick Modification Guide
-1. **Change Theme**: Edit nord.nvim configuration in `lua/plugins/ui.lua`
-2. **Add LSP**: Add servers to ensure_installed in `lua/plugins/lsp.lua`
-3. **Modify Keybindings**: Edit `lua/config/keymaps.lua` to add custom mappings
-4. **Adjust Formatting**: Modify formatters_by_ft in `lua/plugins/tools.lua`
-5. **Disable Transparency**: Comment out `require("config.transparency")` loading in `init.lua`
-6. **Configure Copilot**: Adjust Copilot settings in `lua/plugins/cmp.lua`
-7. **Customize File Explorer**: Modify neo-tree configuration in `lua/plugins/snacks.lua`
+### Tabs, Windows, and Buffers
 
-This configuration provides a complete, modern development environment with excellent performance and usability. All components have been carefully tuned to ensure compatibility and stability.
+| Key                         | Action                              |
+| --------------------------- | ----------------------------------- |
+| `tn`                        | Create a new tab                    |
+| `tN`                        | Put the current buffer in a new tab |
+| `th` / `tl`                 | Previous/next tab                   |
+| `tmh` / `tml`               | Move the tab left/right             |
+| `<leader>bn` / `<leader>bp` | Next/previous buffer                |
+| `<leader>bd`                | Delete the current buffer           |
+| `<C-w>h/j/k/l`              | Use native Neovim window navigation |
 
-## 📝 Language Support
+### fzf-lua and Neo-tree
 
-### Auto-installed LSP Servers
-Configuration automatically installs the following LSP servers:
-- **clangd** - C/C++ language server
-- **pyright** - Python language server (type checking disabled, basic LSP features only)
-- **gopls** - Go language server
-- **eslint** - JavaScript/TypeScript linting
-- **lua_ls** - Lua language server (specially configured for Neovim API support)
-- **rust_analyzer** - Rust language server
-- **marksman** - Markdown language server
+| Key                         | Action                                                  |
+| --------------------------- | ------------------------------------------------------- |
+| `<leader><space>`           | fzf-lua global picker                                   |
+| `<leader>bb` / `<leader>fb` | Buffer list                                             |
+| `<leader>/`                 | Live grep                                               |
+| `<leader>:`                 | Command history                                         |
+| `<leader>ff`                | Find files                                              |
+| `<leader>fg`                | Find Git files                                          |
+| `<leader>fc`                | Find Neovim configuration files                         |
+| `<leader>fr`                | Recent files                                            |
+| `<leader>fs`                | Document symbols: LSP → Tree-sitter → ctags             |
+| `<leader>fS`                | Workspace symbols: LSP → ctags                          |
+| `<leader>ft`                | Tree-sitter symbols                                     |
+| `<leader>fT`                | Project tags                                            |
+| `<leader>fR`                | Resume the previous fzf-lua picker                      |
+| `<leader>e`                 | Toggle Neo-tree on the left and reveal the current file |
 
-### Treesitter Syntax Highlighting
-Automatically installs the following language parsers:
-- Lua, Vim, Vimdoc (Neovim core)
-- Python, JavaScript, TypeScript
-- HTML, CSS, JSON, Markdown
-- Bash, C, C++, Rust, Go, Java
+Inside Neo-tree:
 
-### Code Formatting Support
-- **Python**: ruff (ignores F401 unused import warnings)
-- **JavaScript/TypeScript**: prettier
-- **JavaScript React (JSX)**: prettier
-- **TypeScript React (TSX)**: prettier
-- **HTML**: prettier
-- **CSS/SCSS**: prettier
-- **JSON**: prettier
-- **Markdown**: prettier
-- **YAML**: prettier
-- **Lua**: stylua (2-space indentation)
-- **Shell**: shfmt (2-space indentation)
+| Key          | Action                              |
+| ------------ | ----------------------------------- |
+| `<CR>` / `l` | Open a file or expand a directory   |
+| `h`          | Collapse a directory                |
+| `o`          | Open in a new tab                   |
+| `s` / `S`    | Open in a vertical/horizontal split |
+| `P`          | Toggle floating preview             |
+| `H`          | Toggle hidden and gitignored files  |
 
-All formatting tools support auto-format on save with 500ms timeout, LSP as fallback formatting option.
+`t` is explicitly unmapped inside Neo-tree so it does not interfere with the tab navigation workflow.
 
-#### Batch Format Project Files
-```bash
-# Format all supported files using prettier
-npx prettier --write .
+### LSP and Diagnostics
 
-# Format specific file types
-npx prettier --write "**/*.{js,jsx,ts,tsx,html,css,scss,json,md}"
+| Key                         | Action                                                 |
+| --------------------------- | ------------------------------------------------------ |
+| `<leader>lh`                | Lspsaga hover and focus its floating window            |
+| `<leader>ld`                | Go to definition in the current window                 |
+| `<leader>lv`                | Open a vertical split, then go to definition           |
+| `<leader>ls`                | Open a horizontal split, then go to definition         |
+| `<leader>lf`                | Peek definition in a floating window                   |
+| `<leader>lr`                | Find references and implementations                    |
+| `<leader>rn`                | Rename                                                 |
+| `<leader>ca`                | Code Action in Normal or Visual mode                   |
+| `[d` / `]d`                 | Previous/next diagnostic                               |
+| `<leader>o`                 | Toggle the Lspsaga Outline                             |
+| `<leader>xl`                | Show diagnostics for the current line                  |
+| `<leader>xd`                | Show LSP diagnostic debug state for the current buffer |
+| `<leader>xx`                | Trouble workspace diagnostics                          |
+| `<leader>xX`                | Trouble buffer diagnostics                             |
+| `<leader>cs`                | Trouble symbols                                        |
+| `<leader>cl`                | Trouble LSP information                                |
+| `<leader>xL` / `<leader>xQ` | Location list / Quickfix list                          |
 
-# Check which files need formatting (without modifying files)
-npx prettier --check .
+`K` moves up five lines, so hover documentation uses `<leader>lh`.
+
+### Git
+
+| Key                         | Action                                           |
+| --------------------------- | ------------------------------------------------ |
+| `<leader>gj` / `<leader>gk` | Next/previous hunk                               |
+| `<leader>gs` / `<leader>gr` | Stage/reset a hunk, including a Visual selection |
+| `<leader>gS` / `<leader>gR` | Stage/reset the current buffer                   |
+| `<leader>gp` / `<leader>gi` | Floating/inline hunk preview                     |
+| `<leader>gb`                | Full blame for the current line                  |
+| `<leader>gd` / `<leader>gD` | Diff against the index / `~`                     |
+| `<leader>gq`                | Send hunks to the quickfix list                  |
+| `<leader>gl`                | Toggle current-line blame                        |
+| `<leader>gw`                | Toggle word diff                                 |
+| `ih`                        | Hunk text object                                 |
+
+### Testing
+
+| Key                         | Action                             |
+| --------------------------- | ---------------------------------- |
+| `<leader>tn`                | Run the nearest test               |
+| `<leader>tf`                | Run the current file               |
+| `<leader>ta`                | Run the current project            |
+| `<leader>td`                | Debug the nearest test through DAP |
+| `<leader>tm` / `<leader>tc` | Debug a Python test method/class   |
+| `<leader>ts`                | Toggle the test summary            |
+| `<leader>to`                | Open the latest output             |
+| `<leader>tO`                | Toggle the output panel            |
+| `<leader>tw`                | Watch the current file             |
+| `<leader>tS`                | Stop the test run                  |
+
+### Debugging
+
+| Key                                        | Action                                                           |
+| ------------------------------------------ | ---------------------------------------------------------------- |
+| `<leader>ds`                               | Start debugging                                                  |
+| `<leader>dc`                               | Continue; show session actions when a session is already running |
+| `<leader>dn` / `<leader>di` / `<leader>do` | Step over / into / out                                           |
+| `<leader>db`                               | Toggle a persistent breakpoint                                   |
+| `<leader>dB`                               | Set a conditional breakpoint                                     |
+| `<leader>dl`                               | Set a log point                                                  |
+| `<leader>du`                               | Toggle DAP View                                                  |
+| `<leader>de`                               | Evaluate the cursor expression or Visual selection               |
+| `<leader>dp`                               | Open the REPL                                                    |
+| `<leader>dR`                               | Run the previous configuration again                             |
+| `<leader>dq`                               | Terminate debugging                                              |
+
+Breakpoints persist across Neovim restarts. DAP View is a right-side panel using 50% of the window width and automatically follows the debug lifecycle. Inline debug virtual text is explicitly disabled.
+
+### Taskwarrior
+
+| Key/command                    | Action                    |
+| ------------------------------ | ------------------------- |
+| `<leader>an` / `:TaskNext`     | Show next tasks           |
+| `<leader>aa` / `:TaskAll`      | Show all tasks            |
+| `<leader>ap` / `:TaskProjects` | Show projects             |
+| `<leader>aA` / `:TaskAdd`      | Prompt for and add a task |
+
+Inside the Taskwarrior panel: `r` refreshes, `<CR>` opens task details, `x` completes a task, and `q` closes the panel.
+
+### Other Editing Tools
+
+| Key             | Action                                                                |
+| --------------- | --------------------------------------------------------------------- |
+| `<leader>F`     | Format the buffer in Normal mode or the selected range in Visual mode |
+| `<leader>j`     | Split/join the current syntax node with TreeSJ                        |
+| `<CR>` / `<BS>` | Expand/shrink a Wildfire bracket or Tree-sitter selection             |
+| `]r` / `[r`     | Next/previous highlighted reference                                   |
+| `<leader>ch`    | Toggle reference highlighting for the current buffer                  |
+| `<leader>?`     | Show buffer-local keymaps                                             |
+
+nvim-surround uses its default mappings, for example `ysiw"`, `ds"`, `cs"'`, and `S{char}` in Visual mode.
+
+Other enabled integrations: direnv.vim synchronizes project environments, nvim-colorizer displays color swatches, and nvim-window-picker provides window selection without a dedicated global keymap.
+
+## LSP and Template Support
+
+Mason automatically installs and enables:
+
+- `clangd`
+- `pyright`
+- `gopls`
+- `eslint`
+- `ts_ls`
+- `lua_ls`
+- `rust_analyzer`
+- `marksman`
+- `html`
+- `cssls`
+- `jsonls`
+- `yamlls`
+- `bashls`
+- `dockerls`
+- `taplo`
+- `emmet_language_server`
+- `jinja_lsp`
+
+Special behavior:
+
+- Pyright uses `diagnosticMode=workspace`, disables type checking, and keeps warnings for missing imports/module sources.
+- Pyright searches up to three parent levels for `.venv`, `venv`, or `env` and uses its `bin/python`.
+- Clangd uses `-std=c23` as a fallback when the project has no real compilation database or flags.
+- Lua LS recognizes the Neovim runtime and the `vim` global.
+- HTML, Jinja, and Emmet support `htmldjango`; HTML LS loads local HTMX custom data.
+- CSS LS only serves CSS, SCSS, and Less, avoiding incorrect CSS property completion inside Jinja templates.
+- `.jinja`, `.jinja2`, and `.j2` files become `htmldjango`; HTML files under `templates/` or containing Jinja markers are detected automatically.
+- Typing `%` or `#` between an existing `{}` pair can expand it to `{%  %}` or `{#  #}`.
+- nvim-ts-context-commentstring dynamically selects HTML or Jinja comment syntax.
+
+## Completion and Automatic Pairs
+
+The default blink.cmp sources are:
+
+- LSP
+- Paths
+- friendly-snippets
+- Current buffer
+
+Primary keys:
+
+- `<C-y>` accepts a completion
+- `<C-Space>` opens the menu or toggles documentation
+- `<C-n>` / `<C-p>` selects the next/previous item
+- `<C-e>` is removed from blink.cmp and reserved for the custom end-of-line mapping
+
+blink.cmp `auto_brackets` adds `()` for function and method completions. nvim-autopairs handles manually typed pairs, Enter, and Backspace behavior. In Markdown, brackets and quotes are automatically paired only inside recognized programming-language code blocks.
+
+The Copilot provider, `:Copilot` command, and lualine status component remain configured, but Copilot is not in blink.cmp's default source list and both the suggestion and panel UIs are disabled.
+
+## Formatting
+
+Formatting is triggered manually with `<leader>F`; automatic formatting on save is not enabled. Conform may fall back to LSP formatting when the external formatter is unavailable.
+
+| Filetype                            | Formatter                                           |
+| ----------------------------------- | --------------------------------------------------- |
+| C / C++                             | clang-format, four spaces, no tabs                  |
+| Python                              | ruff_fix → ruff_format; the fix step ignores F401   |
+| JavaScript / TypeScript / JSX / TSX | prettier                                            |
+| HTML / Jinja / htmldjango           | djlint with Jinja profile and two-space indentation |
+| CSS / SCSS                          | prettier                                            |
+| JSON / Markdown                     | prettier                                            |
+| YAML                                | yamlfmt                                             |
+| Lua                                 | stylua with two spaces                              |
+| Shell                               | shfmt with two spaces                               |
+| Dockerfile                          | dprint                                              |
+| SQL                                 | sql-formatter                                       |
+| TOML                                | taplo                                               |
+
+## Tree-sitter and UI
+
+Automatically installed parsers: Lua, Vim, Vimdoc, Python, JavaScript, TypeScript, HTML, htmldjango, CSS, JSON, Markdown, Bash, C, C++, Rust, Go, and Java.
+
+Tree-sitter starts for every recognized filetype. Markdown and Text are explicitly excluded from Tree-sitter folding. Python also restores Vim syntax so the PEP8 indent plugin can use `synID()`.
+
+UI components:
+
+- Nord theme with italic comments and bold lualine sections
+- Transparent Normal, SignColumn, NormalNC, and MsgArea backgrounds
+- Static mini.indentscope guide with no animation
+- rainbow-delimiters with Nord and Catppuccin Frappé colors
+- tiny-inline-diagnostic ghost preset with an 80ms throttle, multiline display, and soft wrapping
+- Noice for command-line and message UI, with common file-write messages hidden
+- Which-key modern preset with a 140ms delay and dynamic toggle-state icons
+- Lspsaga hover biased below the cursor; Outline auto-preview disabled with multi-tab and empty-content stability patches
+- nvim-colorizer for live color swatches; nvim-window-picker initialized as a window-selection component
+
+## Python Debugging
+
+Mason DAP prepares debugpy, and nvim-dap-python uses:
+
+```text
+~/.local/share/nvim/mason/packages/debugpy/venv/bin/python
 ```
 
-#### ESLint Code Linting
-```bash
-# Check all files
-npx eslint .
+Python launch configurations include:
 
-# Auto-fix fixable issues
-npx eslint . --fix
+- Current file
+- Current file with prompted arguments
+- Run a Python module
+- Attach to a host/port, defaulting to `127.0.0.1:5678`
+- Run `doctest` against the current file
 
-# Show only errors, hide warnings
-npx eslint . --quiet
+Programs use the integrated terminal. DAP avoids jumping into `winfixbuf` windows and forces redraws after important debug events.
+
+## Troubleshooting
+
+### `G` leaves the cursor at the bottom in Markdown
+
+Markdown buffers map `G` to `Gzz`. It performs the native jump and then centers the target line. Check the mapping source with:
+
+```vim
+:verbose nmap G
 ```
 
-**Tip**: It's recommended to create `.eslintignore` and `.prettierignore` files in your project root to exclude directories that shouldn't be checked (such as `node_modules/`, `.next/`, `dist/`, `build/`, etc.).
+### LSP does not start
+
+```vim
+:LspInfo
+:Mason
+:checkhealth lsp
+```
+
+This configuration uses the new API; do not convert it back to `require("lspconfig").SERVER.setup()`.
+
+### Pyright cannot find the virtual environment
+
+Verify that `.venv/bin/python`, `venv/bin/python`, or `env/bin/python` exists at the project root or within three parent levels. Use `<leader>xd` to inspect the current Pyright root and diagnostic state.
+
+### Formatting does nothing
+
+```vim
+:ConformInfo
+:lua vim.print(require("conform").list_formatters())
+```
+
+Ensure the formatter is installed and available in `PATH`. SQL is formatted only when `<leader>F` is invoked manually.
+
+### Completion does not add brackets
+
+Confirm that blink.cmp `auto_brackets` is enabled and that both `kind_resolution.blocked_filetypes` and `semantic_token_resolution.blocked_filetypes` are empty. Manually typed pairs are handled by nvim-autopairs.
+
+### Python DAP does not start
+
+```vim
+:DapInstall
+```
+
+Also verify that the Mason debugpy Python path exists. Toggle the debug panel manually with `<leader>du`.
+
+### Noice command-line problems
+
+Noice is configured in `lua/plugins/lsp.lua`. Temporarily disabling its plugin spec can confirm a message-UI conflict; keep `lazyredraw=false`.
+
+## Customization Entry Points
+
+- General options: `lua/config/options.lua`
+- Global keymaps: `lua/config/keymaps.lua`
+- Filetype behavior: `lua/config/filetype.lua`
+- Taskwarrior: `lua/config/taskwarrior.lua`
+- UI: `lua/plugins/ui.lua`
+- Completion: `lua/plugins/cmp.lua`
+- LSP and diagnostics: `lua/plugins/lsp.lua`
+- Search and file tree: `lua/plugins/snacks.lua`
+- Git, tests, formatting, and editing tools: `lua/plugins/tools.lua`
+- Debugging: `lua/plugins/debug.lua`

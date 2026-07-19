@@ -100,3 +100,15 @@ vim.api.nvim_create_autocmd("FileType", {
     end, { buffer = true, expr = true })
   end,
 })
+
+-- Markdown 长文跳到末尾后居中显示，避免光标贴在状态栏上方。
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "markdown",
+  callback = function(args)
+    vim.keymap.set("n", "G", "Gzz", {
+      buffer = args.buf,
+      silent = true,
+      desc = "Go to end and center",
+    })
+  end,
+})
