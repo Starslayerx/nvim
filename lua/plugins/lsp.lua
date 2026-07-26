@@ -816,6 +816,11 @@ return {
           replace = true, -- 关键配置：合并/替换重复通知，避免堆叠
         },
       },
+      messages = {
+        -- Noice 默认把 [当前/总数] 作为虚拟文本画在代码行末。
+        -- 改到底部命令行，保持接近 Neovim 原生的搜索显示方式。
+        view_search = "cmdline",
+      },
       lsp = {
         progress = {
           enabled = false, -- 关闭右上角 LSP 进度提示，避免 pyright 持续占用空间
