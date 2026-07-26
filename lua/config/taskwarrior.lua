@@ -7,7 +7,9 @@ local function task_available()
 end
 
 local function notify_missing_task()
-  vim.notify("Taskwarrior executable not found in PATH", vim.log.levels.WARN)
+  local message = "Taskwarrior executable not found in PATH"
+  vim.notify(message, vim.log.levels.WARN)
+  return message
 end
 
 local function split_lines(text)
@@ -65,7 +67,8 @@ end
 
 local function run_task(args, callback)
   if not task_available() then
-    notify_missing_task()
+    local message = notify_missing_task()
+    callback({ code = 127, stdout = "", stderr = message }, { message })
     return
   end
 
@@ -158,10 +161,12 @@ end
 function M.show(title, args)
   local buf, win = ensure_panel()
   vim.api.nvim_set_current_win(win)
+  local request_id = (vim.b[buf].taskwarrior_request_id or 0) + 1
+  vim.b[buf].taskwarrior_request_id = request_id
   render_panel(buf, title, args, { "Loading Taskwarrior output..." })
 
   run_task(args, function(result, lines)
-    if not vim.api.nvim_buf_is_valid(buf) then
+    if not vim.api.nvim_buf_is_valid(buf) or vim.b[buf].taskwarrior_request_id ~= request_id then
       return
     end
 

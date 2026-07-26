@@ -17,24 +17,6 @@ return {
       },
       completion = {
         documentation = { auto_show = false },
-        accept = {
-          auto_brackets = {
-            enabled = true,
-            default_brackets = { "(", ")" },
-            override_brackets_for_filetypes = {},
-            -- 使用 kind 字段判断是否添加括号
-            kind_resolution = {
-              enabled = true,
-              blocked_filetypes = {}, -- 清空阻止列表，确保 Python 也能使用
-            },
-            -- 使用语义 token 异步判断（更准确）
-            semantic_token_resolution = {
-              enabled = true,
-              blocked_filetypes = {}, -- 清空阻止列表
-              timeout_ms = 400,
-            },
-          },
-        },
       },
       sources = {
         -- Copilot provider stays idle until :Copilot loads and attaches its client.
@@ -110,33 +92,6 @@ return {
 
       local Rule = require("nvim-autopairs.rule")
       local cond = require("nvim-autopairs.conds")
-      local ts_conds = require("nvim-autopairs.ts-conds")
-
-      -- 辅助函数：检查是否在代码块的编程语言中
-      local function is_in_code_lang()
-        return ts_conds.is_in_range(function(result)
-          if result and result.lang then
-            -- 支持的编程语言列表
-            local code_langs = { "python", "lua", "javascript", "typescript", "rust", "go", "c", "cpp", "java" }
-            return vim.tbl_contains(code_langs, result.lang)
-          end
-          return false
-        end, function()
-          local cursor = vim.api.nvim_win_get_cursor(0)
-          return { cursor[1] - 1, cursor[2] }
-        end)
-      end
-
-      -- Markdown 特殊处理：只在代码块内启用括号配对
-      npairs.add_rules({
-        -- 在 markdown 中，只有在代码块内才配对 {
-        Rule("{", "}", "markdown"):with_pair(is_in_code_lang()),
-        Rule("(", ")", "markdown"):with_pair(is_in_code_lang()),
-        Rule("[", "]", "markdown"):with_pair(is_in_code_lang()),
-        -- 引号也只在代码块内配对
-        Rule("'", "'", "markdown"):with_pair(is_in_code_lang()),
-        Rule('"', '"', "markdown"):with_pair(is_in_code_lang()),
-      })
 
       -- Python f-string 会由默认的引号配对规则处理
       -- 删除了之前有问题的特殊规则，该规则会阻止普通引号输入

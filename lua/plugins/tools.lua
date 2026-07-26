@@ -252,6 +252,7 @@ return {
       {
         "<leader>td",
         function()
+          require("lazy").load({ plugins = { "nvim-dap-view" } })
           require("neotest").run.run({ strategy = "dap" })
         end,
         desc = "Debug Nearest",
@@ -369,6 +370,7 @@ return {
   -- Formatter 代码格式化
   {
     "stevearc/conform.nvim",
+    event = "BufWritePre",
     cmd = { "ConformInfo" },
     keys = {
       {

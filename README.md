@@ -194,7 +194,7 @@ Neo-tree 内部：
 
 | 按键                        | 功能                                |
 | --------------------------- | ----------------------------------- |
-| `<leader>lh`                | Lspsaga hover，并自动聚焦浮窗       |
+| `<leader>lh`                | 打开 Lspsaga hover 文档             |
 | `<leader>ld`                | 在当前窗口跳转到定义                |
 | `<leader>lv`                | 垂直分屏后跳转到定义                |
 | `<leader>ls`                | 水平分屏后跳转到定义                |
@@ -205,7 +205,6 @@ Neo-tree 内部：
 | `[d` / `]d`                 | 上一个/下一个诊断                   |
 | `<leader>o`                 | 切换 Lspsaga Outline                |
 | `<leader>xl`                | 显示当前行诊断浮窗                  |
-| `<leader>xd`                | 显示当前 buffer 的 LSP 诊断调试信息 |
 | `<leader>xx`                | Trouble 工作区诊断                  |
 | `<leader>xX`                | Trouble 当前 buffer 诊断            |
 | `<leader>cs`                | Trouble 符号列表                    |
@@ -286,7 +285,7 @@ Taskwarrior 面板中：`r` 刷新、`<CR>` 查看详情、`x` 完成任务、`q
 
 nvim-surround 使用默认映射，例如 `ysiw"`、`ds"`、`cs"'`、可视模式 `S{char}`。
 
-其他已启用集成：direnv.vim 自动同步项目环境，nvim-colorizer 显示颜色值色块，nvim-window-picker 提供窗口选择能力但没有单独配置全局快捷键。
+其他已启用集成：direnv.vim 自动同步项目环境，nvim-colorizer 显示颜色值色块。
 
 ## LSP 与模板支持
 
@@ -312,7 +311,7 @@ Mason 自动安装并启用：
 特殊配置：
 
 - Pyright 使用 `diagnosticMode=workspace`，关闭类型检查，但保留缺失 import/module source 警告。
-- Pyright 会从项目根目录向上最多查找 3 层的 `.venv`、`venv` 或 `env`，并使用其中的 `bin/python`。
+- Pyright 会从项目根目录向上最多查找 3 层的 `.venv`、`venv` 或 `env`，并把其中的 `bin/python` 作为 `pythonPath` 发送给服务端。
 - Clangd 在项目没有真实编译数据库/flags 时使用 `-std=c23` fallback，并只记录错误级别日志。
 - Lua LS 识别 Neovim runtime 与 `vim` 全局。
 - Django 模板使用 HTML LS + Emmet；禁用会把 Django 动态上下文误报为未定义变量的 `jinja_lsp`。
@@ -330,6 +329,7 @@ blink.cmp 默认源：
 - 路径
 - friendly-snippets
 - 当前 buffer
+- Copilot（运行 `:Copilot` 激活客户端前保持空闲）
 
 主要按键：
 
@@ -338,13 +338,13 @@ blink.cmp 默认源：
 - `<C-n>` / `<C-p>` 选择下一项/上一项
 - `<C-e>` 已从 blink.cmp 中取消，保留给自定义行尾跳转
 
-blink.cmp 的 `auto_brackets` 会为函数/方法补全添加 `()`；nvim-autopairs 负责手动括号、回车和退格行为。Markdown 中的括号和引号只会在已识别的代码块语言内自动配对。
+blink.cmp 的 `auto_brackets` 按插件默认规则为函数/方法补全添加 `()`，并保留默认的文件类型安全排除项；Python 仍受支持。nvim-autopairs 负责手动括号、回车和退格行为，Markdown 也使用其常规配对规则。
 
-Copilot provider、`:Copilot` 命令和 lualine 状态组件仍然保留，但 Copilot 不在 blink.cmp 的默认 source 列表中，suggestion 与 panel 也处于关闭状态。
+Copilot provider 位于 blink.cmp 的默认 source 列表中，但在运行 `:Copilot` 加载并连接客户端前保持空闲；Copilot suggestion 与 panel 界面处于关闭状态，lualine 状态组件仍然保留。
 
 ## 格式化
 
-格式化通过 `<leader>F` 手动触发；当前配置没有启用保存时自动格式化。外部 formatter 不可用时允许回退到 LSP formatting。
+默认在保存前自动格式化（2 秒超时，SQL 除外），也可通过 `<leader>F` 手动触发。外部 formatter 不可用时允许回退到 LSP formatting。
 
 | 文件类型                            | Formatter                                 |
 | ----------------------------------- | ----------------------------------------- |
@@ -376,8 +376,8 @@ Tree-sitter 在所有可识别文件类型启动；Markdown、Text 明确排除 
 - tiny-inline-diagnostic ghost preset，80ms throttle，支持多行和软换行
 - Noice 美化命令行和消息，隐藏常见文件写入消息
 - Which-key 使用 modern preset、140ms 延迟，并显示动态开关状态图标
-- Lspsaga hover 偏向光标下方；Outline 禁用自动 preview，并包含多 tab/空内容稳定性补丁
-- nvim-colorizer 为颜色文本显示实时色块；nvim-window-picker 作为窗口选择组件初始化
+- Lspsaga 使用圆角浮窗；Outline 禁用自动 preview，不覆盖插件私有 API，也不强制聚焦 hover 浮窗
+- nvim-colorizer 为颜色文本显示实时色块
 
 ## Python 调试
 
@@ -419,7 +419,7 @@ Markdown buffer 已把 `G` 映射为 `Gzz`。它会先执行原生跳转，再�
 
 ### Pyright 找不到虚拟环境
 
-确认项目根目录或向上 3 层内存在 `.venv/bin/python`、`venv/bin/python` 或 `env/bin/python`。可用 `<leader>xd` 查看当前 Pyright root 和诊断状态。
+确认项目根目录或向上 3 层内存在 `.venv/bin/python`、`venv/bin/python` 或 `env/bin/python`。使用 `:LspInfo` 确认 Pyright 已附着及其项目根目录。
 
 ### 格式化无反应
 
@@ -432,7 +432,7 @@ Markdown buffer 已把 `G` 映射为 `Gzz`。它会先执行原生跳转，再�
 
 ### 补全后没有括号
 
-确认 blink.cmp 的 `auto_brackets` 仍启用，并且 `kind_resolution.blocked_filetypes` 与 `semantic_token_resolution.blocked_filetypes` 都为空表。手动输入括号由 nvim-autopairs 处理。
+确认 blink.cmp 的 `auto_brackets` 仍启用。本配置保留插件默认的安全排除项：TSX、JSX、Vue 不使用 kind resolution，Java 不使用 semantic-token resolution；Python 仍受支持。手动输入括号由 nvim-autopairs 处理。
 
 ### DAP 无法启动 Python
 

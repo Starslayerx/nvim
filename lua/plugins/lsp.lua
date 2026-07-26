@@ -1,211 +1,3 @@
-local function document_symbol_client(bufnr)
-  for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
-    if client.initialized ~= false and client:supports_method("textDocument/documentSymbol") then
-      return client
-    end
-  end
-end
-
-local function lspsaga_symbol_backend()
-  if vim.version().minor >= 10 and vim.fn.exists("##LspNotify") ~= 0 then
-    return require("lspsaga.symbol.head")
-  end
-
-  return require("lspsaga.symbol")
-end
-
-local function bootstrap_lspsaga_symbols(bufnr)
-  local client = document_symbol_client(bufnr)
-  if not client then
-    return nil, nil
-  end
-
-  vim.api.nvim_exec_autocmds("LspAttach", {
-    group = "LspsagaSymbols",
-    buffer = bufnr,
-    modeline = false,
-    data = { client_id = client.id },
-  })
-
-  return client, lspsaga_symbol_backend()
-end
-
-local function toggle_lspsaga_outline()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local outline = require("lspsaga.symbol.outline")
-
-  if outline.winid and vim.api.nvim_win_is_valid(outline.winid) then
-    outline:outline(bufnr)
-    return
-  end
-
-  local client, symbols = bootstrap_lspsaga_symbols(bufnr)
-  if not client then
-    vim.notify("Current buffer has no LSP client with documentSymbol support.", vim.log.levels.WARN)
-    return
-  end
-
-  local cached = symbols:get_buf_symbols(bufnr)
-  if cached and cached.symbols and #cached.symbols > 0 then
-    outline:outline(bufnr)
-    return
-  end
-
-  local group = vim.api.nvim_create_augroup("LspsagaOutlineBootstrap", { clear = false })
-  local autocmd_id
-  autocmd_id = vim.api.nvim_create_autocmd("User", {
-    group = group,
-    pattern = "SagaSymbolUpdate",
-    callback = function(args)
-      if not args.data or args.data.bufnr ~= bufnr then
-        return
-      end
-
-      pcall(vim.api.nvim_del_autocmd, autocmd_id)
-      vim.schedule(function()
-        local updated = symbols:get_buf_symbols(bufnr)
-        if updated and updated.symbols and #updated.symbols > 0 then
-          outline:outline(bufnr)
-          return
-        end
-
-        vim.notify("[lspsaga] No document symbols returned for current buffer.", vim.log.levels.WARN)
-      end)
-    end,
-  })
-
-  if not cached or not cached.pending_request then
-    symbols:do_request(bufnr, client.id)
-  end
-end
-
-local function debug_current_buffer_diagnostics()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local clients = vim.lsp.get_clients({ bufnr = bufnr })
-  local diagnostics = vim.diagnostic.get(bufnr)
-  local lines = {
-    ("buf=%d file=%s"):format(bufnr, vim.api.nvim_buf_get_name(bufnr)),
-    ("diag_count=%d"):format(#diagnostics),
-  }
-
-  if #clients == 0 then
-    lines[#lines + 1] = "clients=(none)"
-  else
-    for _, client in ipairs(clients) do
-      lines[#lines + 1] = ("client=%s root=%s"):format(client.name, client.config.root_dir or "nil")
-
-      local debug_state = vim.b[bufnr].pyright_diag_debug
-      if client.name == "pyright" and debug_state then
-        lines[#lines + 1] = ("diagnostic_mode=%s"):format(debug_state.diagnostic_mode or "nil")
-        lines[#lines + 1] = ("last_publish_count=%s"):format(debug_state.last_count or "nil")
-        lines[#lines + 1] = ("last_publish_at=%s"):format(debug_state.last_at or "nil")
-        lines[#lines + 1] = ("last_changed_count=%s"):format(debug_state.last_changed_count or "nil")
-        lines[#lines + 1] = ("last_notify=%s %s"):format(
-          debug_state.last_notify_method or "nil",
-          debug_state.last_notify_at or "nil"
-        )
-      end
-    end
-  end
-
-  local ns_counts = {}
-  for _, diag in ipairs(vim.diagnostic.get(bufnr, { enabled = true })) do
-    local ns = diag.namespace or -1
-    ns_counts[ns] = (ns_counts[ns] or 0) + 1
-  end
-  for ns, count in pairs(ns_counts) do
-    lines[#lines + 1] = ("namespace[%s]=%d"):format(ns, count)
-  end
-
-  if #diagnostics > 0 then
-    for _, diag in ipairs(diagnostics) do
-      lines[#lines + 1] = ("%d:%d %s %s"):format(
-        diag.lnum + 1,
-        diag.col + 1,
-        diag.source or "unknown",
-        diag.code or diag.message
-      )
-    end
-  end
-
-  vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO, { title = "LSP Diagnostics Debug" })
-end
-
-local function attach_pyright_diagnostic_debug(args)
-  local client = vim.lsp.get_client_by_id(args.data and args.data.client_id or -1)
-  if not client or client.name ~= "pyright" then
-    return
-  end
-
-  local bufnr = args.buf
-  if not vim.api.nvim_buf_is_valid(bufnr) then
-    return
-  end
-
-  local buffer_uri = vim.uri_from_bufnr(bufnr)
-  local group = vim.api.nvim_create_augroup(("PyrightDiagnosticDebug.%d"):format(bufnr), { clear = true })
-  local state = vim.b[bufnr].pyright_diag_debug or {}
-  state.diagnostic_mode = vim.tbl_get(client.config.settings, "python", "analysis", "diagnosticMode")
-  vim.b[bufnr].pyright_diag_debug = state
-
-  vim.api.nvim_create_autocmd("DiagnosticChanged", {
-    group = group,
-    buffer = bufnr,
-    callback = function(event)
-      if not vim.api.nvim_buf_is_valid(event.buf) then
-        return
-      end
-
-      local current = vim.b[event.buf].pyright_diag_debug or {}
-      current.diagnostic_mode = current.diagnostic_mode
-        or vim.tbl_get(client.config.settings, "python", "analysis", "diagnosticMode")
-      current.last_count = #vim.diagnostic.get(event.buf)
-      current.last_at = os.date("%H:%M:%S")
-      current.last_changed_count = #(event.data and event.data.diagnostics or {})
-      vim.b[event.buf].pyright_diag_debug = current
-    end,
-    desc = "Track latest pyright diagnostics for debugging",
-  })
-
-  if vim.fn.exists("##LspNotify") ~= 0 then
-    vim.api.nvim_create_autocmd("LspNotify", {
-      group = group,
-      callback = function(event)
-        if not vim.api.nvim_buf_is_valid(bufnr) then
-          return
-        end
-
-        local data = event.data or {}
-        if data.client_id ~= client.id then
-          return
-        end
-
-        local method = data.method
-        if
-          method ~= "textDocument/didOpen"
-          and method ~= "textDocument/didChange"
-          and method ~= "textDocument/didClose"
-        then
-          return
-        end
-
-        local uri = vim.tbl_get(data.params, "textDocument", "uri")
-        if uri ~= buffer_uri then
-          return
-        end
-
-        local current = vim.b[bufnr].pyright_diag_debug or {}
-        current.diagnostic_mode = current.diagnostic_mode
-          or vim.tbl_get(client.config.settings, "python", "analysis", "diagnosticMode")
-        current.last_notify_method = method
-        current.last_notify_at = os.date("%H:%M:%S")
-        vim.b[bufnr].pyright_diag_debug = current
-      end,
-      desc = "Track pyright textDocument notifications for debugging",
-    })
-  end
-end
-
 local htmx_custom_data_path = vim.fn.stdpath("config") .. "/data/htmx.html-data.json"
 
 local function html_custom_data_content(_, uri)
@@ -318,11 +110,9 @@ return {
           if config.root_dir then
             local venv = find_venv(config.root_dir)
             if venv then
-              config.settings = vim.tbl_deep_extend("force", config.settings or {}, {
-                python = {
-                  pythonPath = venv .. "/bin/python",
-                },
-              })
+              -- Client.create() 已经让 client.settings 指向这张表；必须原地
+              -- 修改，替换 config.settings 会导致 pythonPath 没有发给 Pyright。
+              config.settings.python.pythonPath = venv .. "/bin/python"
             end
           end
         end,
@@ -409,12 +199,6 @@ return {
       for _, server in ipairs(opts.ensure_installed) do
         vim.lsp.enable(server)
       end
-
-      vim.api.nvim_create_autocmd("LspAttach", {
-        group = vim.api.nvim_create_augroup("PyrightDiagnosticDebug", { clear = true }),
-        callback = attach_pyright_diagnostic_debug,
-        desc = "Track pyright diagnostic updates",
-      })
     end,
   },
 
@@ -422,7 +206,6 @@ return {
   {
     "folke/trouble.nvim",
     opts = {
-      height = 10,
       auto_open = false,
       auto_close = true,
     },
@@ -439,11 +222,6 @@ return {
           })
         end,
         desc = "Line Diagnostics",
-      },
-      {
-        "<leader>xd",
-        debug_current_buffer_diagnostics,
-        desc = "Diagnostics Debug",
       },
       {
         "<leader>xx",
@@ -468,15 +246,6 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     priority = 1000,
     config = function()
-      -- 禁用 vim 默认的 virtual text 诊断（由 tiny-inline-diagnostic 接管）
-      vim.diagnostic.config({
-        virtual_text = false, -- 禁用默认的 virtual text
-        signs = true, -- 保留左侧符号栏的诊断标记
-        underline = true, -- 保留下划线
-        update_in_insert = false, -- 不在插入模式更新诊断
-        severity_sort = true, -- 按严重程度排序
-      })
-
       require("tiny-inline-diagnostic").setup({
         preset = "ghost",
         options = {
@@ -496,13 +265,14 @@ return {
   -- LSP UI 美化
   {
     "nvimdev/lspsaga.nvim",
-    event = "LspAttach",
+    -- 需要在 LspAttach 前注册 symbol 监听；按 LspAttach 懒加载会错过
+    -- 当前 buffer 的首次事件，导致刚启动时 Outline 取不到 symbols。
+    event = { "BufReadPre", "BufNewFile" },
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("lspsaga").setup({
         ui = {
           border = "rounded",
-          winblend = 0, -- 不透明，避免透过窗口看到下面的代码造成混淆
           kind = {
             Class = { "󰌗 ", "Include" },
           },
@@ -516,228 +286,13 @@ return {
           open_cmd = "!open", -- macOS 用 open，Linux 用 xdg-open
           max_width = 0.4,
           max_height = 0.6,
-          -- 窗口位置：优先下方，增加偏移避免覆盖当前行
-          position = "auto",
-          prefer_above = false, -- 优先下方
-          offset_y = 1, -- 向下偏移 1 行，确保不覆盖当前行
-          offset_x = 0, -- 水平不偏移
         },
       })
 
       vim.api.nvim_set_hl(0, "SagaClass", { link = "FrappeLavender" })
-
-      local saga_util = require("lspsaga.util")
-      local get_max_content_length = saga_util.get_max_content_length
-
-      -- lspsaga outline 的预览内容偶尔会是空表；原实现会返回 nil 并在 math.min() 处报错。
-      saga_util.get_max_content_length = function(contents)
-        if type(contents) ~= "table" or vim.tbl_isempty(contents) then
-          return 1
-        end
-
-        return get_max_content_length(contents) or 1
-      end
-
-      local outline = require("lspsaga.symbol.outline")
-      local outline_mt = getmetatable(outline)
-      local outline_text_ns = vim.api.nvim_create_namespace("SagaOutlineText")
-      local saga_kinds = require("lspsaga.lspkind").kind
-      local saga_slist = require("lspsaga.slist")
-
-      local function highlight_outline_names(self)
-        if not self.bufnr or not vim.api.nvim_buf_is_valid(self.bufnr) or not self.list then
-          return
-        end
-
-        vim.api.nvim_buf_clear_namespace(self.bufnr, outline_text_ns, 0, -1)
-
-        local node = self.list
-        while node do
-          local value = node.value
-          if value and value.winline and value.winline > 0 and value.kind and saga_kinds[value.kind] then
-            local hl = "Saga" .. saga_kinds[value.kind][1]
-            vim.api.nvim_buf_add_highlight(self.bufnr, outline_text_ns, hl, value.winline - 1, value.inlevel or 0, -1)
-          end
-          node = node.next
-        end
-      end
-
-      if outline_mt and not outline_mt._tab_refresh_guard_patched then
-        outline_mt._tab_refresh_guard_patched = true
-        local original_parse = outline_mt.parse
-        local original_toggle_or_jump = outline_mt.toggle_or_jump
-
-        local outline_group = vim.api.nvim_create_augroup("outline", { clear = false })
-
-        local function outline_window_is_valid(self)
-          return self.winid
-            and vim.api.nvim_win_is_valid(self.winid)
-            and self.bufnr
-            and vim.api.nvim_buf_is_valid(self.bufnr)
-        end
-
-        local function save_outline_view(self)
-          if not outline_window_is_valid(self) then
-            return nil
-          end
-
-          local ok, view = pcall(vim.api.nvim_win_call, self.winid, vim.fn.winsaveview)
-          return ok and view or nil
-        end
-
-        local function restore_outline_view(self, view)
-          if not view or not outline_window_is_valid(self) then
-            return
-          end
-
-          local line_count = vim.api.nvim_buf_line_count(self.bufnr)
-          view.lnum = math.min(math.max(view.lnum or 1, 1), line_count)
-          view.topline = math.min(math.max(view.topline or 1, 1), line_count)
-          pcall(vim.api.nvim_win_call, self.winid, function()
-            vim.fn.winrestview(view)
-          end)
-        end
-
-        local function node_contains_line(value, line)
-          local range = value.range or value.selectionRange or value.targetRange
-          if value.location then
-            range = value.location.range
-          end
-
-          return range and line >= range.start.line and line <= range["end"].line
-        end
-
-        local function focus_outline_at_line(self, curline)
-          if not curline or not outline_window_is_valid(self) or not self.list then
-            return
-          end
-
-          local line = curline - 1
-          local target
-          local node = self.list
-          while node do
-            local value = node.value
-            if value and value.winline and value.winline > 0 and node_contains_line(value, line) then
-              target = value
-            end
-            node = node.next
-          end
-
-          if not target then
-            return
-          end
-
-          local row = math.min(target.winline, vim.api.nvim_buf_line_count(self.bufnr))
-          local col = math.max((target.inlevel or 1) - 1, 0)
-          pcall(vim.api.nvim_win_set_cursor, self.winid, { row, col })
-          pcall(vim.api.nvim_win_call, self.winid, function()
-            vim.cmd("normal! zz")
-          end)
-        end
-
-        outline_mt.parse = function(self, symbols, curline)
-          local view = curline and nil or save_outline_view(self)
-          self.list = saga_slist.new()
-          original_parse(self, symbols, curline)
-          highlight_outline_names(self)
-          focus_outline_at_line(self, curline)
-          restore_outline_view(self, view)
-          vim.schedule(function()
-            focus_outline_at_line(self, curline)
-          end)
-        end
-
-        outline_mt.toggle_or_jump = function(self)
-          original_toggle_or_jump(self)
-          highlight_outline_names(self)
-        end
-
-        local function outline_tab_is_current(self)
-          return self.winid
-            and vim.api.nvim_win_is_valid(self.winid)
-            and vim.api.nvim_win_get_tabpage(self.winid) == vim.api.nvim_get_current_tabpage()
-        end
-
-        -- lspsaga outline 把状态存在单例里，原始 BufEnter/User 回调没有按 tab 隔离。
-        -- 切到别的 tab 时，其他 buffer 会把当前 outline 的 main_buf 覆盖掉，回来后看到旧结构。
-        outline_mt.refresh = function(self)
-          local api = vim.api
-          local symbol = require("lspsaga.symbol")
-
-          api.nvim_create_autocmd("User", {
-            group = outline_group,
-            pattern = "SagaSymbolUpdate",
-            callback = function(args)
-              if
-                not outline_tab_is_current(self)
-                or not self.bufnr
-                or not api.nvim_buf_is_valid(self.bufnr)
-                or api.nvim_get_current_buf() ~= args.data.bufnr
-              then
-                return
-              end
-
-              api.nvim_set_option_value("modifiable", true, { buf = self.bufnr })
-              vim.schedule(function()
-                self:parse(args.data.symbols)
-                self.main_buf = args.data.bufnr
-              end)
-            end,
-          })
-
-          api.nvim_create_autocmd("BufEnter", {
-            group = outline_group,
-            callback = function(args)
-              if not outline_tab_is_current(self) or args.buf == self.main_buf then
-                return
-              end
-
-              local res = not saga_util.nvim_ten() and symbol:get_buf_symbols(args.buf)
-                or require("lspsaga.symbol.head"):get_buf_symbols(args.buf)
-
-              if not res or not res.symbols or #res.symbols == 0 then
-                return
-              end
-
-              local curline = api.nvim_win_get_cursor(0)[1]
-              self.main_buf = args.buf
-              self:parse(res.symbols, curline)
-            end,
-          })
-        end
-      end
-
-      for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-        if vim.api.nvim_buf_is_loaded(bufnr) then
-          bootstrap_lspsaga_symbols(bufnr)
-        end
-      end
     end,
     keys = {
-      -- 查看文档（替代原来的 K）- 自动聚焦到浮动窗口
-      {
-        "<leader>lh",
-        function()
-          vim.cmd("Lspsaga hover_doc ++keep")
-          -- 延迟后查找并聚焦到 hover 窗口
-          vim.defer_fn(function()
-            for _, win in ipairs(vim.api.nvim_list_wins()) do
-              local buf = vim.api.nvim_win_get_buf(win)
-              local ft = vim.bo[buf].filetype
-              -- lspsaga hover 窗口的 filetype
-              if ft == "hover" or ft == "markdown" then
-                local win_config = vim.api.nvim_win_get_config(win)
-                -- 确保是浮动窗口
-                if win_config.relative ~= "" then
-                  vim.api.nvim_set_current_win(win)
-                  break
-                end
-              end
-            end
-          end, 50)
-        end,
-        desc = "Hover Documentation",
-      },
+      { "<leader>lh", "<cmd>Lspsaga hover_doc<cr>", desc = "Hover Documentation" },
 
       -- 跳转到定义（当前窗口）
       {
@@ -783,14 +338,13 @@ return {
       { "]d", "<cmd>Lspsaga diagnostic_jump_next<cr>", desc = "Next Diagnostic" },
 
       -- 大纲（文件结构）
-      { "<leader>o", toggle_lspsaga_outline, desc = "Toggle Outline" },
+      { "<leader>o", "<cmd>Lspsaga outline<cr>", desc = "Toggle Outline" },
     },
   },
 
   -- Noice: cmdline, messages, popupmenu
   {
     "folke/noice.nvim",
-    enabled = true, -- 启用 noice.nvim 的命令行美化
     event = "VeryLazy",
     opts = {
       routes = {
@@ -829,7 +383,6 @@ return {
         override = {
           ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
           ["vim.lsp.util.stylize_markdown"] = true,
-          ["cmp.entry.get_documentation"] = true,
         },
       },
       presets = {

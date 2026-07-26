@@ -228,9 +228,11 @@ return {
         callback = function(args)
           local opts = { buffer = args.buf, desc = "Debug Test Method" }
           vim.keymap.set("n", "<leader>tm", function()
+            require("lazy").load({ plugins = { "nvim-dap-view" } })
             require("dap-python").test_method()
           end, opts)
           vim.keymap.set("n", "<leader>tc", function()
+            require("lazy").load({ plugins = { "nvim-dap-view" } })
             require("dap-python").test_class()
           end, { buffer = args.buf, desc = "Debug Test Class" })
         end,

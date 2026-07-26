@@ -50,11 +50,11 @@ Uses **blink.cmp** (modern completion engine) with:
 - GitHub Copilot integration via blink-copilot (lazy-loaded: use `:Copilot` command to activate)
 - LSP capabilities from blink.cmp are passed to all LSP servers
 - **auto_brackets**: blink.cmp handles bracket insertion for function/method completions
-  - Uses both `kind_resolution` and `semantic_token_resolution` (400ms timeout)
-  - `blocked_filetypes` cleared to support all languages including Python, TS, Vue
+  - Uses blink.cmp's default kind/semantic-token resolution and safety exclusions
+  - Python remains supported; the default blocked-filetype lists are not overridden
 - **nvim-autopairs**: Handles manual bracket input, <CR> formatting, bracket deletion
   - Disabled in macros and replace mode
-  - Special rule for Python f-strings (f' and f" auto-pairing)
+  - Python quotes, including f-strings, use the plugin's default pairing rules
 
 ### Formatting
 
@@ -93,13 +93,12 @@ Important options in `lua/config/options.lua`:
   - Submodules disabled (testing dependencies not needed)
   - Strategy: global by default, local for vim files
 - **Inline diagnostics**: tiny-inline-diagnostic.nvim
-  - Ghost preset, throttle 150ms, multiline enabled
+  - Ghost preset, 80ms throttle, multiline display, and soft wrapping
   - Disables default vim virtual_text
-  - Smart delay: waits 300ms after fast typing before showing diagnostics
-- **lspsaga**: LSP UI with rounded borders, winblend=0 (opaque)
-  - Hover window: auto position, prefer below, offset_y=1 to avoid covering current line
-  - Auto-focuses hover window after 50ms delay
-  - Outline auto-preview disabled to avoid tab-switch float-window height errors
+  - Hidden in Insert mode and refreshed after leaving Insert mode
+- **lspsaga**: LSP UI with rounded borders
+  - `<leader>lh` opens hover documentation without forcibly changing the active window
+  - Outline auto-preview is disabled; the configuration does not override lspsaga private APIs
 - **noice.nvim**: Enabled for cmdline/messages/popupmenu beautification
 
 ### Debugging Configuration
@@ -281,7 +280,7 @@ If LSP not working:
 If completion not working:
 1. Check if blink.cmp loaded: `:lua require('blink.cmp')`
 2. For Copilot: Did you run `:Copilot` to authenticate?
-3. Check auto_brackets blocked_filetypes is empty for your filetype
+3. Check whether blink.cmp intentionally excludes the current filetype from automatic bracket resolution
 
 If formatting not working:
 1. Check conform setup: `:lua vim.print(require('conform').list_formatters())`
@@ -289,7 +288,7 @@ If formatting not working:
 3. For SQL files, auto-format on save is disabled to prevent syntax errors
 
 If autopairs not working with blink.cmp:
-1. Verify blink.cmp auto_brackets is enabled with empty blocked_filetypes
+1. Verify blink.cmp auto_brackets is enabled; this config keeps its default filetype exclusions
 2. Check nvim-autopairs is not disabled for your filetype
 3. Remember: blink handles function/method completions, autopairs handles manual input
 
@@ -333,8 +332,8 @@ If config not applying:
 
 **Solution**: This config uses a **combined approach**:
 - **blink.cmp auto_brackets**: Handles function/method completions
-  - Ensure `kind_resolution.blocked_filetypes = {}` (empty)
-  - Ensure `semantic_token_resolution.blocked_filetypes = {}` (empty)
+  - Uses blink.cmp defaults instead of clearing its safety exclusions
+  - Python is supported; kind resolution remains blocked for TSX/JSX/Vue and semantic-token resolution for Java
 - **nvim-autopairs**: Handles manual bracket input and <CR> formatting
   - Check your filetype is not in `disable_filetype`
 
@@ -363,14 +362,6 @@ Test scenarios:
 
 **Solution**: Noice is enabled for cmdline beautification. If causing issues, disable by setting `enabled = false` in the noice plugin spec in `lua/plugins/lsp.lua`. The config uses `command_palette = false` to avoid conflicts.
 
-### Lspsaga Hover Window Covering Code
+### Lspsaga UI Behavior
 
-**Problem**: Hover documentation covers the line being edited.
-
-**Solution**: Lspsaga is configured with `offset_y = 1` and `prefer_above = false` to prefer showing hover below and offset by 1 line. If still covering, increase `offset_y` value in `lua/plugins/lsp.lua`.
-
-### Lspsaga Outline Error After Switching Tabs
-
-**Problem**: `CursorMoved` in the outline buffer can trigger a float-window error like `'height' key must be a positive Integer` after switching tabs.
-
-**Solution**: Keep `outline.auto_preview = false` in `lua/plugins/lsp.lua`. This disables outline's automatic preview float, which avoids the tab-switch height calculation bug while preserving `<leader>o` outline navigation.
+`<leader>lh` opens hover documentation without forcibly focusing the float. `<leader>o` toggles Outline with auto-preview disabled. Keep the integration on lspsaga's public setup options and commands; update or pin the plugin if an upstream regression appears instead of overriding private modules.

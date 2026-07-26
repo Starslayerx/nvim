@@ -194,7 +194,7 @@ Inside Neo-tree:
 
 | Key                         | Action                                                 |
 | --------------------------- | ------------------------------------------------------ |
-| `<leader>lh`                | Lspsaga hover and focus its floating window            |
+| `<leader>lh`                | Open Lspsaga hover documentation                       |
 | `<leader>ld`                | Go to definition in the current window                 |
 | `<leader>lv`                | Open a vertical split, then go to definition           |
 | `<leader>ls`                | Open a horizontal split, then go to definition         |
@@ -205,7 +205,6 @@ Inside Neo-tree:
 | `[d` / `]d`                 | Previous/next diagnostic                               |
 | `<leader>o`                 | Toggle the Lspsaga Outline                             |
 | `<leader>xl`                | Show diagnostics for the current line                  |
-| `<leader>xd`                | Show LSP diagnostic debug state for the current buffer |
 | `<leader>xx`                | Trouble workspace diagnostics                          |
 | `<leader>xX`                | Trouble buffer diagnostics                             |
 | `<leader>cs`                | Trouble symbols                                        |
@@ -286,7 +285,7 @@ Inside the Taskwarrior panel: `r` refreshes, `<CR>` opens task details, `x` comp
 
 nvim-surround uses its default mappings, for example `ysiw"`, `ds"`, `cs"'`, and `S{char}` in Visual mode.
 
-Other enabled integrations: direnv.vim synchronizes project environments, nvim-colorizer displays color swatches, and nvim-window-picker provides window selection without a dedicated global keymap.
+Other enabled integrations: direnv.vim synchronizes project environments, and nvim-colorizer displays color swatches.
 
 ## LSP and Template Support
 
@@ -312,7 +311,7 @@ Mason automatically installs and enables:
 Special behavior:
 
 - Pyright uses `diagnosticMode=workspace`, disables type checking, and keeps warnings for missing imports/module sources.
-- Pyright searches up to three parent levels for `.venv`, `venv`, or `env` and uses its `bin/python`.
+- Pyright searches up to three parent levels for `.venv`, `venv`, or `env` and sends its `bin/python` to the server as `pythonPath`.
 - Clangd uses `-std=c23` as a fallback when no compilation database/flags exist and logs errors only.
 - Lua LS recognizes the Neovim runtime and the `vim` global.
 - Django templates use HTML LS + Emmet; `jinja_lsp` is disabled because it treats Django's dynamic context as undefined variables.
@@ -330,6 +329,7 @@ The default blink.cmp sources are:
 - Paths
 - friendly-snippets
 - Current buffer
+- Copilot (idle until `:Copilot` activates the client)
 
 Primary keys:
 
@@ -338,13 +338,13 @@ Primary keys:
 - `<C-n>` / `<C-p>` selects the next/previous item
 - `<C-e>` is removed from blink.cmp and reserved for the custom end-of-line mapping
 
-blink.cmp `auto_brackets` adds `()` for function and method completions. nvim-autopairs handles manually typed pairs, Enter, and Backspace behavior. In Markdown, brackets and quotes are automatically paired only inside recognized programming-language code blocks.
+blink.cmp `auto_brackets` adds `()` for function and method completions according to its default rules, including its default filetype safety exclusions; Python remains supported. nvim-autopairs handles manually typed pairs, Enter, and Backspace behavior, including its normal pairing rules in Markdown.
 
-The Copilot provider, `:Copilot` command, and lualine status component remain configured, but Copilot is not in blink.cmp's default source list and both the suggestion and panel UIs are disabled.
+The Copilot provider is in blink.cmp's default source list, but stays idle until `:Copilot` loads and attaches the client. The Copilot suggestion and panel UIs remain disabled, and the lualine status component remains configured.
 
 ## Formatting
 
-Formatting is triggered manually with `<leader>F`; automatic formatting on save is not enabled. Conform may fall back to LSP formatting when the external formatter is unavailable.
+Formatting runs before save by default (with a two-second timeout, except for SQL) and can also be triggered manually with `<leader>F`. Conform may fall back to LSP formatting when the external formatter is unavailable.
 
 | Filetype                            | Formatter                                           |
 | ----------------------------------- | --------------------------------------------------- |
@@ -376,8 +376,8 @@ UI components:
 - tiny-inline-diagnostic ghost preset with an 80ms throttle, multiline display, and soft wrapping
 - Noice for command-line and message UI, with common file-write messages hidden
 - Which-key modern preset with a 140ms delay and dynamic toggle-state icons
-- Lspsaga hover biased below the cursor; Outline auto-preview disabled with multi-tab and empty-content stability patches
-- nvim-colorizer for live color swatches; nvim-window-picker initialized as a window-selection component
+- Lspsaga with rounded floats; Outline auto-preview disabled, with no private-API overrides or forced hover focus
+- nvim-colorizer for live color swatches
 
 ## Python Debugging
 
@@ -419,7 +419,7 @@ This configuration uses the new API; do not convert it back to `require("lspconf
 
 ### Pyright cannot find the virtual environment
 
-Verify that `.venv/bin/python`, `venv/bin/python`, or `env/bin/python` exists at the project root or within three parent levels. Use `<leader>xd` to inspect the current Pyright root and diagnostic state.
+Verify that `.venv/bin/python`, `venv/bin/python`, or `env/bin/python` exists at the project root or within three parent levels. Use `:LspInfo` to confirm that Pyright is attached and inspect its project root.
 
 ### Formatting does nothing
 
@@ -432,7 +432,7 @@ Ensure the formatter is installed and available in `PATH`. SQL is formatted only
 
 ### Completion does not add brackets
 
-Confirm that blink.cmp `auto_brackets` is enabled and that both `kind_resolution.blocked_filetypes` and `semantic_token_resolution.blocked_filetypes` are empty. Manually typed pairs are handled by nvim-autopairs.
+Confirm that blink.cmp `auto_brackets` is enabled. This configuration keeps the plugin's default safety exclusions: TSX, JSX, and Vue skip kind resolution, while Java skips semantic-token resolution; Python remains supported. Manually typed pairs are handled by nvim-autopairs.
 
 ### Python DAP does not start
 

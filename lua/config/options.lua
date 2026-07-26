@@ -1,10 +1,8 @@
 local opt = vim.opt
-local g = vim.g
 
 -- 编码和系统
-opt.encoding = "utf-8"
 opt.fileencoding = "utf-8"
-opt.fileencodings = "utf-8,ucs-bom"
+opt.fileencodings = "ucs-bom,utf-8"
 opt.clipboard = "unnamedplus"
 opt.autochdir = false
 
@@ -85,12 +83,11 @@ opt.completeopt = { "menuone", "noselect" }
 opt.virtualedit = "block"
 -- 确保搜索计数显示，移除可能抑制显示的选项
 -- F: 隐藏文件读写消息 (避免显示 "xxx lines written" 等)
-opt.shortmess = "filnxxtToOF" -- 移除了 "c"，保留搜索计数显示，添加 "F" 隐藏文件消息
+opt.shortmess = "filnxtToOF" -- 移除了 "c"，保留搜索计数显示，添加 "F" 隐藏文件消息
 opt.viewoptions = "cursor,folds,slash,unix"
 
 -- 终端相关
 opt.termguicolors = true
-g.terminal_emulator = "nvim"
 
 -- 禁用自动注释，并重置缩进表达式
 vim.api.nvim_create_autocmd("FileType", {

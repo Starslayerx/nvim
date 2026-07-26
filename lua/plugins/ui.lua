@@ -84,7 +84,7 @@ return {
           "snacks_picker_list",
           "terminal",
           "toggleterm",
-          "Trouble",
+          "trouble",
         },
         callback = function(args)
           vim.b[args.buf].miniindentscope_disable = true
@@ -116,11 +116,6 @@ return {
     },
     config = function(_, opts)
       local wk = require("which-key")
-
-      local function outline_is_open()
-        local ok, outline = pcall(require, "lspsaga.symbol.outline")
-        return ok and outline.winid and vim.api.nvim_win_is_valid(outline.winid) or false
-      end
 
       local function current_line_breakpoint()
         local ok, breakpoints = pcall(require, "dap.breakpoints")
@@ -253,20 +248,6 @@ return {
             return illuminate_is_enabled() and "Disable References" or "Enable References"
           end,
         },
-        {
-          "<leader>o",
-          mode = "n",
-          icon = function()
-            local enabled = outline_is_open()
-            return {
-              icon = enabled and " " or " ",
-              color = enabled and "green" or "yellow",
-            }
-          end,
-          desc = function()
-            return outline_is_open() and "Close Outline" or "Open Outline"
-          end,
-        },
       })
     end,
     keys = {
@@ -278,17 +259,6 @@ return {
         desc = "Buffer Local Keymaps (which-key)",
       },
     },
-  },
-
-  -- window picker: 快速切换窗口
-  {
-    "s1n7ax/nvim-window-picker",
-    name = "window-picker",
-    event = "VeryLazy",
-    version = "2.*",
-    config = function()
-      require("window-picker").setup()
-    end,
   },
 
   -- nvim-treesitter 语法高亮 (新版 main 分支)
@@ -529,14 +499,6 @@ return {
       },
       tabline = {},
       extensions = {},
-      spinners = {
-        "✶",
-        "✸",
-        "✹",
-        "✺",
-        "✹",
-        "✷",
-      },
     },
   },
 
