@@ -402,7 +402,9 @@ return {
     opts = {
       format_on_save = function(bufnr)
         -- SQL formatting remains manual because dialect guessing can corrupt syntax.
-        if vim.bo[bufnr].filetype == "sql" then
+        -- Django templates remain manual so djLint does not rewrite intentional layout.
+        local filetype = vim.bo[bufnr].filetype
+        if filetype == "sql" or filetype == "htmldjango" then
           return nil
         end
         return { timeout_ms = 2000, lsp_format = "fallback" }
@@ -440,7 +442,7 @@ return {
         },
         djlint = {
           prepend_args = {
-            "--profile=jinja",
+            "--profile=django",
             "--indent=2",
           },
         },

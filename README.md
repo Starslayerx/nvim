@@ -344,14 +344,14 @@ Copilot provider 位于 blink.cmp 的默认 source 列表中，但在运行 `:Co
 
 ## 格式化
 
-默认在保存前自动格式化（2 秒超时，SQL 除外），也可通过 `<leader>F` 手动触发。外部 formatter 不可用时允许回退到 LSP formatting。
+默认在保存前自动格式化（2 秒超时，SQL 和 htmldjango 除外），也可通过 `<leader>F` 手动触发。外部 formatter 不可用时允许回退到 LSP formatting。
 
 | 文件类型                            | Formatter                                 |
 | ----------------------------------- | ----------------------------------------- |
 | C / C++                             | clang-format，4 空格，不使用 Tab          |
 | Python                              | ruff_fix → ruff_format，fix 阶段忽略 F401 |
 | JavaScript / TypeScript / JSX / TSX | prettier                                  |
-| HTML / Jinja / htmldjango           | djlint，Jinja profile，2 空格             |
+| HTML / Jinja / htmldjango           | djlint，Django profile，2 空格            |
 | CSS / SCSS                          | prettier                                  |
 | JSON / Markdown                     | prettier                                  |
 | YAML                                | yamlfmt                                   |

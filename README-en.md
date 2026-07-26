@@ -344,14 +344,14 @@ The Copilot provider is in blink.cmp's default source list, but stays idle until
 
 ## Formatting
 
-Formatting runs before save by default (with a two-second timeout, except for SQL) and can also be triggered manually with `<leader>F`. Conform may fall back to LSP formatting when the external formatter is unavailable.
+Formatting runs before save by default (with a two-second timeout, except for SQL and htmldjango) and can also be triggered manually with `<leader>F`. Conform may fall back to LSP formatting when the external formatter is unavailable.
 
 | Filetype                            | Formatter                                           |
 | ----------------------------------- | --------------------------------------------------- |
 | C / C++                             | clang-format, four spaces, no tabs                  |
 | Python                              | ruff_fix → ruff_format; the fix step ignores F401   |
 | JavaScript / TypeScript / JSX / TSX | prettier                                            |
-| HTML / Jinja / htmldjango           | djlint with Jinja profile and two-space indentation |
+| HTML / Jinja / htmldjango           | djlint with Django profile and two-space indentation |
 | CSS / SCSS                          | prettier                                            |
 | JSON / Markdown                     | prettier                                            |
 | YAML                                | yamlfmt                                             |
