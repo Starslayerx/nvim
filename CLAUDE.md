@@ -36,11 +36,12 @@ vim.lsp.config(server, server_opts)
 vim.lsp.enable(server)
 ```
 
-Mason auto-installs LSP servers: clangd, pyright, gopls, eslint, ts_ls, lua_ls, rust_analyzer, marksman, html, cssls, jsonls, yamlls, bashls, dockerls, taplo, emmet_language_server, jinja_lsp
+Mason auto-installs LSP servers: clangd, pyright, gopls, eslint, ts_ls, lua_ls, rust_analyzer, marksman, html, cssls, jsonls, yamlls, bashls, dockerls, taplo, emmet_language_server
 
 Special configurations:
 - **pyright**: Type checking disabled (`typeCheckingMode = "off"`), automatic venv discovery (searches up 3 levels for .venv/venv/env)
 - **lua_ls**: Configured for Neovim API with `vim` global recognized
+- **Django templates**: Use HTML LS + Emmet. `jinja_lsp` is intentionally disabled because it cannot resolve Django's runtime template context and reports false errors.
 
 ### Completion System
 

@@ -68,8 +68,8 @@ opt.hidden = true
 
 -- 设置备份和撤销目录
 local config_dir = vim.fn.expand("$HOME/.config/nvim")
-vim.fn.system("mkdir -p " .. config_dir .. "/tmp/backup")
-vim.fn.system("mkdir -p " .. config_dir .. "/tmp/undo")
+vim.fn.mkdir(config_dir .. "/tmp/backup", "p")
+vim.fn.mkdir(config_dir .. "/tmp/undo", "p")
 
 opt.backupdir = config_dir .. "/tmp/backup,."
 opt.directory = config_dir .. "/tmp/backup,."
@@ -79,7 +79,7 @@ if vim.fn.has("persistent_undo") == 1 then
 end
 
 -- 补全设置
-opt.completeopt = { "longest", "noinsert", "menuone", "noselect", "preview" }
+opt.completeopt = { "menuone", "noselect" }
 
 -- 其他设置
 opt.virtualedit = "block"

@@ -110,7 +110,7 @@ local function ensure_panel()
   vim.api.nvim_win_set_buf(win, buf)
 
   vim.bo[buf].buftype = "nofile"
-  vim.bo[buf].bufhidden = "hide"
+  vim.bo[buf].bufhidden = "wipe"
   vim.bo[buf].swapfile = false
   vim.bo[buf].filetype = "taskwarrior"
   vim.bo[buf].modifiable = false
@@ -202,6 +202,7 @@ function M.info()
 end
 
 function M.done()
+  local panel_buf = vim.api.nvim_get_current_buf()
   local id = current_task_id()
   if not id then
     vim.notify("No task ID on current line", vim.log.levels.INFO)
@@ -214,7 +215,9 @@ function M.done()
       return
     end
     vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO)
-    M.refresh()
+    if vim.api.nvim_buf_is_valid(panel_buf) then
+      M.refresh(panel_buf)
+    end
   end)
 end
 

@@ -37,9 +37,25 @@ return {
         },
       },
       sources = {
-        -- 移除 copilot，只在需要时手动添加
-        default = { "lsp", "path", "snippets", "buffer" },
+        -- Copilot provider stays idle until :Copilot loads and attaches its client.
+        default = { "lsp", "path", "snippets", "buffer", "copilot" },
         providers = {
+          lsp = {
+            name = "LSP",
+            module = "blink.cmp.sources.lsp",
+            transform_items = function(ctx, items)
+              -- Python's leading underscore is an internal-use convention. Keep
+              -- those members available when the user explicitly types `_`, but
+              -- do not flood normal member completion with private APIs.
+              if vim.bo[ctx.bufnr].filetype ~= "python" or ctx.get_keyword():sub(1, 1) == "_" then
+                return items
+              end
+
+              return vim.tbl_filter(function(item)
+                return item.label:sub(1, 1) ~= "_"
+              end, items)
+            end,
+          },
           copilot = {
             name = "copilot",
             module = "blink-copilot",

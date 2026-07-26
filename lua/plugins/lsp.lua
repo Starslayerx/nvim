@@ -263,7 +263,6 @@ return {
         "dockerls",
         "taplo",
         "emmet_language_server",
-        "jinja_lsp",
       },
       automatic_enable = false, -- 禁用自动启用，手动配置
     },
@@ -280,7 +279,19 @@ return {
         settings = {
           python = {
             analysis = {
+              autoSearchPaths = true,
               diagnosticMode = "workspace",
+              typeCheckingMode = "off",
+              useLibraryCodeForTypes = true,
+              diagnosticSeverityOverrides = {
+                reportAttributeAccessIssue = "none",
+                reportGeneralTypeIssues = "none",
+                reportIncompatibleVariableOverride = "none",
+                reportMissingImports = "warning",
+                reportMissingModuleSource = "warning",
+                reportOptionalIterable = "none",
+                reportUnknownMemberType = "none",
+              },
             },
           },
         },
@@ -333,14 +344,14 @@ return {
         },
       }
 
-      -- Jinja LSP 特殊配置：同时服务于 html 和 htmldjango 文件类型
-      vim.lsp.config.jinja_lsp = {
+      -- 没有 compile_commands.json/compile_flags.txt 时默认使用 C23。
+      -- 这是面向 C 项目的明确偏好；不保证 C++ 文件的 fallback 兼容性。
+      vim.lsp.config.clangd = {
         capabilities = capabilities,
-        filetypes = { "html", "htmldjango" },
-        root_dir = function(fname)
-          -- 在包含 templates/ 目录的项目中启用
-          return vim.fs.root(fname, { "templates", ".git", "manage.py", "app.py" })
-        end,
+        cmd = { "clangd", "--log=error" },
+        init_options = {
+          fallbackFlags = { "-std=c23" },
+        },
       }
 
       -- HTML LSP 特殊配置：同时服务于 htmldjango
@@ -380,7 +391,14 @@ return {
       }
 
       -- 其他服务器使用默认配置
-      local special_servers = { "pyright", "lua_ls", "jinja_lsp", "html", "cssls", "emmet_language_server" }
+      local special_servers = {
+        "clangd",
+        "pyright",
+        "lua_ls",
+        "html",
+        "cssls",
+        "emmet_language_server",
+      }
       for _, server in ipairs(opts.ensure_installed) do
         if not vim.tbl_contains(special_servers, server) then
           vim.lsp.config[server] = { capabilities = capabilities }
@@ -465,10 +483,10 @@ return {
           show_source = { enabled = true, if_many = true },
           throttle = 80,
           softwrap = 30,
-          multilines = { enabled = true, always_show = true },
+          multilines = { enabled = true, always_show = false },
           show_all_diags_on_cursorline = false,
           enable_on_insert = false,
-          overflow = { mode = "wrap" },
+          overflow = { mode = "oneline" },
           virt_texts = { priority = 2048 },
         },
       })

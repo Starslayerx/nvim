@@ -398,6 +398,13 @@ return {
       },
     },
     opts = {
+      format_on_save = function(bufnr)
+        -- SQL formatting remains manual because dialect guessing can corrupt syntax.
+        if vim.bo[bufnr].filetype == "sql" then
+          return nil
+        end
+        return { timeout_ms = 2000, lsp_format = "fallback" }
+      end,
       formatters_by_ft = {
         c = { "clang-format" },
         cpp = { "clang-format" },

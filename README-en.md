@@ -308,14 +308,14 @@ Mason automatically installs and enables:
 - `dockerls`
 - `taplo`
 - `emmet_language_server`
-- `jinja_lsp`
 
 Special behavior:
 
 - Pyright uses `diagnosticMode=workspace`, disables type checking, and keeps warnings for missing imports/module sources.
 - Pyright searches up to three parent levels for `.venv`, `venv`, or `env` and uses its `bin/python`.
-- Clangd uses `-std=c23` as a fallback when the project has no real compilation database or flags.
+- Clangd uses `-std=c23` as a fallback when no compilation database/flags exist and logs errors only.
 - Lua LS recognizes the Neovim runtime and the `vim` global.
+- Django templates use HTML LS + Emmet; `jinja_lsp` is disabled because it treats Django's dynamic context as undefined variables.
 - HTML, Jinja, and Emmet support `htmldjango`; HTML LS loads local HTMX custom data.
 - CSS LS only serves CSS, SCSS, and Less, avoiding incorrect CSS property completion inside Jinja templates.
 - `.jinja`, `.jinja2`, and `.j2` files become `htmldjango`; HTML files under `templates/` or containing Jinja markers are detected automatically.

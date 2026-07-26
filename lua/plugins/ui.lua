@@ -159,16 +159,6 @@ return {
       end
 
       wk.setup(opts)
-      -- Use an explicit leader trigger instead of relying only on which-key's
-      -- auto-generated state. This keeps <Space> from falling back to the
-      -- built-in right-move when the trigger state gets out of sync.
-      vim.keymap.set({ "n", "x" }, "<leader>", function()
-        require("which-key.state").start({ keys = "<leader>" })
-      end, {
-        desc = "which-key-trigger user leader",
-        nowait = true,
-        silent = true,
-      })
 
       wk.add({
         { "<leader>a", group = "Agenda", icon = { icon = "󰃭", color = "cyan" } },
@@ -337,14 +327,17 @@ return {
       -- 启用语法高亮（新版需要手动启用）
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "*",
-        callback = function()
-          if vim.bo.filetype ~= "" then
-            pcall(vim.treesitter.start)
+        callback = function(args)
+          local filetype = vim.bo[args.buf].filetype
+          if filetype ~= "" then
+            pcall(vim.treesitter.start, args.buf)
             -- 对 Python 重新启用 vim 语法引擎，让 pep8-indent 的 synID() 正常工作
             -- 用 vim.schedule 延迟到 treesitter.start() 完全处理完之后
-            if vim.bo.filetype == "python" then
+            if filetype == "python" then
               vim.schedule(function()
-                vim.bo.syntax = "python"
+                if vim.api.nvim_buf_is_valid(args.buf) then
+                  vim.bo[args.buf].syntax = "python"
+                end
               end)
             end
           end
@@ -354,16 +347,25 @@ return {
       -- 启用 treesitter 折叠
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "*",
-        callback = function()
+        callback = function(args)
           -- 排除可能导致索引越界的文件类型
           local excluded = { "markdown", "text", "" }
-          if vim.tbl_contains(excluded, vim.bo.filetype) then
+          if vim.tbl_contains(excluded, vim.bo[args.buf].filetype) then
             return
           end
 
-          vim.wo.foldmethod = "expr"
-          vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-          vim.wo.foldenable = false -- 默认不折叠
+          -- 没有 parser 时保留全局 indent folding，避免无效的 TS foldexpr。
+          local ok, parser = pcall(vim.treesitter.get_parser, args.buf)
+          if not ok or not parser then
+            return
+          end
+
+          local win = vim.fn.bufwinid(args.buf)
+          if win ~= -1 then
+            vim.wo[win].foldmethod = "expr"
+            vim.wo[win].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+            vim.wo[win].foldenable = false -- 默认不折叠
+          end
         end,
       })
     end,

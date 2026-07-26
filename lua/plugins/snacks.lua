@@ -45,7 +45,10 @@ end
 return {
   {
     "ibhagwan/fzf-lua",
-    cmd = "FzfLua",
+    -- fzf-lua starts an RPC server used by its multiprocess file provider.
+    -- Loading it on the first keypress can race that server on a cold start,
+    -- leaving the initial picker empty (0/0). Initialize it during startup.
+    lazy = false,
     dependencies = { "nvim-tree/nvim-web-devicons" },
     keys = {
       {
@@ -149,6 +152,12 @@ return {
     },
     opts = {
       { "fzf-native", "hide" },
+      -- File icons force the first files picker through a headless Neovim RPC
+      -- process. On a cold start that process can race initialization and leave
+      -- fzf at 0/0. Without icons, files are streamed directly from fd.
+      files = {
+        file_icons = false,
+      },
       winopts = {
         height = 0.9,
         width = 0.9,
