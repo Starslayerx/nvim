@@ -342,7 +342,7 @@ return {
     },
   },
 
-  -- Noice: cmdline, messages, popupmenu
+  -- Noice: cmdline, notifications, popupmenu; messages stay native.
   {
     "folke/noice.nvim",
     event = "VeryLazy",
@@ -371,9 +371,9 @@ return {
         },
       },
       messages = {
-        -- Noice 默认把 [当前/总数] 作为虚拟文本画在代码行末。
-        -- 改到底部命令行，保持接近 Neovim 原生的搜索显示方式。
-        view_search = "cmdline",
+        -- 不接管 ext_messages，让 /、?、n、N 的 [当前/总数] 使用
+        -- Neovim 原生底部命令行显示，而不是行末虚拟文本。
+        enabled = false,
       },
       lsp = {
         progress = {

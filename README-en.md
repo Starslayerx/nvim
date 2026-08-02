@@ -102,7 +102,7 @@ Plugins are grouped by responsibility: UI, completion, LSP, search/files, tools,
 ## Core Options
 
 - Absolute and relative line numbers, cursor line, and a persistent sign column
-- Global soft wrapping, `scrolloff=8`, and a 100-column guide
+- Global soft wrapping, `scrolloff=8` with its bottom margin preserved at end-of-buffer, and a 100-column guide
 - Four-space indentation with `expandtab` and `autoindent`
 - `smartindent` and `cindent` disabled; Python keeps the PEP8 plugin's `indentexpr`
 - Default `foldmethod=indent`, `foldlevel=99`, and folding disabled
@@ -189,6 +189,7 @@ Inside Neo-tree:
 | `H`          | Toggle hidden and gitignored files  |
 
 `t` is explicitly unmapped inside Neo-tree so it does not interfere with the tab navigation workflow.
+Normal files and Neo-tree scroll upward near end-of-buffer to preserve the bottom margin configured by the global `scrolloff` option.
 
 ### LSP and Diagnostics
 
@@ -374,7 +375,7 @@ UI components:
 - Static mini.indentscope guide with no animation
 - rainbow-delimiters with Nord and Catppuccin Frappé colors
 - tiny-inline-diagnostic ghost preset with an 80ms throttle, multiline display, and soft wrapping
-- Noice for command-line and message UI, with common file-write messages hidden
+- Noice for command-line, notification, and popup-menu UI; native Neovim messages keep search counts on the bottom command line
 - Which-key modern preset with a 140ms delay and dynamic toggle-state icons
 - Lspsaga with rounded floats; Outline auto-preview disabled, with no private-API overrides or forced hover focus
 - nvim-colorizer for live color swatches

@@ -102,7 +102,7 @@ nvim
 ## 核心选项
 
 - 行号与相对行号、光标行、固定 sign column
-- 全局软换行，`scrolloff=8`，100 列参考线
+- 全局软换行，`scrolloff=8`，并在文件末尾主动保留底部余量；100 列参考线
 - 4 空格缩进，启用 `expandtab` 和 `autoindent`
 - 禁用 `smartindent`、`cindent`；Python 保留 PEP8 插件的 `indentexpr`
 - 默认 `foldmethod=indent`、`foldlevel=99`、不启用折叠
@@ -189,6 +189,7 @@ Neo-tree 内部：
 | `H`          | 切换隐藏文件和 gitignored 文件 |
 
 `t` 在 Neo-tree 中明确取消映射，避免影响其他 tab 导航习惯。
+普通文件和 Neo-tree 在接近 buffer 末尾时都会主动上滚视图，保留全局 `scrolloff` 指定的底部余量。
 
 ### LSP 与诊断
 
@@ -374,7 +375,7 @@ Tree-sitter 在所有可识别文件类型启动；Markdown、Text 明确排除 
 - mini.indentscope 静态缩进范围线
 - rainbow-delimiters 的 Nord/Catppuccin Frappé 配色
 - tiny-inline-diagnostic ghost preset，80ms throttle，支持多行和软换行
-- Noice 美化命令行和消息，隐藏常见文件写入消息
+- Noice 美化命令行、通知和弹出菜单；消息层保持 Neovim 原生，搜索计数显示在底部命令行
 - Which-key 使用 modern preset、140ms 延迟，并显示动态开关状态图标
 - Lspsaga 使用圆角浮窗；Outline 禁用自动 preview，不覆盖插件私有 API，也不强制聚焦 hover 浮窗
 - nvim-colorizer 为颜色文本显示实时色块

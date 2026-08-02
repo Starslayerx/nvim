@@ -99,7 +99,7 @@ Important options in `lua/config/options.lua`:
 - **lspsaga**: LSP UI with rounded borders
   - `<leader>lh` opens hover documentation without forcibly changing the active window
   - Outline auto-preview is disabled; the configuration does not override lspsaga private APIs
-- **noice.nvim**: Enabled for cmdline/messages/popupmenu beautification
+- **noice.nvim**: Enabled for cmdline/notifications/popupmenu; the native message UI retains bottom-line search counts
 
 ### Debugging Configuration
 
@@ -267,6 +267,7 @@ File explorer is **neo-tree**:
 - `H`: toggle hidden and gitignored files
 - Hidden files and gitignored files are filtered by default
 - `follow_current_file` is enabled so the tree can reveal the active buffer
+- A global `CursorMoved` guard keeps the configured `scrolloff` margin at the end of normal files and Neo-tree
 - `t` is intentionally unmapped inside neo-tree so tab navigation keeps working elsewhere
 
 ## Debugging Tips

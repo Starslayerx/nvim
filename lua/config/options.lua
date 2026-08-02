@@ -86,6 +86,47 @@ opt.virtualedit = "block"
 opt.shortmess = "filnxtToOF" -- 移除了 "c"，保留搜索计数显示，添加 "F" 隐藏文件消息
 opt.viewoptions = "cursor,folds,slash,unix"
 
+-- Neovim 在 buffer 末尾不会继续应用 scrolloff，会把光标压到窗口底边。
+-- 普通编辑 buffer 和 Neo-tree 都补回底部余量；软换行/折叠窗口使用 zz，
+-- 避免按逻辑行调整 topline 时跨过多行屏幕内容。
+local function keep_cursor_above_bottom_edge()
+  local winid = vim.api.nvim_get_current_win()
+  if vim.api.nvim_win_get_config(winid).relative ~= "" then
+    return
+  end
+
+  local bufnr = vim.api.nvim_win_get_buf(winid)
+  if vim.bo[bufnr].buftype ~= "" and vim.bo[bufnr].filetype ~= "neo-tree" then
+    return
+  end
+
+  local height = vim.api.nvim_win_get_height(winid)
+  local scrolloff = math.min(vim.wo[winid].scrolloff, math.floor((height - 1) / 2))
+  if scrolloff < 1 then
+    return
+  end
+
+  local overflow = vim.fn.winline() - (height - scrolloff)
+  if overflow < 1 then
+    return
+  end
+
+  if vim.wo[winid].wrap or vim.wo[winid].foldenable then
+    vim.cmd("normal! zz")
+    return
+  end
+
+  local view = vim.fn.winsaveview()
+  view.topline = view.topline + overflow
+  vim.fn.winrestview(view)
+end
+
+vim.api.nvim_create_autocmd("CursorMoved", {
+  group = vim.api.nvim_create_augroup("KeepCursorAboveBottomEdge", { clear = true }),
+  callback = keep_cursor_above_bottom_edge,
+  desc = "Keep scrolloff visible at the end of editable buffers",
+})
+
 -- 终端相关
 opt.termguicolors = true
 
