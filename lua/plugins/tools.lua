@@ -401,10 +401,9 @@ return {
     },
     opts = {
       format_on_save = function(bufnr)
-        -- SQL formatting remains manual because dialect guessing can corrupt syntax.
-        -- Django templates remain manual so djLint does not rewrite intentional layout.
-        local filetype = vim.bo[bufnr].filetype
-        if filetype == "sql" or filetype == "htmldjango" then
+        -- Keep save-time formatting limited to Markdown. All other filetypes
+        -- are formatted explicitly with <leader>F.
+        if vim.bo[bufnr].filetype ~= "markdown" then
           return nil
         end
         return { timeout_ms = 2000, lsp_format = "fallback" }
