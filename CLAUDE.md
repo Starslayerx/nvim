@@ -266,8 +266,8 @@ File explorer is **neo-tree**:
 - `s` / `S`: vertical / horizontal split
 - `H`: toggle hidden and gitignored files
 - Hidden files and gitignored files are filtered by default
-- `follow_current_file` is enabled so the tree can reveal the active buffer
-- A global `CursorMoved` guard keeps the configured `scrolloff` margin at the end of normal files and Neo-tree
+- `follow_current_file` is disabled so changing window focus does not move the tree selection; `<leader>e` explicitly uses `reveal` when opening the tree
+- A `CursorMoved` guard preserves the configured `scrolloff` margin only in normal editable buffers; Neo-tree manages its own cursor and scroll position
 - `t` is intentionally unmapped inside neo-tree so tab navigation keeps working elsewhere
 
 ## Debugging Tips

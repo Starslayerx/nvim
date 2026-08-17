@@ -87,8 +87,9 @@ opt.shortmess = "filnxtToOF" -- 移除了 "c"，保留搜索计数显示，添�
 opt.viewoptions = "cursor,folds,slash,unix"
 
 -- Neovim 在 buffer 末尾不会继续应用 scrolloff，会把光标压到窗口底边。
--- 普通编辑 buffer 和 Neo-tree 都补回底部余量；软换行/折叠窗口使用 zz，
--- 避免按逻辑行调整 topline 时跨过多行屏幕内容。
+-- 只为普通编辑 buffer 补回底部余量；Neo-tree 等特殊窗口自行管理视图，
+-- 避免这里的 CursorMoved 回调与插件的光标/滚动位置恢复互相干扰。
+-- 软换行/折叠窗口使用 zz，避免按逻辑行调整 topline 时跨过多行屏幕内容。
 local function keep_cursor_above_bottom_edge()
   local winid = vim.api.nvim_get_current_win()
   if vim.api.nvim_win_get_config(winid).relative ~= "" then
@@ -96,7 +97,7 @@ local function keep_cursor_above_bottom_edge()
   end
 
   local bufnr = vim.api.nvim_win_get_buf(winid)
-  if vim.bo[bufnr].buftype ~= "" and vim.bo[bufnr].filetype ~= "neo-tree" then
+  if vim.bo[bufnr].buftype ~= "" then
     return
   end
 

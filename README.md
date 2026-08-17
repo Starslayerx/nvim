@@ -102,7 +102,7 @@ nvim
 ## 核心选项
 
 - 行号与相对行号、光标行、固定 sign column
-- 全局软换行，`scrolloff=8`，并在文件末尾主动保留底部余量；100 列参考线
+- 全局软换行，`scrolloff=8`，并在普通编辑文件末尾主动保留底部余量；100 列参考线
 - 4 空格缩进，启用 `expandtab` 和 `autoindent`
 - 禁用 `smartindent`、`cindent`；Python 保留 PEP8 插件的 `indentexpr`
 - 默认 `foldmethod=indent`、`foldlevel=99`、不启用折叠
@@ -189,7 +189,7 @@ Neo-tree 内部：
 | `H`          | 切换隐藏文件和 gitignored 文件 |
 
 `t` 在 Neo-tree 中明确取消映射，避免影响其他 tab 导航习惯。
-普通文件和 Neo-tree 在接近 buffer 末尾时都会主动上滚视图，保留全局 `scrolloff` 指定的底部余量。
+Neo-tree 不自动跟随编辑区的当前文件，切换窗口时会保留文件树选中项；通过 `<leader>e` 打开时仍会主动定位当前文件。自定义的文件末尾滚动逻辑不处理 Neo-tree，由插件自行维护光标和视图位置。
 
 ### LSP 与诊断
 

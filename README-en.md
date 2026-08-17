@@ -102,7 +102,7 @@ Plugins are grouped by responsibility: UI, completion, LSP, search/files, tools,
 ## Core Options
 
 - Absolute and relative line numbers, cursor line, and a persistent sign column
-- Global soft wrapping, `scrolloff=8` with its bottom margin preserved at end-of-buffer, and a 100-column guide
+- Global soft wrapping, `scrolloff=8` with its bottom margin preserved at the end of normal editable buffers, and a 100-column guide
 - Four-space indentation with `expandtab` and `autoindent`
 - `smartindent` and `cindent` disabled; Python keeps the PEP8 plugin's `indentexpr`
 - Default `foldmethod=indent`, `foldlevel=99`, and folding disabled
@@ -189,7 +189,7 @@ Inside Neo-tree:
 | `H`          | Toggle hidden and gitignored files  |
 
 `t` is explicitly unmapped inside Neo-tree so it does not interfere with the tab navigation workflow.
-Normal files and Neo-tree scroll upward near end-of-buffer to preserve the bottom margin configured by the global `scrolloff` option.
+Neo-tree does not automatically follow the editor's active file, so changing window focus preserves the tree selection; opening it with `<leader>e` still reveals the active file. The custom end-of-buffer scrolling logic skips Neo-tree and leaves cursor/view management to the plugin.
 
 ### LSP and Diagnostics
 

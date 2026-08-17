@@ -187,9 +187,10 @@ return {
       enable_diagnostics = true,
       open_files_do_not_replace_types = { "terminal", "trouble", "qf" },
       filesystem = {
+        -- Keep the tree selection stable when focus moves to an editor window.
+        -- `<leader>e` already uses `reveal`, so opening the tree still locates the active file.
         follow_current_file = {
-          enabled = true,
-          leave_dirs_open = true,
+          enabled = false,
         },
         hijack_netrw_behavior = "open_default",
         use_libuv_file_watcher = true,
