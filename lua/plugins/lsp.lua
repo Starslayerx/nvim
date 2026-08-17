@@ -134,13 +134,13 @@ return {
         },
       }
 
-      -- 没有 compile_commands.json/compile_flags.txt 时默认使用 C23。
-      -- 这是面向 C 项目的明确偏好；不保证 C++ 文件的 fallback 兼容性。
+      -- 没有编译数据库时撤销 clangd 为孤立头文件选择的 Objective-C++ 模式，
+      -- 再按扩展名使用 C/C++；真实项目参数仍以编译数据库为准。
       vim.lsp.config.clangd = {
         capabilities = capabilities,
         cmd = { "clangd", "--log=error" },
         init_options = {
-          fallbackFlags = { "-std=c23" },
+          fallbackFlags = { "-x", "none" },
         },
       }
 

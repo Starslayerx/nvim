@@ -313,7 +313,7 @@ Special behavior:
 
 - Pyright uses `diagnosticMode=workspace`, disables type checking, and keeps warnings for missing imports/module sources.
 - Pyright searches up to three parent levels for `.venv`, `venv`, or `env` and sends its `bin/python` to the server as `pythonPath`.
-- Clangd uses `-std=c23` as a fallback when no compilation database/flags exist and logs errors only.
+- Clangd falls back to C/C++ based on the file extension when no compilation database/flags exist, avoiding Objective-C++ for standalone `.h` files, and logs errors only.
 - Lua LS recognizes the Neovim runtime and the `vim` global.
 - Django templates use HTML LS + Emmet; `jinja_lsp` is disabled because it treats Django's dynamic context as undefined variables.
 - HTML, Jinja, and Emmet support `htmldjango`; HTML LS loads local HTMX custom data.
