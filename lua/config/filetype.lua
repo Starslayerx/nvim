@@ -47,6 +47,17 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   end,
 })
 
+-- HTML/Jinja 模板使用与 djLint 格式化器一致的 2 空格缩进
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "html", "jinja", "htmldjango" },
+  callback = function(args)
+    vim.bo[args.buf].expandtab = true
+    vim.bo[args.buf].tabstop = 2
+    vim.bo[args.buf].shiftwidth = 2
+    vim.bo[args.buf].softtabstop = 2
+  end,
+})
+
 -- htmldjango 文件类型配置
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "htmldjango",
