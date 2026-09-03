@@ -87,9 +87,8 @@ opt.shortmess = "filnxtToOF" -- 移除了 "c"，保留搜索计数显示，添�
 opt.viewoptions = "cursor,folds,slash,unix"
 
 -- Neovim 在 buffer 末尾不会继续应用 scrolloff，会把光标压到窗口底边。
--- 只为普通编辑 buffer 补回底部余量；Neo-tree 等特殊窗口自行管理视图，
--- 避免这里的 CursorMoved 回调与插件的光标/滚动位置恢复互相干扰。
--- 软换行/折叠窗口使用 zz，避免按逻辑行调整 topline 时跨过多行屏幕内容。
+-- 只在文件末尾已经可见时为普通编辑 buffer 补回底部余量；Neo-tree 等特殊窗口
+-- 自行管理视图。按屏幕行做最小幅度滚动，避免使用 zz 时突然把光标居中。
 local function keep_cursor_above_bottom_edge()
   local winid = vim.api.nvim_get_current_win()
   if vim.api.nvim_win_get_config(winid).relative ~= "" then
@@ -98,6 +97,14 @@ local function keep_cursor_above_bottom_edge()
 
   local bufnr = vim.api.nvim_win_get_buf(winid)
   if vim.bo[bufnr].buftype ~= "" then
+    return
+  end
+
+  local last_visible_line = vim.fn.line("w$")
+  if vim.wo[winid].foldenable then
+    last_visible_line = math.max(last_visible_line, vim.fn.foldclosedend(last_visible_line))
+  end
+  if last_visible_line < vim.api.nvim_buf_line_count(bufnr) then
     return
   end
 
@@ -112,14 +119,8 @@ local function keep_cursor_above_bottom_edge()
     return
   end
 
-  if vim.wo[winid].wrap or vim.wo[winid].foldenable then
-    vim.cmd("normal! zz")
-    return
-  end
-
-  local view = vim.fn.winsaveview()
-  view.topline = view.topline + overflow
-  vim.fn.winrestview(view)
+  local scroll_down = vim.api.nvim_replace_termcodes(overflow .. "<C-e>", true, false, true)
+  vim.cmd.normal({ scroll_down, bang = true })
 end
 
 vim.api.nvim_create_autocmd("CursorMoved", {
